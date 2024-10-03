@@ -1,6 +1,5 @@
 # Group 26's DSD CW1 Database Implementation
 This is our groups physical implementation of the relational database for Stellar Education Solutions. It consists of all entities outlined in the ERD 
-
 ([View PDF here](https://drive.google.com/file/d/1nB0oTYydLEmE2_XtO4u9A2eawc3cBWs-/view?usp=drive_link)) 
 along with inserts of mock data to test/prove functionalty of the database.
 
