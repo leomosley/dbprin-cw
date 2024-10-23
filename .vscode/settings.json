@@ -1,0 +1,7 @@
+{
+  "[sql]": {
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "adpyke.vscode-sql-formatter"
+  }
+}
