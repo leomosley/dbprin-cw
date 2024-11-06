@@ -479,7 +479,7 @@ CREATE TABLE teacher (
 -- Table structure for OFFICE_HOUR
 -- -------------------------------
 CREATE TABLE office_hour (
-  hour_id SERIAL PRIMARY KEY NOT NULL,
+  hour_id SERIAL PRIMARY KEY,
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
   date DATE NOT NULL
