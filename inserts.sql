@@ -1,6 +1,6 @@
--- -------------------
+-- ------------------
 -- Records of STUDENT
--- -------------------
+-- ------------------
 INSERT INTO student (student_personal_email, student_fname, student_mname, student_lname, student_pronouns, student_addr1, student_addr2, student_city, student_postcode, student_landline, student_mobile, student_dob, student_attendance)
 VALUES
   ('alex.braun@gmail.com', 'Alex', NULL, 'Braun', 'He/Him', '123 Main Street', 'Mayfair', 'London', 'SW1A 1AA', '0201234570', '07891234572', '1995-05-15', 0.00),
@@ -11,11 +11,13 @@ VALUES
   ('emma.williams@example.com', 'Emma', NULL, 'Williams', 'She/Her', '789 Cedar Street', NULL, 'London', 'SW1A 2AB', '0203456789', '07892345678', '1999-04-15', 0.00),
   ('alexander.brown@example.com', 'Alexander', 'James', 'Brown', 'He/Him', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', '0163456789', '07998765432', '1998-08-20', 0.00),
   ('olivia.taylor@example.com', 'Olivia', NULL, 'Taylor', 'She/Her', '101 Elm Street', NULL, 'Glasgow', 'G2 1AB', '0142345671', '07871234571', '2000-02-25', 0.00),
-  ('will.thomas@example.com', 'William', 'John', 'Thomas', 'He/Him', '789 Oak Lane', NULL, 'Bristol', 'BS2 1AB', '0113456780', '07912345681', '1997-06-30', 0.00);
+  ('will.thomas@example.com', 'William', 'John', 'Thomas', 'He/Him', '789 Oak Lane', NULL, 'Bristol', 'BS2 1AB', '0113456781', '07912335681', '1997-06-30', 0.00);
+  ('will.james@example.com', 'Will', NULL, 'James', 'He/Him', '125 Cedar Lane', NULL, 'London', 'SW1A 4AB', '0113456780', '07912345581', '1995-05-20', 0.00);
+  ('amanda.thomas@example.com', 'Amanda', NULL, 'Thomas', 'She/Her', '789 Oak Lane', NULL, 'Bristol', 'BS2 1AB', '0113456781', '07912345681', '1997-06-30', 0.00);
 
--- -------------------
+-- ------------------
 -- Records of TUITION
--- -------------------
+-- ------------------
 INSERT INTO tuition (tuition_amount, tuition_paid, tuition_remaining, tuition_remaining_perc, tuition_deadline)
 VALUES
   (2800.00, 0, 2800.00, 0, '2025-07-01'),
@@ -29,25 +31,15 @@ VALUES
   (3600.00, 0, 3600.00, 0, '2025-07-10'),
   (1500.00, 0, 1500.00, 0, '2025-07-31');
 
--- ---------------------------
+-- --------------------------
 -- Records of STUDENT_TUITION
--- ---------------------------
+-- --------------------------
 INSERT INTO student_tuition (student_id, tuition_id)
 VALUES
-  (1, 1),
-  (2, 2),
-  (3, 3),
-  (4, 4),
-  (5, 5),
-  (6, 6),
-  (7, 7),
-  (8, 8),
-  (9, 9),
-  (9, 10);
 
--- ---------------------------
+-- --------------------------
 -- Records of TUITION_PAYMENT
--- ---------------------------
+-- --------------------------
 INSERT INTO tuition_payment (tuition_id, tuition_payment_amount, tuition_payment_date, tuition_payment_method)
 VALUES
   (1, 300.00, '2025-03-15', 'Bank Transfer'),
@@ -66,10 +58,10 @@ VALUES
   (4, 400.00, '2025-05-20', 'Credit Card'),
   (5, 200.00, '2025-05-10', 'Bank Transfer');
 
--- -----------------------
--- Records of DEPARTMENTS
--- -----------------------
-INSERT INTO departments (dep_name, dep_type, dep_description)
+-- ---------------------
+-- Records of DEPARTMENT
+-- ---------------------
+INSERT INTO department (dep_name, dep_type, dep_description)
 VALUES
   ('Arts', 'Educational', 'Department of Arts'),
   ('Humanities', 'Educational', 'Department of Humanities'),
@@ -80,6 +72,8 @@ VALUES
   ('Engineering', 'Educational', 'Department of Engineering'),
   ('Vocational Training', 'Educational', 'Department of Vocational Training'),
   ('Finance', 'Administrative', NULL),
+  ('Facilities and Maintenance', 'Maintenance', NULL),
+  ('SES Operations', 'Operational', 'Manages the SES operations and infrastructure'),
   ('Human Resources', 'Administrative', NULL);
   
 -- -----------------
@@ -87,11 +81,11 @@ VALUES
 -- -----------------
 INSERT INTO branch (branch_name, branch_status, branch_addr1, branch_addr2, branch_postcode, branch_contact_number, branch_email)
 VALUES
-  ('SES London', 'Open', '123 High Street', 'Westminster', 'SW1A 1AA', '020 7946 0958', 'london@ses.edu.org'),
+  ('SES London (HQ)', 'Open', '123 High Street', 'Westminster', 'SW1A 1AA', '020 7946 0958', 'london@ses.edu.org'),
   ('SES Manchester', 'Open', '45 Oxford Road', 'Manchester City Centre', 'M1 5QA', '0161 306 6000', 'manchester@ses.edu.org'),
-  ('SES Birmingham', 'Closed', '200 Broad Street', 'Birmingham', 'B1 2HQ', '0121 643 2233', 'birmingham@ses.edu.org'),
+  ('SES Birmingham', 'Open', '200 Broad Street', 'Birmingham', 'B1 2HQ', '0121 643 2233', 'birmingham@ses.edu.org'),
   ('SES Edinburgh', 'Open', '7 George Street', 'Edinburgh', 'EH2 2QL', '0131 622 8000', 'edinburgh@ses.edu.org'),
-  ('SES Bristol', 'Closed', '25 Park Street', 'Bristol', 'BS1 5NH', '0117 928 9000', 'bristol@ses.edu.org');
+  ('SES Bristol', 'Open', '25 Park Street', 'Bristol', 'BS1 5NH', '0117 928 9000', 'bristol@ses.edu.org');
 
 -- ----------------------------
 -- Records of BRANCH_DEPARTMENT
@@ -103,58 +97,82 @@ VALUES
   (1, 5),
   (1, 9),
   (1, 10),
+  (1, 11),
+  (1, 12),
   (2, 3),
   (2, 4),
   (2, 5),
   (2, 6),
   (2, 7),
-  (2, 9),
   (2, 10),
   (3, 8),
-  (3, 9),
   (3, 10),
   (4, 1),
   (4, 2),
   (4, 5),
   (4, 6),
-  (4, 9),
   (4, 10),
   (5, 2),
   (5, 3),
   (5, 4),
   (5, 5),
-  (5, 9),
-  (5, 10);
+  (5, 10),
 
+
+-- ---------------
+-- Records of ROLE
+-- ---------------
+INSERT INTO role (role_name) VALUES 
+  ('Lecturer'),
+  ('Senior Lecturer'),
+  ('Course Leader'),
+  ('Head of Department'),
+  ('Teaching Assistant'),
+  ('Admissions Officer'),
+  ('Academic Registrar'),
+  ('Student Affairs Coordinator'),
+  ('Financial Aid Advisor'),
+  ('Human Resources Manager'),
+  ('IT Support Specialist'),
+  ('Facilities Manager'),
+  ('Security Officer'),
+  ('Library Assistant'),
+  ('Receptionist'),
+  ('Maintenance Technician'),
+  ('Custodian'),
+  ('Groundskeeper'),
+  ('Electrician'),
+  ('Plumber');
+  
 -- ----------------
 -- Records of STAFF
 -- ----------------
 INSERT INTO staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile, staff_dob)
 VALUES
-('John', NULL, 'Smith', 'Dr', '789 Elm Street', NULL, 'London', 'SW1A 2AA', 'john.smith@example.com', '0201234567', '07891234567', '1980-03-25'),
-('Jane', NULL, 'Doe', 'Mrs', '987 Oak Avenue', NULL, 'Manchester', 'M1 2AA', 'jAne.doe@example.com', '0161234567', '07987654321', '1975-07-10'),
-('Laura', 'Lily', 'Taylor', 'Ms', '456 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'laura.taylor@example.com', '0201234512', '07891232567', '1985-05-20'),
-('David', NULL, 'Clark', 'Dr', '789 Pine Avenue', NULL, 'Bristol', 'BS1 1AA', 'david.clark@example.com', '0123456789', '07712345678', '1978-09-12'),
-('Michael', NULL, 'Johnson', 'Dr', '123 Cedar Street', NULL, 'London', 'SW1A 2AA', 'michael.johnson@example.com', '0131234567', '07723456789', '1983-02-15'),
-('Emily', 'Anne', 'Harris', 'Mrs', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', 'emily.harris@example.com', '0203456789', '07892345678', '1977-11-30'),
-('Daniel', 'James', 'Anderson', 'Mr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'dan.anderson@example.com', '0163456789', '07998765432', '1982-06-25'),
-('Sophia', NULL, 'Wilson', 'Ms', '101 Maple Street', NULL, 'Bristol', 'BS2 1AB', 'sophia.wilson@example.com', '0142345678', '07871234567', '1980-09-18'),
-('Oliver', 'Robert', 'Martin', 'Mr', '789 Elm Street', NULL, 'London', 'SW1A 1AA', 'oliver.martin@example.com', '0113456789', '07912345678', '1975-04-10'),
-('Amelia', NULL, 'Thompson', 'Dr', '456 Oak Avenue', NULL, 'Manchester', 'M1 1AA', 'amelia.thompson@example.com', '0202345678', '07891234568', '1978-08-05'),
-('Ethan', 'William', 'White', 'Dr', '789 Pine Avenue', NULL, 'Glasgow', 'G1 1AA', 'ethan.white@example.com', '0162345679', '07987654322', '1983-11-20'),
-('Ava', NULL, 'Davis', 'Mrs', '101 Cedar Street', NULL, 'Bristol', 'BS1 1AA', 'ava.davis@example.com', '0141234578', '07876543210', '1981-03-15'),
-('Noah', 'Edward', 'Wilson', 'Dr', '123 Birch Avenue', NULL, 'London', 'SW1A 2AB', 'noah.wilson@example.com', '0203456790', '07892345679', '1976-06-30'),
-('Isabella', NULL, 'Harris', 'Dr', '456 Maple Street', NULL, 'Manchester', 'M1 2AB', 'isabella.harris@example.com', '0163456791', '07998765433', '1979-09-25'),
-('James', 'Alexander', 'Brown', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'james.brown@example.com', '0112345670', '07871234568', '1984-12-10'),
-('Charlotte', NULL, 'Wilson', 'Dr', '101 Elm Street', NULL, 'Bristol', 'BS2 1AB', 'charlotte.wilson@example.com', '0142345679', '07876543211', '1977-02-05'),
-('Benjamin', 'Michael', 'Lee', 'Mr', '789 Pine Avenue', NULL, 'London', 'SW1A 1AA', 'benjamin.lee@example.com', '0112345671', '07901234569', '1982-05-20'),
-('Mia', NULL, 'Roberts', 'Dr', '456 Cedar Street', NULL, 'Manchester', 'M1 1AA', 'mia.roberts@example.com', '0201234568', '07891234569', '1975-08-15'),
-('William', 'Daniel', 'Thomas', 'Dr', '789 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'william.thomas@example.com', '0161234568', '07987554322', '1980-10-30'),
-('Evelyn', NULL, 'Evans', 'Mrs', '101 Oak Avenue', NULL, 'Bristol', 'BS1 1AA', 'evelyn.evans@example.com', '0142348579', '07872234568', '1973-11-25'),
-('Sophie', NULL, 'Roberts', 'Dr', '123 Maple Street', NULL, 'London', 'SW1A 2AA', 'sophie.roberts@example.com', '0113256780', '07912345679', '1988-09-15'),
-('Jack', 'William', 'Harris', 'Mr', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', 'jack.harris@example.com', '0142345670', '07871234570', '1977-12-20'),
-('Emily', 'Grace', 'Wilson', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'emily.wilson@example.com', '0113256781', '07912345680', '1982-06-25'),
-('Daniel', 'Thomas', 'Anderson', 'Mr', '101 Cedar Street', NULL, 'Bristol', 'BS1 1AB', 'daniel.anderson@example.com', '0201234569', '07891234571', '1979-03-30');
+  ('Sophie', NULL, 'Roberts', 'Dr', '123 Maple Street', NULL, 'London', 'SW1A 2AA', 'sophie.roberts@example.com', '0113256780', '07912345679', '1988-09-15'),
+  ('John', NULL, 'Smith', 'Dr', '789 Elm Street', NULL, 'London', 'SW1A 2AA', 'john.smith@example.com', '0201234567', '07891234567', '1980-03-25'),
+  ('David', NULL, 'Clark', 'Dr', '789 Pine Avenue', NULL, 'Bristol', 'BS1 1AA', 'david.clark@example.com', '0123456789', '07712345678', '1978-09-12'),
+  ('Michael', NULL, 'Johnson', 'Dr', '123 Cedar Street', NULL, 'London', 'SW1A 2AA', 'michael.johnson@example.com', '0131234567', '07723456789', '1983-02-15'),
+  ('Emily', 'Grace', 'Wilson', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'emily.wilson@example.com', '0113256781', '07912345680', '1982-06-25'),
+  ('Noah', 'Edward', 'Wilson', 'Dr', '123 Birch Avenue', NULL, 'London', 'SW1A 2AB', 'noah.wilson@example.com', '0203456790', '07892345679', '1976-06-30'),
+  ('Amelia', NULL, 'Thompson', 'Dr', '456 Oak Avenue', NULL, 'Manchester', 'M1 1AA', 'amelia.thompson@example.com', '0202345678', '07891234568', '1978-08-05'),
+  ('Ethan', 'William', 'White', 'Dr', '789 Pine Avenue', NULL, 'Glasgow', 'G1 1AA', 'ethan.white@example.com', '0162345679', '07987654322', '1983-11-20'),
+  ('William', 'Daniel', 'Thomas', 'Dr', '789 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'william.thomas@example.com', '0161234568', '07987554322', '1980-10-30'),
+  ('Isabella', NULL, 'Harris', 'Dr', '456 Maple Street', NULL, 'Manchester', 'M1 2AB', 'isabella.harris@example.com', '0163456791', '07998765433', '1979-09-25'),
+  ('James', 'Alexander', 'Brown', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'james.brown@example.com', '0112345670', '07871234568', '1984-12-10'),
+  ('Charlotte', NULL, 'Wilson', 'Dr', '101 Elm Street', NULL, 'Bristol', 'BS2 1AB', 'charlotte.wilson@example.com', '0142345679', '07876543211', '1977-02-05'),
+  ('Laura', 'James', 'Taylor', 'Ms', '456 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'laura.taylor@example.com', '0201234512', '07891232567', '1985-05-20'),
+  ('Jane', NULL, 'Doe', 'Mrs', '987 Oak Avenue', NULL, 'Manchester', 'M1 2AA', 'jAne.doe@example.com', '0161234567', '07987654321', '1975-07-10'),
+  ('Emily', 'Anne', 'Harris', 'Mrs', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', 'emily.harris@example.com', '0203456789', '07892345678', '1977-11-30'),
+  ('Daniel', 'James', 'Anderson', 'Mr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'dan.anderson@example.com', '0163456789', '07998765432', '1982-06-25'),
+  ('Sophia', NULL, 'Wilson', 'Ms', '101 Maple Street', NULL, 'Bristol', 'BS2 1AB', 'sophia.wilson@example.com', '0142345678', '07871234567', '1980-09-18'),
+  ('Oliver', 'Robert', 'Martin', 'Mr', '789 Elm Street', NULL, 'London', 'SW1A 1AA', 'oliver.martin@example.com', '0113456789', '07912345678', '1975-04-10'),
+  ('Ava', NULL, 'Davis', 'Mrs', '101 Cedar Street', NULL, 'Bristol', 'BS1 1AA', 'ava.davis@example.com', '0141234578', '07876543210', '1981-03-15'),
+  ('Benjamin', 'Michael', 'Lee', 'Mr', '789 Pine Avenue', NULL, 'London', 'SW1A 1AA', 'benjamin.lee@example.com', '0112345671', '07901234569', '1982-05-20'),
+  ('Mia', NULL, 'Roberts', 'Dr', '456 Cedar Street', NULL, 'Manchester', 'M1 1AA', 'mia.roberts@example.com', '0201234568', '07891234569', '1975-08-15'),
+  ('Evelyn', NULL, 'Evans', 'Mrs', '101 Oak Avenue', NULL, 'Bristol', 'BS1 1AA', 'evelyn.evans@example.com', '0142348579', '07872234568', '1973-11-25'),
+  ('Jack', 'William', 'Harris', 'Mr', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', 'jack.harris@example.com', '0142345670', '07871234570', '1977-12-20'),
+  ('Daniel', 'Thomas', 'Anderson', 'Mr', '101 Cedar Street', NULL, 'Bristol', 'BS1 1AB', 'daniel.anderson@example.com', '0201234569', '07891234571', '1979-03-30');
 
 
 -- ----------------------------
@@ -199,72 +217,25 @@ VALUES
 -- ------------------------
 INSERT INTO staff_contact (contact_id, staff_id)
 VALUES
-  (13, 1),
-  (14, 2),
-  (15, 3),
-  (16, 4),
-  (17, 5),
-  (18, 6),
-  (19, 7),
-  (20, 8),
-  (21, 9),
-  (22, 10),
-  (23, 11),
-  (24, 12),
-  (25, 13),
-  (26, 14),
-  (27, 15),
-  (28, 16),
-  (29, 17),
-  (30, 18),
-  (31, 19),
-  (32, 20),
-  (33, 21);
 
 -- --------------------------
 -- Records of STUDENT_CONTACT
 -- --------------------------
 INSERT INTO student_contact (contact_id, student_id)
 VALUES
-  (1, 1),
-  (2, 2),
-  (3, 3),
-  (4, 4),
-  (5, 5),
-  (6, 6),
-  (7, 7),
-  (8, 8),
-  (9, 9),
-  (10, 10),
-  (11, 11),
-  (12, 12);
 
 -- ---------------------------
 -- Records of STAFF_DEPARTMENT
 -- ---------------------------
-INSERT INTO staff_department (staff_id, dep_id)
+INSERT INTO staff_department (staff_id, dep_id, date_assinged)
 VALUES
-  (1, 1),
-  (2, 1),
-  (4, 1),
-  (5, 1),
-  (6, 2),
-  (7, 2),
-  (8, 2),
-  (10, 2),
-  (11, 3),
-  (12, 3),
-  (13, 3),
-  (14, 3),
-  (15, 3),
-  (16, 4),
-  (18, 4),
-  (19, 4),
-  (20, 4),
-  (3, 9),
-  (9, 8),
-  (17, 9),
-  (10, 9);
+
+-- -----------------------
+-- Records of STAFF_BRANCH
+-- -----------------------
+INSERT INTO staff_department (staff_id, branch_id, date_assinged)
+VALUES
+
 
 -- -------------------
 -- Records of BUILDING
@@ -417,94 +388,174 @@ VALUES
   (43, 8, 30),
   (44, 6, 1);
 
--- ------------------
--- Records of COURSES
--- ------------------
-INSERT INTO courses (teacher_id, course_name, course_code, course_description, course_length)
+-- -----------------
+-- Records of COURSE
+-- -----------------
+INSERT INTO course (course_code, course_name, course_description, course_length)
 VALUES
-  (1, 'Introduction to Theater', 101, 'An introductory course covering the basics of theater and performance art.', 2),
-  (2, 'Literary Analysis', 201, 'An in-depth exploration of literary theory and critical analysis.', 3),
-  (5, 'Creative Writing Workshop', 301, 'A hands-on workshop focusing on various forms of creative writing.', 4),
-  (4, 'History of Art', 105, 'A study of art history from ancient times to modern movements.', 2),
-  (3, 'Film Studies', 106, 'An introduction to film analysis and the history of cinema.', 2),
-  (6, 'World History', 102, 'A comprehensive survey of world history from ancient civilizations to modern times.', 2),
-  (8, 'Introduction to Linguistics', 202, 'An overview of the scientific study of language and its structure.', 3),
-  (10, 'Cultural Studies Seminar', 302, 'An examination of cultural phenomena and their impact on society.', 4),
-  (9, 'Philosophy of Mind', 107, 'An exploration of philosophical questions related to consciousness and cognition.', 2),
-  (7, 'Social Anthropology', 203, 'An introduction to the study of societies and human cultures.', 3),
-  (11, 'Introduction to Computer Science', 103, 'Fundamental concepts and principles of computer science and programming.', 2),
-  (13, 'Data Science Fundamentals', 203, 'An introduction to data analysis, machine learning, and statistical modeling.', 3),
-  (15, 'Cybersecurity Essentials', 303, 'A hands-on course covering essential cybersecurity concepts and practices.', 4),
-  (12, 'Algorithms and Data Structures', 108, 'An introductory course on algorithms and efficient data structures.', 3),
-  (14, 'Software Engineering Principles', 204, 'Fundamentals of software design, architecture, and project management.', 3),
-  (16, 'Calculus I', 104, 'An introductory course on differential and integral calculus.', 2),
-  (18, 'Statistics for Decision Making', 204, 'A study of basic statistical methods for decision-making in various fields.', 3),
-  (20, 'Mathematical Physics', 304, 'An advanced course integrating mathematical techniques with principles of physics.', 4),
-  (17, 'Linear Algebra', 109, 'A course on vector spaces, linear transformations, and matrices.', 3),
-  (19, 'Differential Equations', 205, 'An introduction to ordinary differential equations and their applications.', 3),
-  (21, 'Introduction to Robotics', 110, 'Basics of robotics engineering including mechanics and control.', 3),
-  (22, 'Digital Systems Design', 206, 'Principles of digital logic and circuit design.', 3),
-  (23, 'Engineering Thermodynamics', 305, 'Fundamentals of thermodynamics for engineering applications.', 4),
-  (24, 'Fluid Mechanics', 111, 'Introduction to fluid behavior and its applications in engineering.', 3),
-  (25, 'Materials Science', 207, 'Study of the properties and applications of engineering materials.', 3),
-  (26, 'Electrical Installation Basics', 112, 'A course on electrical systems, wiring, and safety standards.', 2),
-  (27, 'Carpentry and Woodworking', 208, 'An introduction to woodworking techniques and tools.', 3),
-  (28, 'Plumbing Essentials', 306, 'Core concepts in plumbing installation and maintenance.', 4),
-  (29, 'Automotive Maintenance', 113, 'Basics of automotive repair and maintenance practices.', 3),
-  (30, 'Welding Techniques', 209, 'Practical training in various welding techniques.', 3);
+  ('TH102101', 'Introduction to Theater', 'An introductory course covering the basics of theater and performance art.', 2),
+  ('LI102201', 'Literary Analysis', 'An in-depth exploration of literary theory and critical analysis.', 3),
+  ('CW102301', 'Creative Writing Workshop', 'A hands-on workshop focusing on various forms of creative writing.', 4),
+  ('HI102105', 'History of Art', 'A study of art history from ancient times to modern movements.', 2),
+  ('FI102106', 'Film Studies', 'An introduction to film analysis and the history of cinema.', 2),
+  ('HI102102', 'World History', 'A comprehensive survey of world history from ancient civilizations to modern times.', 2),
+  ('LN102202', 'Introduction to Linguistics', 'An overview of the scientific study of language and its structure.', 3),
+  ('CS102302', 'Cultural Studies Seminar', 'An examination of cultural phenomena and their impact on society.', 4),
+  ('PH102107', 'Philosophy of Mind', 'An exploration of philosophical questions related to consciousness and cognition.', 2),
+  ('AN102203', 'Social Anthropology', 'An introduction to the study of societies and human cultures.', 3),
+  ('CS102103', 'Introduction to Computer Science', 'Fundamental concepts and principles of computer science and programming.', 2),
+  ('DS102203', 'Data Science Fundamentals', 'An introduction to data analysis, machine learning, and statistical modeling.', 3),
+  ('CY102303', 'Cybersecurity Essentials', 'A hands-on course covering essential cybersecurity concepts and practices.', 4),
+  ('CS102108', 'Algorithms and Data Structures', 'An introductory course on algorithms and efficient data structures.', 3),
+  ('SE102204', 'Software Engineering Principles', 'Fundamentals of software design, architecture, and project management.', 3),
+  ('MT102104', 'Calculus I', 'An introductory course on differential and integral calculus.', 2),
+  ('ST102204', 'Statistics for Decision Making', 'A study of basic statistical methods for decision-making in various fields.', 3),
+  ('PH102304', 'Mathematical Physics', 'An advanced course integrating mathematical techniques with principles of physics.', 4),
+  ('MA102109', 'Linear Algebra', 'A course on vector spaces, linear transformations, and matrices.', 3),
+  ('DE102205', 'Differential Equations', 'An introduction to ordinary differential equations and their applications.', 3),
+  ('RB102110', 'Introduction to Robotics', 'Basics of robotics engineering including mechanics and control.', 3),
+  ('DS102206', 'Digital Systems Design', 'Principles of digital logic and circuit design.', 3),
+  ('ET102305', 'Engineering Thermodynamics', 'Fundamentals of thermodynamics for engineering applications.', 4),
+  ('FM102111', 'Fluid Mechanics', 'Introduction to fluid behavior and its applications in engineering.', 3),
+  ('MS102207', 'Materials Science', 'Study of the properties and applications of engineering materials.', 3),
+  ('EI102112', 'Electrical Installation Basics', 'A course on electrical systems, wiring, and safety standards.', 2),
+  ('CW102208', 'Carpentry and Woodworking', 'An introduction to woodworking techniques and tools.', 3),
+  ('PL102306', 'Plumbing Essentials', 'Core concepts in plumbing installation and maintenance.', 4),
+  ('AM102113', 'Automotive Maintenance', 'Basics of automotive repair and maintenance practices.', 3),
+  ('WT102209', 'Welding Techniques', 'Practical training in various welding techniques.', 3);
 
--- -----------------------------
--- Records of DEPARTMENT_COURSES
--- ------------------------------
-INSERT INTO department_courses (dep_id, course_id)
+-- ----------------------------
+-- Records of DEPARTMENT_COURSE
+-- ----------------------------
+INSERT INTO department_course (dep_id, course_id)
 VALUES
-  (1, 101),
-  (1, 201),
-  (1, 301),
-  (1, 105),
-  (1, 106),
-  (2, 102),
-  (2, 202),
-  (2, 302),
-  (2, 107),
-  (2, 203),
-  (3, 103),
-  (3, 203),
-  (3, 303),
-  (3, 108),
-  (3, 204),
-  (4, 104),
-  (4, 204),
-  (4, 304),
-  (4, 109),
-  (4, 205),
-  (5, 110),
-  (5, 206),
-  (5, 305),
-  (5, 111),
-  (5, 207),
-  (6, 112),
-  (6, 208),
-  (6, 306),
-  (6, 113),
-  (6, 209);
-
--- ------------------
--- Records of TEACHER
--- ------------------
-INSERT INTO teachers (staff_id, room_id, teacher_role, teacher_tenure, phone_ext)
-VALUES
+  (1, 1),
+  (1, 4),
+  (1, 5),
+  (1, 3),
+  (2, 2),
+  (2, 6),
+  (2, 8),
+  (2, 10),
+  (3, 11),
+  (3, 12),
+  (3, 13),
+  (3, 14),
+  (3, 15),
+  (4, 16),
+  (4, 18),
+  (4, 19),
+  (4, 20),
+  (5, 17),
+  (5, 21),
+  (5, 22),
+  (5, 23),
+  (6, 24),
+  (6, 26),
+  (6, 28),
+  (6, 29),
+  (7, 25),
+  (7, 27),
+  (7, 30),
+  (7, 31),
+  (8, 32),
+  (8, 33),
+  (8, 34),
+  (8, 35);
 
 -- ----------------------
 -- Records of OFFICE_HOUR
 -- ----------------------
 INSERT INTO office_hour (start_time, end_time, date)
 VALUES
-
--- ------------------------------
--- Records of TEACHER_OFFICE_HOUR
--- ------------------------------
-INSERT INTO teacher_office_hour (teacher_id, hour_id)
+  ('09:00', '11:00', '2024-11-01'),
+  ('13:00', '15:00', '2024-11-02'),
+  ('10:00', '12:00', '2024-11-03'),
+  ('14:00', '16:00', '2024-11-04'),
+  ('11:00', '13:00', '2024-11-05'),
+  ('09:30', '11:30', '2024-11-06'),
+  ('13:30', '15:30', '2024-11-07'),
+  ('09:00', '11:00', '2024-11-08'),
+  ('13:00', '15:00', '2024-11-09'),
+  ('10:00', '12:00', '2024-11-10'),
+  ('14:00', '16:00', '2024-11-11'),
+  ('11:00', '13:00', '2024-11-12'),
+  ('09:30', '11:30', '2024-11-13'),
+  ('13:30', '15:30', '2024-11-14'),
+  ('09:00', '11:00', '2024-11-15'),
+  ('13:00', '15:00', '2024-11-16'),
+  ('10:00', '12:00', '2024-11-17'),
+  ('14:00', '16:00', '2024-11-18'),
+  ('11:00', '13:00', '2024-11-19'),
+  ('09:30', '11:30', '2024-11-20'),
+  ('13:30', '15:30', '2024-11-21'),
+  ('09:00', '11:00', '2024-11-22'),
+  ('13:00', '15:00', '2024-11-23'),
+  ('10:00', '12:00', '2024-11-24'),
+  ('14:00', '16:00', '2024-11-25'),
+  ('11:00', '13:00', '2024-11-26'),
+  ('09:30', '11:30', '2024-11-27'),
+  ('13:30', '15:30', '2024-11-28'),
+  ('09:00', '11:00', '2024-11-29'),
+  ('13:00', '15:00', '2024-11-30'),
+  ('10:00', '12:00', '2024-12-01'),
+  ('14:00', '16:00', '2024-12-02'),
+  ('11:00', '13:00', '2024-12-03'),
+  ('09:30', '11:30', '2024-12-04'),
+  ('13:30', '15:30', '2024-12-05'),
+  ('09:00', '11:00', '2024-12-06'),
+  ('13:00', '15:00', '2024-12-07'),
+  ('10:00', '12:00', '2024-12-08'),
+  ('14:00', '16:00', '2024-12-09'),
+  ('11:00', '13:00', '2024-12-10'),
+  ('09:30', '11:30', '2024-12-11'),
+  ('13:30', '15:30', '2024-12-12'),
+  ('09:00', '11:00', '2024-12-13'),
+  ('13:00', '15:00', '2024-12-14'),
+  ('10:00', '12:00', '2024-12-15'),
+  ('14:00', '16:00', '2024-12-16'),
+  ('11:00', '13:00', '2024-12-17'),
+  ('09:30', '11:30', '2024-12-18'),
+  ('13:30', '15:30', '2024-12-19'),
+  ('09:00', '11:00', '2024-12-20'),
+  ('13:00', '15:00', '2024-12-21'),
+  ('10:00', '12:00', '2024-12-22'),
+  ('14:00', '16:00', '2024-12-23'),
+  ('11:00', '13:00', '2024-12-24'),
+  ('09:30', '11:30', '2024-12-25'),
+  ('13:30', '15:30', '2024-12-26'),
+  ('09:00', '11:00', '2024-12-27'),
+  ('13:00', '15:00', '2024-12-28'),
+  ('10:00', '12:00', '2024-12-29'),
+  ('14:00', '16:00', '2024-12-30'),
+  ('11:00', '13:00', '2024-12-31'),
+  ('09:30', '11:30', '2025-01-01'),
+  ('13:30', '15:30', '2025-01-02'),
+  ('09:00', '11:00', '2025-01-03'),
+  ('13:00', '15:00', '2025-01-04'),
+  ('10:00', '12:00', '2025-01-05'),
+  ('14:00', '16:00', '2025-01-06'),
+  ('11:00', '13:00', '2025-01-07'),
+  ('09:30', '11:30', '2025-01-08'),
+  ('13:30', '15:30', '2025-01-09'),
+  ('09:00', '11:00', '2025-01-10'),
+  ('13:00', '15:00', '2025-01-11'),
+  ('10:00', '12:00', '2025-01-12'),
+  ('14:00', '16:00', '2025-01-13'),
+  ('11:00', '13:00', '2025-01-14'),
+  ('09:30', '11:30', '2025-01-15'),
+  ('13:30', '15:30', '2025-01-16'),
+  ('09:00', '11:00', '2025-01-17'),
+  ('13:00', '15:00', '2025-01-18'),
+  ('10:00', '12:00', '2025-01-19'),
+  ('14:00', '16:00', '2025-01-20'),
+  ('11:00', '13:00', '2025-01-21'),
+  ('09:30', '11:30', '2025-01-22'),
+  ('13:30', '15:30', '2025-01-23');
+-- ----------------------------
+-- Records of STAFF_OFFICE_HOUR
+-- ----------------------------
+INSERT INTO staff_office_hour (staff_id, hour_id)
 VALUES
 
 -- ------------------
@@ -513,10 +564,10 @@ VALUES
 INSERT INTO session (module_id, room_id, session_type, session_start_time, ession_end_time, session_date, session_feedback, session_mandatory, session_description)
 VALUES
 
--- --------------------------
--- Records of TEACHER_SESSION
--- --------------------------
-INSERT INTO teacher_session (session_id, teacher_id)
+-- ------------------------
+-- Records of STAFF_SESSION
+-- ------------------------
+INSERT INTO staff_session (session_id, staff_id)
 VALUES
 
 -- ---------------------
@@ -536,79 +587,79 @@ VALUES
 -- -----------------
 INSERT INTO module (module_code, module_name, module_description, academ_lvl, module_credits, module_status, last_reviewed, notional_hours, module_duration)
 VALUES
-('TH10101', 'Theater History', 'An overview of the history of theater from ancient times to the present.', 'L4', 20, 'Active', '2024-06-15', 150.00, 12),
-('TH10102', 'Acting Techniques', 'Exploration of various acting techniques and methods.', 'L5', 20, 'Active', '2024-06-15', 150.00, 12),
-('TH10103', 'Stage Design Basics', 'Introduction to basic concepts in stage design and set decoration.', 'L6', 40, 'Active', '2024-06-15', 200.00, 18),
-('LI20101', 'Introduction to Literary Theory', 'An introduction to different approaches to literary analysis.', 'L4', 20, 'Active', '2024-06-20', 150.00, 12),
-('LI20102', 'Critical Reading Skills', 'Development of critical reading and analysis skills.', 'L5', 20, 'Active', '2024-06-20', 150.00, 12),
-('LI20103', 'Literary Movements', 'Study of significant literary movements throughout history.', 'L6', 40, 'Active', '2024-06-20', 200.00, 18),
-('CW30101', 'Fiction Writing', 'Workshop focusing on writing short stories and novels.', 'L4', 20, 'Active', '2024-06-25', 150.00, 12),
-('CW30102', 'Poetry Workshop', 'Workshop focusing on writing poetry and verse.', 'L6', 20, 'Active', '2024-06-25', 150.00, 12),
-('CW30103', 'Writing for Television', 'Workshop on writing scripts for television series.', 'L5', 40, 'Active', '2024-06-25', 200.00, 18),
-('HI10201', 'Ancient Civilizations', 'Study of the rise and fall of ancient civilizations.', 'L4', 20, 'Active', '2024-06-10', 150.00, 12),
-('HI10202', 'Modern History', 'Exploration of major events and developments in modern history.', 'L5', 20, 'Active', '2024-06-10', 150.00, 12),
-('HI10203', 'World Wars in Context', 'Detailed study of the causes and impact of the World Wars.', 'L6', 40, 'Active', '2024-06-10', 200.00, 18),
-('LN20201', 'Phonetics and Phonology', 'Study of speech sounds and their patterns.', 'L4', 20, 'Active', '2024-06-20', 150.00, 12),
-('LN20202', 'Syntax and Semantics', 'Study of sentence structure and meaning in language.', 'L5', 20, 'Active', '2024-06-20', 150.00, 12),
-('LN20203', 'Language Acquisition', 'An exploration of how people learn language.', 'L6', 40, 'Active', '2024-06-20', 200.00, 18),
-('CS10301', 'Introduction to Programming', 'Fundamentals of programming using a high-level language.', 'L4', 20, 'Active', '2024-06-05', 150.00, 12),
-('CS10302', 'Algorithms and Data Structures', 'Study of algorithms and data structures used in computer science.', 'L5', 20, 'Active', '2024-06-05', 150.00, 12),
-('CS10303', 'Advanced Computing Concepts', 'In-depth study of advanced computing theories.', 'L6', 40, 'Active', '2024-06-05', 200.00, 18),
-('DS20301', 'Statistical Analysis', 'Introduction to statistical methods for data analysis.', 'L5', 20, 'Active', '2024-06-10', 150.00, 12),
-('DS20302', 'Machine Learning Basics', 'Fundamentals of machine learning algorithms and techniques.', 'L6', 40, 'Active', '2024-06-10', 200.00, 18),
-('CY30301', 'Network Security', 'Study of principles and techniques for securing computer networks.', 'L5', 20, 'Active', '2024-06-08', 150.00, 12),
-('CY30302', 'Ethical Hacking', 'Introduction to ethical hacking and penetration testing.', 'L7', 40, 'Active', '2024-06-08', 200.00, 18),
-('MT10401', 'Differential Calculus', 'Study of rates of change and slopes of curves.', 'L5', 20, 'Active', '2024-06-12', 150.00, 12),
-('MT10402', 'Integral Calculus', 'Study of accumulation and area under curves.', 'L6', 40, 'Active', '2024-06-12', 200.00, 18),
-('ST20401', 'Descriptive Statistics', 'Presentation and analysis of data using graphical and numerical methods.', 'L6', 20, 'Active', '2024-06-15', 150.00, 12),
-('ST20402', 'Inferential Statistics', 'Estimation and hypothesis testing using statistical methods.', 'L7', 40, 'Active', '2024-06-15', 200.00, 18),
-('PH30401', 'Classical Mechanics', 'Study of the motion of objects and systems under the influence of forces.', 'L6', 20, 'Active', '2024-06-18', 150.00, 12),
-('PH30402', 'Quantum Mechanics', 'Introduction to the principles of quantum mechanics.', 'L7', 40, 'Active', '2024-06-18', 200.00, 18);
+  ('TH10101', 'Theater History', 'An overview of the history of theater from ancient times to the present.', 'L4', 20, 'Active', '2024-06-15', 150.00, 1),
+  ('TH10102', 'Acting Techniques', 'Exploration of various acting techniques and methods.', 'L5', 20, 'Active', '2024-06-15', 150.00, 2),
+  ('TH10103', 'Stage Design Basics', 'Introduction to basic concepts in stage design and set decoration.', 'L6', 40, 'Active', '2024-06-15', 200.00, 1),
+  ('LI20101', 'Introduction to Literary Theory', 'An introduction to different approaches to literary analysis.', 'L4', 20, 'Active', '2024-06-20', 150.00, 1),
+  ('LI20102', 'Critical Reading Skills', 'Development of critical reading and analysis skills.', 'L5', 20, 'Active', '2024-06-20', 150.00, 2),
+  ('LI20103', 'Literary Movements', 'Study of significant literary movements throughout history.', 'L6', 40, 'Active', '2024-06-20', 200.00, 1),
+  ('CW30101', 'Fiction Writing', 'Workshop focusing on writing short stories and novels.', 'L4', 20, 'Active', '2024-06-25', 150.00, 1),
+  ('CW30102', 'Poetry Workshop', 'Workshop focusing on writing poetry and verse.', 'L6', 20, 'Active', '2024-06-25', 150.00, 2),
+  ('CW30103', 'Writing for Television', 'Workshop on writing scripts for television series.', 'L5', 40, 'Active', '2024-06-25', 200.00, 1),
+  ('HI10201', 'Ancient Civilizations', 'Study of the rise and fall of ancient civilizations.', 'L4', 20, 'Active', '2024-06-10', 150.00, 1),
+  ('HI10202', 'Modern History', 'Exploration of major events and developments in modern history.', 'L5', 20, 'Active', '2024-06-10', 150.00, 2),
+  ('HI10203', 'World Wars in Context', 'Detailed study of the causes and impact of the World Wars.', 'L6', 40, 'Active', '2024-06-10', 200.00, 1),
+  ('LN20201', 'Phonetics and Phonology', 'Study of speech sounds and their patterns.', 'L4', 20, 'Active', '2024-06-20', 150.00, 2),
+  ('LN20202', 'Syntax and Semantics', 'Study of sentence structure and meaning in language.', 'L5', 20, 'Active', '2024-06-20', 150.00, 2),
+  ('LN20203', 'Language Acquisition', 'An exploration of how people learn language.', 'L6', 40, 'Active', '2024-06-20', 200.00, 1),
+  ('CS10301', 'Introduction to Programming', 'Fundamentals of programming using a high-level language.', 'L4', 20, 'Active', '2024-06-05', 150.00, 2),
+  ('CS10302', 'Algorithms and Data Structures', 'Study of algorithms and data structures used in computer science.', 'L5', 20, 'Active', '2024-06-05', 150.00, 1),
+  ('CS10303', 'Advanced Computing Concepts', 'In-depth study of advanced computing theories.', 'L6', 40, 'Active', '2024-06-05', 200.00, 1),
+  ('DS20301', 'Statistical Analysis', 'Introduction to statistical methods for data analysis.', 'L5', 20, 'Active', '2024-06-10', 150.00, 2),
+  ('DS20302', 'Machine Learning Basics', 'Fundamentals of machine learning algorithms and techniques.', 'L6', 40, 'Active', '2024-06-10', 200.00, 1),
+  ('CY30301', 'Network Security', 'Study of principles and techniques for securing computer networks.', 'L5', 20, 'Active', '2024-06-08', 150.00, 1),
+  ('CY30302', 'Ethical Hacking', 'Introduction to ethical hacking and penetration testing.', 'L7', 40, 'Active', '2024-06-08', 200.00, 2),
+  ('MT10401', 'Differential Calculus', 'Study of rates of change and slopes of curves.', 'L5', 20, 'Active', '2024-06-12', 150.00, 2),
+  ('MT10402', 'Integral Calculus', 'Study of accumulation and area under curves.', 'L6', 40, 'Active', '2024-06-12', 200.00, 1),
+  ('ST20401', 'Descriptive Statistics', 'Presentation and analysis of data using graphical and numerical methods.', 'L6', 20, 'Active', '2024-06-15', 150.00, 1),
+  ('ST20402', 'Inferential Statistics', 'Estimation and hypothesis testing using statistical methods.', 'L7', 40, 'Active', '2024-06-15', 200.00, 1),
+  ('PH30401', 'Classical Mechanics', 'Study of the motion of objects and systems under the influence of forces.', 'L6', 20, 'Active', '2024-06-18', 150.00, 2),
+  ('PH30402', 'Quantum Mechanics', 'Introduction to the principles of quantum mechanics.', 'L7', 40, 'Active', '2024-06-18', 200.00, 2);
+  ('TH10201', 'Theater Production', 'Study of the processes involved in producing a theater production.', 'L4', 20, 'Active', '2024-06-15', 150.00, 1),
+  ('TH10202', 'Improvisation Techniques', 'Techniques for improving improvisational acting skills.', 'L5', 20, 'Active', '2024-06-15', 150.00, 2),
+  ('TH10203', 'Stage Lighting', 'Introduction to the fundamentals of stage lighting and its impact on performance.', 'L6', 40, 'Active', '2024-06-15', 200.00, 1),
+  ('LI20201', 'Poetry Analysis', 'Critical analysis of poetry from different periods and regions.', 'L4', 20, 'Active', '2024-06-20', 150.00, 2),
+  ('LI20202', 'Literary Criticism', 'In-depth exploration of literary criticism theories and their applications.', 'L5', 20, 'Active', '2024-06-20', 150.00, 1),
+  ('LI20203', 'Comparative Literature', 'Study of the comparative methods used in literature from various cultures.', 'L6', 40, 'Active', '2024-06-20', 200.00, 2),
+  ('CW30201', 'Screenwriting', 'Crafting scripts for film and television with a focus on structure and narrative.', 'L4', 20, 'Active', '2024-06-25', 150.00, 2),
+  ('CW30202', 'Advanced Poetry Techniques', 'Advanced techniques in poetry writing, including form, style, and structure.', 'L6', 20, 'Active', '2024-06-25', 150.00, 1),
+  ('CW30203', 'Creative Nonfiction Writing', 'Study of narrative nonfiction writing techniques and styles.', 'L5', 40, 'Active', '2024-06-25', 200.00, 1),
+  ('HI10301', 'Ancient Rome', 'Exploration of ancient Roman culture, politics, and history.', 'L4', 20, 'Active', '2024-06-10', 150.00, 2),
+  ('HI10302', 'Cold War History', 'In-depth study of the Cold War, focusing on its origins and effects.', 'L5', 20, 'Active', '2024-06-10', 150.00, 1),
+  ('HI10303', 'History of the Enlightenment', 'Study of the intellectual movement that shaped modern philosophy and politics.', 'L6', 40, 'Active', '2024-06-10', 200.00, 2),
+  ('LN20301', 'Applied Linguistics', 'Study of the practical applications of linguistic theories in real-world scenarios.', 'L4', 20, 'Active', '2024-06-20', 150.00, 1),
+  ('LN20302', 'Sociolinguistics', 'Study of the relationship between language and society.', 'L5', 20, 'Active', '2024-06-20', 150.00, 2),
+  ('LN20303', 'Psycholinguistics', 'Exploration of the psychological aspects of language processing and acquisition.', 'L6', 40, 'Active', '2024-06-20', 200.00, 1),
+  ('CS10401', 'Web Development', 'Introduction to building dynamic websites and web applications.', 'L4', 20, 'Active', '2024-06-05', 150.00, 2),
+  ('CS10402', 'Operating Systems', 'Study of operating system design and function in computer systems.', 'L5', 20, 'Active', '2024-06-05', 150.00, 1),
+  ('CS10403', 'Software Engineering Principles', 'Exploration of software development methodologies and project management.', 'L6', 40, 'Active', '2024-06-05', 200.00, 2),
+  ('DS20401', 'Big Data Analysis', 'Introduction to analyzing large datasets and deriving insights.', 'L5', 20, 'Active', '2024-06-10', 150.00, 1),
+  ('DS20402', 'Deep Learning Fundamentals', 'Study of the foundational principles of deep learning and neural networks.', 'L6', 40, 'Active', '2024-06-10', 200.00, 2),
+  ('CY30401', 'Cryptography', 'Study of cryptographic techniques and their applications in computer security.', 'L5', 20, 'Active', '2024-06-08', 150.00, 2),
+  ('CY30402', 'Penetration Testing', 'Introduction to testing systems for vulnerabilities through ethical hacking.', 'L7', 40, 'Active', '2024-06-08', 200.00, 1),
+  ('MT10501', 'Vector Calculus', 'Study of vector fields and multivariable functions.', 'L5', 20, 'Active', '2024-06-12', 150.00, 2),
+  ('MT10502', 'Linear Algebra', 'Introduction to matrix theory and vector spaces.', 'L6', 40, 'Active', '2024-06-12', 200.00, 1),
+  ('ST20501', 'Probability Theory', 'Study of the theory of probability and its applications in statistics.', 'L6', 20, 'Active', '2024-06-15', 150.00, 1),
+  ('ST20502', 'Advanced Regression Analysis', 'In-depth exploration of regression models and techniques.', 'L7', 40, 'Active', '2024-06-15', 200.00, 2),
+  ('PH30501', 'Electrodynamics', 'Study of electric and magnetic fields and their interactions.', 'L6', 20, 'Active', '2024-06-18', 150.00, 2),
+  ('PH30502', 'Relativity Theory', 'Study of Einstein’s theory of relativity and its implications in physics.', 'L7', 40, 'Active', '2024-06-18', 200.00, 1);
 
--- -------------------------
+-- ------------------------
 -- Records of COURSE_MODULE
--- -------------------------
+-- ------------------------
 INSERT INTO course_module (course_id, module_id)
 VALUES
-(1, 1),
-(1, 2),
-(1, 3),
-(2, 4),
-(2, 5),
-(2, 6),
-(3, 7),
-(3, 8),
-(3, 9),
-(4, 10),
-(4, 11),
-(4, 12),
-(5, 13),
-(5, 14),
-(5, 15),
-(6, 16),
-(6, 17),
-(6, 18),
-(7, 19),
-(7, 20),
-(8, 21),
-(8, 22),
-(9, 23),
-(9, 24),
-(10, 25),
-(10, 26),
-(11, 27),
-(11, 28);
 
 -- -----------------------------
 -- Records of COURSE_COORDINATOR
 -- -----------------------------
-INSERT INTO course_coordinator (teacher_id, course_id)
+INSERT INTO course_coordinator (staff_id, course_id)
 VALUES
 
 -- -----------------------------
 -- Records of MODULE_COORDINATOR
 -- -----------------------------
-INSERT INTO module_coordinator (teacher_id, module_id)
+INSERT INTO module_coordinator (staff_id, module_id)
 VALUES
 
 
@@ -621,235 +672,518 @@ VALUES
 -- ---------------------
 -- Records of ASSESSMENT
 -- ---------------------
-INSERT INTO assessment (module_id, assessment_title, assessment_set_date, assessment_due_date, assessment_set_time, assessment_due_time, assessment_description, assessment_type, assessment_weighting, assessment_attachment, assessment_max_attempts, assessment_visble)
+INSERT INTO assessment (module_id, assessment_title, assessment_set_date, assessment_set_time, assessment_due_date, assessment_due_time, assessment_description, assessment_type, assessment_weighting, assessment_attachment, assessment_max_attempts, assessment_visble)
+VALUES
+  (1, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (1, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (1, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (1, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (1, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (1, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (1, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (1, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (1, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (2, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (2, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (2, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (2, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (2, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (2, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (2, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (2, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (2, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (3, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (3, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (3, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (3, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (3, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (3, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (3, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (3, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (3, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (4, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (4, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (4, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (4, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (4, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (4, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (4, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (4, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (4, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (5, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (5, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (5, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (5, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (5, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (5, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (5, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (5, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (5, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (6, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (6, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (6, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (6, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (6, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (6, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (6, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (6, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (6, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (7, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (7, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (7, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (7, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (7, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (7, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (7, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (7, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (7, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (8, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (8, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (8, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (8, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (8, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (8, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (8, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (8, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (8, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (9, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (9, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (9, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (9, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (9, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (9, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (9, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (9, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (9, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (10, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (10, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (10, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (10, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (10, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (10, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (10, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (10, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (10, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (11, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (11, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (11, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (11, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (11, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (11, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (11, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (11, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (11, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (12, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (12, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (12, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (12, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (12, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (12, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (12, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (12, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (12, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (13, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (13, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (13, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (13, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (13, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (13, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (13, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (13, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (13, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (14, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (14, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (14, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (14, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (14, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (14, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (14, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (14, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (14, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (15, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (15, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (15, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (15, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (15, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (15, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (15, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (15, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (15, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (16, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (16, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (16, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (16, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (16, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (16, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (16, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (16, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (16, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (17, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (17, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (17, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (17, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (17, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (17, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (17, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (17, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (17, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (18, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (18, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (18, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (18, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (18, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (18, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (18, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (18, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (18, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (19, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (19, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (19, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (19, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (19, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (19, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (19, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (19, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (19, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (20, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (20, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (20, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (20, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (20, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (20, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (20, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (20, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (20, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (21, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (21, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (21, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (21, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (21, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (21, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (21, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (21, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (21, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (22, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (22, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (22, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (22, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (22, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (22, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (22, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (22, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (22, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (23, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (23, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (23, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (23, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (23, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (23, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (23, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (23, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (23, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (24, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (24, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (24, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (24, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (24, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (24, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (24, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (24, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (24, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (25, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (25, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (25, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (25, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (25, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (25, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (25, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (25, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (25, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (26, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (26, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (26, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (26, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (26, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (26, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (26, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (26, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (26, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (27, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (27, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (27, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (27, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (27, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (27, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (27, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (27, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (27, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (28, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (28, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (28, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (28, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (28, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (28, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (28, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (28, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (28, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (29, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (29, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (29, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (29, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (29, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (29, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (29, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (29, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (29, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (30, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (30, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (30, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (30, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (30, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (30, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (30, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (30, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (30, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (31, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (31, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (31, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (31, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (31, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (31, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (31, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (31, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (31, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (32, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (32, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (32, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (32, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (32, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (32, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (32, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (32, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (32, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (33, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (33, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (33, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (33, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (33, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (33, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (33, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (33, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (33, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (34, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (34, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (34, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (34, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (34, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (34, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (34, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (34, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (34, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (35, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (35, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (35, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (35, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (35, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (35, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (35, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (35, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (35, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (36, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (36, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (36, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (36, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (36, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (36, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (36, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (36, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (36, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (37, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (37, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (37, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (37, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (37, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (37, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (37, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (37, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (37, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (38, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (38, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (38, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (38, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (38, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (38, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (38, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (38, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (38, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (39, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (39, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (39, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (39, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (39, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (39, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (39, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (39, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (39, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (40, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (40, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (40, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (40, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (40, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (40, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (40, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (40, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (40, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (41, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (41, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (41, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (41, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (41, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (41, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (41, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (41, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (41, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (42, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (42, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (42, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (42, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (42, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (42, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (42, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (42, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (42, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (43, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (43, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (43, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (43, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (43, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (43, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (43, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (43, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (43, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE),
+  (44, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (44, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (44, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (44, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (44, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (44, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (44, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (44, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (44, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (45, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (45, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (45, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (45, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (45, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (45, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (45, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (45, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (45, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (46, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (46, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (46, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (46, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (46, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (46, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (46, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (46, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (46, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (47, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (47, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (47, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (47, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (47, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (47, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (47, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (47, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (47, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (48, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (48, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (48, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (48, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (48, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (48, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (48, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (48, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (48, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (49, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (49, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (49, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (49, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (49, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (49, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (49, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (49, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (49, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (50, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (50, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (50, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (50, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (50, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (50, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (50, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (50, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (50, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (51, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (51, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 30.00, NULL, 1, TRUE),
+  (51, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 50.00, NULL, 2, TRUE),
+  (51, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 10.00 NULL, 1, TRUE),
+  (51, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (51, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (51, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (51, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (51, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (52, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (52, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (52, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 30.00, NULL, 2, TRUE),
+  (52, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (52, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (52, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (52, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (52, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (52, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (53, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (53, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 50.00, NULL, 1, TRUE),
+  (53, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (53, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (53, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (53, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (53, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (53, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (53, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 10.00, NULL, 1, TRUE),
+  (54, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (54, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (54, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (54, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 30.00 NULL, 1, TRUE),
+  (54, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (54, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (54, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (54, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (54, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 50.00, NULL, 1, TRUE),
+  (55, 'General Exam', '2024-11-15', '09:00:00', '2024-12-15', '17:00:00', 'An exam to test the fundamental concepts covered in this module.', 'Exam', 0.00, NULL, 1, TRUE),
+  (55, 'Final Exam', '2024-11-20', '10:00:00', '2024-12-20', '14:00:00', 'A final exam covering all the material presented during the course.', 'Exam', 10.00, NULL, 1, TRUE),
+  (55, 'Coursework Project', '2024-9-10', '10:00:00', '2024-11-10', '16:00:00', 'A coursework project requiring research and practical application of the material learned.', 'Coursework', 10.00, NULL, 2, TRUE),
+  (55, 'Essay', '2024-11-05', '09:00:00', '2024-12-05', '23:59:00', 'An essay to critically analyze specific theories covered in the module.', 'Essay', 50.00 NULL, 1, TRUE),
+  (55, 'Research Essay', '2024-11-07', '10:00:00', '2024-12-07', '23:59:00', 'A research-based essay where students need to analyze key topics in depth.', 'Essay', 0.00, NULL, 1, TRUE),
+  (55, 'Supervised Work Session 1', '2024-11-10', '13:00:00', '2024-11-10', '16:00:00', 'A supervised work session to assist with the ongoing coursework or project development.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (55, 'Supervised Work Session 2', '2024-11-12', '14:00:00', '2024-11-12', '17:00:00', 'A follow-up supervised session for additional support on the project work.', 'Supervised work session', 0.00, NULL, 1, TRUE),
+  (55, 'Oral Presentation', '2024-11-15', '09:00:00', '2024-11-15', '12:00:00', 'A presentation summarising the key points of the research conducted during the course.', 'Presentation', 0.00, NULL, 1, TRUE),
+  (55, 'Final Presentation', '2024-11-18', '11:00:00', '2024-11-18', '14:00:00', 'The final presentation covering the complete research and findings for the module.', 'Presentation', 30.00, NULL, 1, TRUE);
+
+-- --------------------------------
+-- Records of STUDENT_MODULE_RESULT
+-- --------------------------------
+INSERT INTO student_module_result (student_id, module_id, module_grade, feedback, passed)
 VALUES
 
 -- -----------------------------
 -- Records of ASSESSMENT_ATTEMPT
 -- -----------------------------
-INSERT INTO module_assessment_grade (assessment_id, student_id, assessment_grade)
+INSERT INTO assessment_attempt (assessment_id, attempt_grade, attempt_feedback, attempt_no, attempt_date, attempt_time) 
 VALUES
-(1, 1, 85),
-(2, 1, 72),
-(3, 2, 90),
-(4, 2, 65),
-(5, 3, 78),
-(6, 3, 80),
-(7, 4, 70),
-(8, 4, 88),
-(9, 5, 95),
-(10, 5, 84),
-(11, 6, 75),
-(12, 6, 60),
-(13, 7, 85),
-(14, 7, 72),
-(15, 8, 90),
-(16, 8, 65),
-(17, 9, 78),
-(18, 9, 80),
-(19, 9, 70),
-(20, 9, 88);
 
--- ----------------------------
--- Records of TEACHING_SESSION
--- ----------------------------
-INSERT INTO teaching_session (module_id, session_type, session_start_time, session_length, session_date, session_notes)
+-- -------------------------------------
+-- Records of STUDENT_ASSESSMENT_ATTEMPT
+-- -------------------------------------
+INSERT INTO student_assessment_attempt (student_id, assessment_id, highest_grade, feedbacl, attempts) 
 VALUES
-(1, 'Lecture', '09:00:00', 60.00, '2024-03-05', 'Introduction to Theater History'),
-(2, 'Workshop', '13:00:00', 120.00, '2024-03-06', 'Acting Techniques Practical Session'),
-(3, 'Seminar', '10:00:00', 120.00, '2024-03-07', 'Discussion on Literary Theory Approaches'),
-(4, 'Tutorial', '11:00:00', 60.00, '2024-03-08', 'Critical Reading Skills Group Exercise'),
-(5, 'Workshop', '14:00:00', 120.00, '2024-03-09', 'Fiction Writing Workshop Session'),
-(6, 'Workshop', '13:00:00', 120.00, '2024-03-10', 'Poetry Workshop Analysis Session'),
-(7, 'Lecture', '09:00:00', 60.00, '2024-03-11', 'Ancient Civilizations Overview'),
-(8, 'Seminar', '10:00:00', 60.00, '2024-03-12', 'Modern History Discussion Forum'),
-(9, 'Tutorial', '11:00:00', 60.00, '2024-03-13', 'Phonetics and Phonology Practice Exercises'),
-(10, 'Seminar', '14:00:00', 60.00, '2024-03-14', 'Syntax and Semantics Case Studies'),
-(11, 'Lecture', '09:00:00', 60.00, '2024-03-15', 'Introduction to Popular Culture'),
-(12, 'Tutorial', '11:00:00', 120.00, '2024-03-16', 'Gender Studies Debate Session'),
-(13, 'Lecture', '09:00:00', 60.00, '2024-03-17', 'Introduction to Programming Basics'),
-(14, 'Seminar', '10:00:00', 60.00, '2024-03-18', 'Algorithms and Data Structures Review'),
-(15, 'Workshop', '13:00:00', 120.00, '2024-03-19', 'Statistical Analysis Lab Session'),
-(16, 'Workshop', '14:00:00', 120.00, '2024-03-20', 'Introduction to Machine Learning Workshop'),
-(17, 'Seminar', '10:00:00', 60.00, '2024-03-21', 'Network Security Discussion'),
-(18, 'Workshop', '13:00:00', 120.00, '2024-03-22', 'Ethical Hacking Practice Session'),
-(19, 'Tutorial', '11:00:00', 120.00, '2024-03-23', 'Differential Calculus Problem Solving'),
-(20, 'Seminar', '10:00:00', 120.00, '2024-03-24', 'Integral Calculus Discussion Forum');
-
--- ----------------------------
--- Records of TEACHER_SESSIONS
--- ----------------------------
-INSERT INTO teachers_sessions (teacher_id, session_id)
-VALUES
-(1, 1),
-(1, 2),
-(2, 3),
-(2, 4),
-(5, 5),
-(5, 6),
-(6, 7),
-(6, 8),
-(8, 9),
-(8, 10),
-(10, 11),
-(10, 12),
-(11, 13),
-(11, 14),
-(13, 15),
-(13, 16),
-(15, 17),
-(15, 18),
-(16, 19),
-(16, 20);
-
--- ----------------------------------
--- Records of ACADEMIC_HELP_SESSIONS
--- ----------------------------------
-INSERT INTO academic_help_sessions (student_id, ah_session_type, ah_session_start_time, ah_session_length, ah_session_date, ah_session_notes)
-VALUES
-(1, 'One-on-One Tutoring', '14:00:00', 1.00, '2024-02-15', 'Tutoring session for exam preparation'),
-(2, 'One-on-One Tutoring', '10:00:00', 1.50, '2024-02-17', 'Tutoring session for math assignment'),
-(3, 'One-on-One Tutoring', '13:30:00', 2.00, '2024-02-18', 'Tutoring session for essay writing skills');
-
--- --------------------------------
--- Records of TEACHERS_AH_SESSIONS
--- --------------------------------
-INSERT INTO teachers_ah_sessions (teacher_id, ah_session_id)
-VALUES
-(1, 1),
-(2, 2),
-(3, 3);
-
--- ----------------------
--- Records of ATTENDANCE
--- ----------------------
-INSERT INTO attendance (student_id, session_id, attendance_record)
-VALUES
-(1, 1, TRUE),
-(1, 2, TRUE),
-(2, 3, TRUE),
-(2, 4, FALSE),
-(3, 5, TRUE),
-(3, 6, TRUE),
-(4, 7, TRUE),
-(4, 8, TRUE),
-(5, 9, TRUE),
-(5, 10, FALSE),
-(6, 11, TRUE),
-(6, 12, TRUE),
-(7, 13, TRUE),
-(7, 14, TRUE),
-(8, 15, TRUE),
-(8, 16, TRUE),
-(9, 17, TRUE),
-(9, 18, TRUE),
-(9, 19, FALSE),
-(9, 20, TRUE);
-
--- ------------------
--- Records of SALARY
--- ------------------
-INSERT INTO salary (salary_base, salary_bonuses, salary_start_date, salary_end_date) 
-VALUES 
-(50000.00, 5000.00, '2023-01-01', '2023-12-31'),
-(60000.00, 6000.00, '2024-01-01', '2024-12-31'),
-(55000.00, 5500.00, '2025-01-01', NULL);
-
--- ------------------------
--- Records of STAFF_SALARY
--- ------------------------
-INSERT INTO staff_salary (salary_id, staff_id)
-VALUES
-(1, 1), 
-(1, 2), 
-(1, 3), 
-(1, 4), 
-(1, 5),
-(1, 6), 
-(1, 7), 
-(1, 8),
-(2, 9), 
-(2, 10), 
-(2, 11), 
-(2, 12),
-(2, 13), 
-(2, 14), 
-(2, 15), 
-(2, 16),
-(3, 17), 
-(3, 18), 
-(3, 19), 
-(3, 20), 
-(3, 21), 
-(3, 22),
-(3, 23),
-(3, 24);
-
--- -----------------
--- Records of HOURS
--- -----------------
-INSERT INTO hours (start_time, end_time, date)
-VALUES
-('09:00:00', '17:00:00', '2023-01-01'),
-('08:00:00', '16:30:00', '2023-01-02'),
-('10:00:00', '18:00:00', '2023-01-03');
-
--- -----------------------
--- Records of STAFF_HOURS
--- -----------------------
-INSERT INTO staff_hours (hour_id, staff_id)
-VALUES
-(1, 1), 
-(1, 2), 
-(1, 3), 
-(1, 4), 
-(1, 5), 
-(1, 6), 
-(1, 7), 
-(1, 8),
-(2, 9), 
-(2, 10), 
-(2, 11), 
-(2, 12), 
-(2, 13), 
-(2, 14), 
-(2, 15), 
-(2, 16),
-(3, 17), 
-(3, 18), 
-(3, 19), 
-(3, 20), 
-(3, 21), 
-(3, 22), 
-(3, 23), 
-(3, 24);
-
--- ---------------------
--- Records of DEDUCTION
--- ---------------------
-INSERT INTO deduction (deduction_title, deduction_details, deduction_amount)
-VALUES
-('Tax', 'Income tax deduction for January', 1500.00),
-('Health Insurance', 'Monthly health insurance premium', 200.00),
-('Pension', 'Contribution to employee pension plan', 500.00);
-
--- -------------------------
--- Records of SALARY_PAYSLIP
--- -------------------------
-INSERT INTO salary_payslip (salary_id, issue_date, start_date, end_date, net_pay, gross_pay, payment_method, tax_code, tax_period, national_insurance_num, hourly_rate)
-VALUES
-(1, '2023-01-31', '2023-01-01', '2023-01-31', 4500.00, 5000.00, 'Direct Deposit', '1250L', 1, 'AB123456C', 20.00),
-(2, '2023-02-28', '2023-02-01', '2023-02-28', 5500.00, 6000.00, 'Cheque', '1200L', 2, 'CD987654A', 25.00),
-(3, '2023-03-31', '2023-03-01', '2023-03-31', 5000.00, 5500.00, 'Bank Transfer', '1300L', 3, 'EF345678B', 22.00);
-
--- ----------------------------
--- Records of SALARY_DEDUCTION
--- ----------------------------
-INSERT INTO salary_deduction (deduction_id, salary_id)
-VALUES
-(1, 1), 
-(2, 1),
-(1, 2), 
-(3, 2),
-(2, 3), 
-(3, 3);

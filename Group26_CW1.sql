@@ -1,7 +1,7 @@
 /*
  Group 26 DBPRIN Coursework Database Schema
  ERD PDF: https://drive.google.com/file/d/1nB0oTYydLEmE2_XtO4u9A2eawc3cBWs-/view?usp=drive_link
- Github Repo: https://github.com/leomosley/dbprin-cw
+ Github Repo: https://github.com/leomosley/dbprin-cw (made public after submission date)
  */
 
 /* 
@@ -183,7 +183,7 @@ INSERT ON tuition_payment FOR EACH ROW EXECUTE FUNCTION update_tuition_after_pay
 -- ------------------------------
 -- Table structure for DEPARTMENT
 -- ------------------------------
-CREATE TYPE dep_type_enum AS ENUM ('Educational', 'Administrative');
+CREATE TYPE dep_type_enum AS ENUM ('Educational', 'Administrative', 'Operational', 'Maintenance');
 
 CREATE TABLE department (
   dep_id SERIAL PRIMARY KEY,
@@ -234,7 +234,9 @@ CREATE TYPE title_enum AS ENUM ('Mr', 'Mrs', 'Ms', 'Dr');
 
 CREATE TABLE staff (
   staff_id SERIAL PRIMARY KEY,
+  room_id INT,
   staff_company_email CHAR(22) UNIQUE,
+  staff_personal_email VARCHAR(150) NOT NULL UNIQUE,
   staff_number CHAR(10) NOT NULL UNIQUE,
   staff_fname VARCHAR(50) NOT NULL,
   staff_mname VARCHAR(50),
@@ -244,10 +246,11 @@ CREATE TABLE staff (
   staff_addr2 VARCHAR(30),
   staff_city VARCHAR(30) NOT NULL,
   staff_postcode VARCHAR(10) NOT NULL,
-  staff_personal_email VARCHAR(150) NOT NULL UNIQUE,
   staff_landline VARCHAR(30) NOT NULL,
   staff_mobile VARCHAR(15) NOT NULL,
-  staff_dob DATE NOT NULL
+  staff_dob DATE NOT NULL,
+  phone_ext 
+  FOREIGN KEY (room_id) REFERENCES room (room_id)
 );
 
 /* 
@@ -365,10 +368,25 @@ CREATE TABLE staff_assignment (
 CREATE TABLE staff_department (
   staff_id INT NOT NULL,
   dep_id INT NOT NULL,
+  date_assinged DATE NOT NULL,
   PRIMARY KEY (staff_id, dep_id),
   FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
   FOREIGN KEY (dep_id) REFERENCES department (dep_id)
 );
+
+
+-- -------------------------------------
+-- Table structure for STAFF_BRANCH
+-- -------------------------------------
+CREATE TABLE staff_branch (
+  staff_id INT NOT NULL,
+  branch_id INT NOT NULL,
+  date_assinged DATE NOT NULL,
+  PRIMARY KEY (staff_id, branch_id),
+  FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
+  FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
+);
+
 
 -- ----------------------------
 -- Table structure for BUILDING
@@ -443,7 +461,7 @@ CREATE TABLE room_facility (
 -- --------------------------
 CREATE TABLE course (
   course_id SERIAL PRIMARY KEY,
-  course_code CHAR(12) NOT NULL UNIQUE,
+  course_code CHAR(8) NOT NULL UNIQUE,
   course_name VARCHAR(50) NOT NULL,
   course_description TEXT,
   course_entry_requirements TEXT,
@@ -461,20 +479,6 @@ CREATE TABLE department_course (
   FOREIGN KEY (course_id) REFERENCES course (course_id)
 );
 
--- ---------------------------
--- Table structure for TEACHER
--- ---------------------------
-CREATE TABLE teacher (
-  teacher_id SERIAL PRIMARY KEY,
-  staff_id INT,
-  room_id INT,
-  teacher_role VARCHAR(50) NOT NULL,
-  teacher_tenure VARCHAR(50),
-  phone_ext VARCHAR(5) NOT NULL,
-  FOREIGN KEY (room_id) REFERENCES room (room_id),
-  FOREIGN KEY (staff_id) REFERENCES staff (staff_id)
-);
-
 -- -------------------------------
 -- Table structure for OFFICE_HOUR
 -- -------------------------------
@@ -485,14 +489,14 @@ CREATE TABLE office_hour (
   date DATE NOT NULL
 );
 
--- ---------------------------------------
--- Table structure for TEACHER_OFFICE_HOUR
--- ---------------------------------------
-CREATE TABLE teacher_office_hour (
-  teacher_id INT NOT NULL,
+-- -------------------------------------
+-- Table structure for STAFF_OFFICE_HOUR
+-- -------------------------------------
+CREATE TABLE staff_office_hour (
+  staff_id INT NOT NULL,
   hour_id INT NOT NULL,
-  PRIMARY KEY (teacher_id, hour_id),
-  FOREIGN KEY (teacher_id) REFERENCES teacher (teacher_id),
+  PRIMARY KEY (staff_id, hour_id),
+  FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
   FOREIGN KEY (hour_id) REFERENCES office_hour (hour_id)
 );
 
@@ -521,14 +525,14 @@ CREATE TABLE session (
   FOREIGN KEY (module_id) REFERENCES module (module_id)
 );
 
--- -----------------------------------
--- Table structure for TEACHER_SESSION
--- -----------------------------------
-CREATE TABLE teacher_session (
-  teacher_id INT NOT NULL,
+-- ---------------------------------
+-- Table structure for STAFF_SESSION
+-- ---------------------------------
+CREATE TABLE staff_session (
+  staff_id INT NOT NULL,
   session_id INT NOT NULL,
-  PRIMARY KEY (teacher_id, session_id),
-  FOREIGN KEY (teacher_id) REFERENCES teacher (teacher_id),
+  PRIMARY KEY (staff_id, session_id),
+  FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
   FOREIGN KEY (session_id) REFERENCES session (session_id)
 );
 
@@ -590,10 +594,10 @@ CREATE TABLE course_module (
 -- Table structure for COURSE_COORDINATOR
 -- --------------------------------------
 CREATE TABLE course_coordinator (
-  teacher_id INT NOT NULL,
+  staff_id INT NOT NULL,
   course_id INT NOT NULL,
-  PRIMARY KEY (teacher_id, course_id),
-  FOREIGN KEY (teacher_id) REFERENCES teacher (teacher_id),
+  PRIMARY KEY (staff_id, course_id),
+  FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
   FOREIGN KEY (course_id) REFERENCES course (course_id)
 );
 
@@ -601,10 +605,10 @@ CREATE TABLE course_coordinator (
 -- Table structure for MODULE_COORDINATOR
 -- --------------------------------------
 CREATE TABLE module_coordinatior (
-  teacher_id INT NOT NULL,
+  staff_id INT NOT NULL,
   module_id INT NOT NULL,
-  PRIMARY KEY (teacher_id, module_id),
-  FOREIGN KEY (teacher_id) REFERENCES teacher (teacher_id),
+  PRIMARY KEY (staff_id, module_id),
+  FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
   FOREIGN KEY (module_id) REFERENCES module (module_id)
 );
 
@@ -625,6 +629,14 @@ CREATE TABLE student_module_result (
 -- ------------------------------
 -- Table structure for ASSESSMENT
 -- ------------------------------
+CREATE TYPE assessment_type_enum AS ENUM (
+  'Exam',
+  'Coursework',
+  'Essay',
+  'Supervised work session',
+  'Presentation'
+);
+
 CREATE TABLE assessment (
   assessment_id SERIAL PRIMARY KEY,
   module_id INT,
@@ -634,7 +646,7 @@ CREATE TABLE assessment (
   assessment_due_date DATE NOT NULL,
   assessment_due_time TIME NOT NULL,
   assessment_description TEXT,
-  assessment_type ENUM NOT NULL,
+  assessment_type assessment_type_enum NOT NULL,
   assessment_weighting DECIMAL(5, 2) NOT NULL,
   assessment_attachment TEXT,
   assessment_max_attempts INT NOT NULL,
