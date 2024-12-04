@@ -7,13 +7,13 @@ VALUES
   ('jane.smith@outlook.com', 'Jane', NULL, 'Smith', 'She/Her', '456 Park Avenue', NULL, 'Manchester', 'M1 1AA', '0161234569', '07987654323', '1994-10-20', 0.00),
   ('JOHN.doe@yahoo.com', 'John', 'James', 'Doe', 'He/Him', '123 Main Street', 'Kensington', 'London', 'SW1A 1AA', '0201234571', '07891234573', '1995-05-15', 0.00),
   ('emily.johnson@mail.co.uk', 'Emily', NULL, 'Johnson', 'She/Her', '789 Oak Lane', NULL, 'Birmingham', 'B1 1AA', '0123456789', '07712345678', '1997-08-18', 0.00),
-  ('michael.brown@example.com', 'Michael', 'Luke', 'Brown', 'He/Him', '1010 Maple Street', NULL, 'Edinburgh', 'EH1 1AA', '0131234567', '07723456789', '1996-12-03', 0.00),
-  ('emma.williams@example.com', 'Emma', NULL, 'Williams', 'She/Her', '789 Cedar Street', NULL, 'London', 'SW1A 2AB', '0203456789', '07892345678', '1999-04-15', 0.00),
-  ('alexander.brown@example.com', 'Alexander', 'James', 'Brown', 'He/Him', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', '0163456789', '07998765432', '1998-08-20', 0.00),
-  ('olivia.taylor@example.com', 'Olivia', NULL, 'Taylor', 'She/Her', '101 Elm Street', NULL, 'Glasgow', 'G2 1AB', '0142345671', '07871234571', '2000-02-25', 0.00),
-  ('will.thomas@example.com', 'William', 'John', 'Thomas', 'He/Him', '789 Oak Lane', NULL, 'Bristol', 'BS2 1AB', '0113456781', '07912335681', '1997-06-30', 0.00);
-  ('will.james@example.com', 'Will', NULL, 'James', 'He/Him', '125 Cedar Lane', NULL, 'London', 'SW1A 4AB', '0113456780', '07912345581', '1995-05-20', 0.00);
-  ('amanda.thomas@example.com', 'Amanda', NULL, 'Thomas', 'She/Her', '789 Oak Lane', NULL, 'Bristol', 'BS2 1AB', '0113456781', '07912345681', '1997-06-30', 0.00);
+  ('michael.brown@gmail.com', 'Michael', 'Luke', 'Brown', 'He/Him', '1010 Maple Street', NULL, 'Edinburgh', 'EH1 1AA', '0131234567', '07723456789', '1996-12-03', 0.00),
+  ('emma.williams@gmail.com', 'Emma', NULL, 'Williams', 'She/Her', '789 Cedar Street', NULL, 'London', 'SW1A 2AB', '0203456789', '07892345678', '1999-04-15', 0.00),
+  ('alexander.brown@gmail.com', 'Alexander', 'James', 'Brown', 'He/Him', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', '0163456789', '07998765432', '1998-08-20', 0.00),
+  ('olivia.taylor@gmail.com', 'Olivia', NULL, 'Taylor', 'She/Her', '101 Elm Street', NULL, 'Glasgow', 'G2 1AB', '0142345671', '07871234571', '2000-02-25', 0.00),
+  ('will.thomas@gmail.com', 'William', 'John', 'Thomas', 'He/Him', '789 Oak Lane', NULL, 'Bristol', 'BS2 1AB', '0113456781', '07912335681', '1997-06-30', 0.00),
+  ('will.james@gmail.com', 'Will', NULL, 'James', 'He/Him', '125 Cedar Lane', NULL, 'London', 'SW1A 4AB', '0113456780', '07912345581', '1995-05-20', 0.00),
+  ('amanda.thomas@gmail.com', 'Amanda', NULL, 'Thomas', 'She/Her', '789 Oak Lane', NULL, 'Bristol', 'BS2 1AB', '0113456781', '07912345681', '1997-06-30', 0.00);
 
 -- ------------------
 -- Records of TUITION
@@ -29,6 +29,7 @@ VALUES
   (3400.00, 0, 3400.00, 0, '2025-07-30'),
   (3500.00, 0, 3500.00, 0, '2025-08-05'),
   (3600.00, 0, 3600.00, 0, '2025-07-10'),
+  (1500.00, 0, 1500.00, 0, '2025-07-31'),
   (1500.00, 0, 1500.00, 0, '2025-07-31');
 
 -- --------------------------
@@ -36,6 +37,17 @@ VALUES
 -- --------------------------
 INSERT INTO student_tuition (student_id, tuition_id)
 VALUES
+  (1, 1),
+  (2, 2),
+  (3, 3),
+  (4, 4),
+  (5, 5),
+  (6, 6),
+  (7, 7),
+  (8, 8),
+  (9, 9),
+  (10, 10),
+  (11, 11);
 
 -- --------------------------
 -- Records of TUITION_PAYMENT
@@ -57,24 +69,6 @@ VALUES
   (3, 500.00, '2025-05-10', 'Debit Card'),
   (4, 400.00, '2025-05-20', 'Credit Card'),
   (5, 200.00, '2025-05-10', 'Bank Transfer');
-
--- ---------------------
--- Records of DEPARTMENT
--- ---------------------
-INSERT INTO department (dep_name, dep_type, dep_description)
-VALUES
-  ('Arts', 'Educational', 'Department of Arts'),
-  ('Humanities', 'Educational', 'Department of Humanities'),
-  ('Computing', 'Educational', 'Department of Computing'),
-  ('Mathematics', 'Educational', 'Department of Mathematics'),
-  ('Science', 'Educational', 'Department of Science'),
-  ('Technology', 'Educational', 'Department of Technology'),
-  ('Engineering', 'Educational', 'Department of Engineering'),
-  ('Vocational Training', 'Educational', 'Department of Vocational Training'),
-  ('Finance', 'Administrative', NULL),
-  ('Facilities and Maintenance', 'Maintenance', NULL),
-  ('SES Operations', 'Operational', 'Manages the SES operations and infrastructure'),
-  ('Human Resources', 'Administrative', NULL);
   
 -- -----------------
 -- Records of BRANCH
@@ -87,37 +81,34 @@ VALUES
   ('SES Edinburgh', 'Open', '7 George Street', 'Edinburgh', 'EH2 2QL', '0131 622 8000', 'edinburgh@ses.edu.org'),
   ('SES Bristol', 'Open', '25 Park Street', 'Bristol', 'BS1 5NH', '0117 928 9000', 'bristol@ses.edu.org');
 
--- ----------------------------
--- Records of BRANCH_DEPARTMENT
--- ----------------------------
-INSERT INTO branch_department (branch_id, dep_id)
+-- ---------------------
+-- Records of DEPARTMENT
+-- ---------------------
+INSERT INTO department (branch_id, dep_name, dep_type, dep_description) 
 VALUES
-  (1, 1),
-  (1, 2),
-  (1, 5),
-  (1, 9),
-  (1, 10),
-  (1, 11),
-  (1, 12),
-  (2, 3),
-  (2, 4),
-  (2, 5),
-  (2, 6),
-  (2, 7),
-  (2, 10),
-  (3, 8),
-  (3, 10),
-  (4, 1),
-  (4, 2),
-  (4, 5),
-  (4, 6),
-  (4, 10),
-  (5, 2),
-  (5, 3),
-  (5, 4),
-  (5, 5),
-  (5, 10),
-
+  (1, 'Arts', 'Educational', 'Department of Arts'),
+  (1, 'Humanities', 'Educational', 'Department of Humanities'),
+  (1, 'Science', 'Educational', 'Department of Science'),
+  (1, 'Finance', 'Administrative', NULL),
+  (1, 'Facilities and Maintenance', 'Maintenance', NULL),
+  (1, 'SES Operations', 'Operational', 'Manages the SES operations and infrastructure'),
+  (1, 'Human Resources', 'Administrative', NULL),
+  (2, 'Computing', 'Educational', 'Department of Computing'),
+  (2, 'Mathematics', 'Educational', 'Department of Mathematics'),
+  (2, 'Science', 'Educational', 'Department of Science'),
+  (2, 'Engineering', 'Educational', 'Department of Engineering'),
+  (2, 'Facilities and Maintenance', 'Maintenance', NULL),
+  (3, 'Vocational Training', 'Educational', 'Department of Vocational Training'),
+  (3, 'Facilities and Maintenance', 'Maintenance', NULL),
+  (4, 'Arts', 'Educational', 'Department of Arts'),
+  (4, 'Humanities', 'Educational', 'Department of Humanities'),
+  (4, 'Science', 'Educational', 'Department of Science'),
+  (4, 'Facilities and Maintenance', 'Maintenance', NULL),
+  (5, 'Humanities', 'Educational', 'Department of Humanities'),
+  (5, 'Computing', 'Educational', 'Department of Computing'),
+  (5, 'Mathematics', 'Educational', 'Department of Mathematics'),
+  (5, 'Science', 'Educational', 'Department of Science'),
+  (5, 'Facilities and Maintenance', 'Maintenance', NULL);
 
 -- ---------------
 -- Records of ROLE
@@ -140,40 +131,111 @@ INSERT INTO role (role_name) VALUES
   ('Receptionist'),
   ('Maintenance Technician'),
   ('Custodian'),
-  ('Groundskeeper'),
-  ('Electrician'),
-  ('Plumber');
+  ('Groundskeeper');   
+
+-- -------------------
+-- Records of BUILDING
+-- -------------------
+INSERT INTO building (branch_id, building_name, building_alt_name, building_type, building_addr1, building_addr2, building_city, building_postcode, building_country)
+VALUES
+  (1, 'Turing Hall', 'STEM Innovation Centre', 'Educational', '12 Science Way', 'South Bank', 'London', 'SW1A 1AA', 'United Kingdom'),
+  (1, 'Ada Lovelace Building', 'Administrative Office', 'Administrative', '98 King Street', 'Mayfair', 'London', 'SW1A 1AB', 'United Kingdom'),
+  (2, 'Anthony Burgess Hall', 'Humanities and Arts Centre', 'Educational', '21 University Street', NULL, 'Manchester', 'M1 1AA', 'United Kingdom'),
+  (2, 'Pankhurst Building', 'Finance and HR Office', 'Administrative', '15 Queens Avenue', NULL, 'Manchester', 'M1 2AB', 'United Kingdom'),
+  (3, 'James Watt Building', 'Technology and Science Wing', 'Educational', '10 Research Road', NULL, 'Birmingham', 'B1 1AA', 'United Kingdom'),
+  (3, 'Priestley House', 'Administrative Block', 'Administrative', '22 Green Park', NULL, 'Birmingham', 'B1 1BB', 'United Kingdom'),
+  (4, 'Adam Smith Centre', 'Vocational Skills Hub', 'Educational', '5 Industry Lane', NULL, 'Edinburgh', 'EH1 1AA', 'United Kingdom'),
+  (5, 'Kelvin Science Building', 'STEM Centre', 'Educational', '3 Knowledge Crescent', NULL, 'Glasgow', 'G2 1AB', 'United Kingdom'),
+  (5, 'Mackintosh Arts Building', 'Humanities and Arts Wing', 'Educational', '5 University Avenue', NULL, 'Glasgow', 'G2 1AD', 'United Kingdom'),
+  (5, 'Adam Smith Administration Block', NULL, 'Administrative', '8 College Gardens', NULL, 'Glasgow', 'G2 2AB', 'United Kingdom');
+
+-- ---------------
+-- Records of ROOM
+-- ---------------
+INSERT INTO room (building_id, room_name, room_alt_name, room_type, room_capacity, room_floor)
+VALUES
+  (1, 'Arts Building 1.01', 'AB 1.01', 'Lecture Theatre', 100, 1),
+  (1, 'Arts Building 1.02', 'AB 1.02', 'Computer Lab', 40, 1),
+  (1, 'Arts Building 1.03', 'AB 1.03', 'Studio', 30, 1),
+  (1, 'Arts Building 1.04', 'AB 1.04', 'Practical Room', 25, 1),
+  (1, 'Arts Building 1.05', 'AB 1.05', 'Office', 1, 1),
+  (1, 'Arts Building 1.06', 'AB 1.06', 'Office', 1, 1),
+  (1, 'Arts Building 1.07', 'AB 1.07', 'Office', 1, 1),
+  (1, 'Arts Building 1.08', 'AB 1.08', 'Office', 1, 1),
+  (1, 'Arts Building 1.09', 'AB 1.09', 'Office', 1, 1),
+  (1, 'Arts Building 2.01', 'AB 2.01', 'Office', 1, 2),
+  (1, 'Arts Building 2.02', 'AB 2.02', 'Office', 1, 2),
+  (1, 'Arts Building 2.03', 'AB 2.03', 'Office', 1, 2),
+  (1, 'Arts Building 2.04', 'AB 2.04', 'Office', 1, 2),
+  (1, 'Arts Building 2.05', 'AB 2.05', 'Studio', 20, 2),
+  (1, 'Arts Building 2.06', 'AB 2.06', 'Practical Room', 35, 2),
+  (1, 'Arts Building 2.07', 'AB 2.07', 'Studio', 25, 2),
+  (2, 'Turing Hall 1.01', 'TH 1.01', 'Computer Lab', 40, 1),
+  (2, 'Turing Hall 1.02', 'TH 1.02', 'Office', 1, 1),
+  (2, 'Turing Hall 1.03', 'TH 1.03', 'Office', 1, 1),
+  (2, 'Turing Hall 1.04', 'TH 1.04', 'Office', 1, 1),
+  (2, 'Turing Hall 1.05', 'TH 1.05', 'Office', 1, 1),
+  (2, 'Turing Hall 2.01', 'TH 2.01', 'Office', 1, 2),
+  (2, 'Turing Hall 2.02', 'TH 2.02', 'Computer Lab', 40, 2),
+  (2, 'Turing Hall 2.03', 'TH 2.03', 'Office', 1, 2),
+  (2, 'Turing Hall 2.04', 'TH 2.04', 'Computer Lab', 40, 2),
+  (3, 'Newton Science Lab 1.01', 'NSL 1.01', 'Practical Room', 35, 1),
+  (3, 'Newton Science Lab 1.02', 'NSL 1.02', 'Lab', 30, 1),
+  (3, 'Newton Science Lab 1.03', 'NSL 1.03', 'Lab', 30, 1),
+  (3, 'Newton Science Lab 2.01', 'NSL 2.01', 'Lab', 30, 2),
+  (3, 'Newton Science Lab 2.02', 'NSL 2.02', 'Office', 1, 2),
+  (3, 'Newton Science Lab 2.03', 'NSL 2.03', 'Office', 1, 2),
+  (3, 'Newton Science Lab 2.04', 'NSL 2.04', 'Office', 1, 2),
+  (4, 'Humanities Building 1.01', 'HB 1.01', 'Lecture Theatre', 100, 1),
+  (4, 'Humanities Building 1.02', 'HB 1.02', 'Seminar Room', 20, 1),
+  (4, 'Humanities Building 1.03', 'HB 1.03', 'Office', 1, 1),
+  (4, 'Humanities Building 2.01', 'HB 2.01', 'Office', 1, 2),
+  (4, 'Humanities Building 2.02', 'HB 2.02', 'Office', 1, 2),
+  (4, 'Humanities Building 2.03', 'HB 2.03', 'Practical Room', 25, 2),
+  (5, 'Maths Building 1.01', 'MB 1.01', 'Lecture Theatre', 100, 1),
+  (5, 'Maths Building 1.02', 'MB 1.02', 'Lab', 30, 1),
+  (5, 'Maths Building 1.03', 'MB 1.03', 'Office', 1, 1),
+  (5, 'Maths Building 2.01', 'MB 2.01', 'Office', 1, 2),
+  (5, 'Maths Building 2.02', 'MB 2.02', 'Office', 1, 2),
+  (6, 'Engineering Building 1.01', 'EB 1.01', 'Practical Room', 40, 1),
+  (6, 'Engineering Building 1.02', 'EB 1.02', 'Workshop', 50, 1),
+  (6, 'Engineering Building 1.03', 'EB 1.03', 'Office', 1, 1),
+  (6, 'Engineering Building 2.01', 'EB 2.01', 'Office', 1, 2),
+  (6, 'Engineering Building 2.02', 'EB 2.02', 'Workshop', 50, 2),
+  (7, 'Vocational Training Building 1.01', 'VTB 1.01', 'Office', 1, 1),
+  (7, 'Vocational Training Building 1.02', 'VTB 1.02', 'Practical Room', 35, 1),
+  (7, 'Vocational Training Building 1.03', 'VTB 1.03', 'Office', 1, 1),
+  (7, 'Vocational Training Building 2.01', 'VTB 2.01', 'Workshop', 30, 2); 
   
 -- ----------------
 -- Records of STAFF
 -- ----------------
 INSERT INTO staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile, staff_dob)
 VALUES
-  ('Sophie', NULL, 'Roberts', 'Dr', '123 Maple Street', NULL, 'London', 'SW1A 2AA', 'sophie.roberts@example.com', '0113256780', '07912345679', '1988-09-15'),
-  ('John', NULL, 'Smith', 'Dr', '789 Elm Street', NULL, 'London', 'SW1A 2AA', 'john.smith@example.com', '0201234567', '07891234567', '1980-03-25'),
-  ('David', NULL, 'Clark', 'Dr', '789 Pine Avenue', NULL, 'Bristol', 'BS1 1AA', 'david.clark@example.com', '0123456789', '07712345678', '1978-09-12'),
-  ('Michael', NULL, 'Johnson', 'Dr', '123 Cedar Street', NULL, 'London', 'SW1A 2AA', 'michael.johnson@example.com', '0131234567', '07723456789', '1983-02-15'),
-  ('Emily', 'Grace', 'Wilson', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'emily.wilson@example.com', '0113256781', '07912345680', '1982-06-25'),
-  ('Noah', 'Edward', 'Wilson', 'Dr', '123 Birch Avenue', NULL, 'London', 'SW1A 2AB', 'noah.wilson@example.com', '0203456790', '07892345679', '1976-06-30'),
-  ('Amelia', NULL, 'Thompson', 'Dr', '456 Oak Avenue', NULL, 'Manchester', 'M1 1AA', 'amelia.thompson@example.com', '0202345678', '07891234568', '1978-08-05'),
-  ('Ethan', 'William', 'White', 'Dr', '789 Pine Avenue', NULL, 'Glasgow', 'G1 1AA', 'ethan.white@example.com', '0162345679', '07987654322', '1983-11-20'),
-  ('William', 'Daniel', 'Thomas', 'Dr', '789 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'william.thomas@example.com', '0161234568', '07987554322', '1980-10-30'),
-  ('Isabella', NULL, 'Harris', 'Dr', '456 Maple Street', NULL, 'Manchester', 'M1 2AB', 'isabella.harris@example.com', '0163456791', '07998765433', '1979-09-25'),
-  ('James', 'Alexander', 'Brown', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'james.brown@example.com', '0112345670', '07871234568', '1984-12-10'),
-  ('Charlotte', NULL, 'Wilson', 'Dr', '101 Elm Street', NULL, 'Bristol', 'BS2 1AB', 'charlotte.wilson@example.com', '0142345679', '07876543211', '1977-02-05'),
-  ('Laura', 'James', 'Taylor', 'Ms', '456 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'laura.taylor@example.com', '0201234512', '07891232567', '1985-05-20'),
-  ('Jane', NULL, 'Doe', 'Mrs', '987 Oak Avenue', NULL, 'Manchester', 'M1 2AA', 'jAne.doe@example.com', '0161234567', '07987654321', '1975-07-10'),
-  ('Emily', 'Anne', 'Harris', 'Mrs', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', 'emily.harris@example.com', '0203456789', '07892345678', '1977-11-30'),
-  ('Daniel', 'James', 'Anderson', 'Mr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'dan.anderson@example.com', '0163456789', '07998765432', '1982-06-25'),
-  ('Sophia', NULL, 'Wilson', 'Ms', '101 Maple Street', NULL, 'Bristol', 'BS2 1AB', 'sophia.wilson@example.com', '0142345678', '07871234567', '1980-09-18'),
-  ('Oliver', 'Robert', 'Martin', 'Mr', '789 Elm Street', NULL, 'London', 'SW1A 1AA', 'oliver.martin@example.com', '0113456789', '07912345678', '1975-04-10'),
-  ('Ava', NULL, 'Davis', 'Mrs', '101 Cedar Street', NULL, 'Bristol', 'BS1 1AA', 'ava.davis@example.com', '0141234578', '07876543210', '1981-03-15'),
-  ('Benjamin', 'Michael', 'Lee', 'Mr', '789 Pine Avenue', NULL, 'London', 'SW1A 1AA', 'benjamin.lee@example.com', '0112345671', '07901234569', '1982-05-20'),
-  ('Mia', NULL, 'Roberts', 'Dr', '456 Cedar Street', NULL, 'Manchester', 'M1 1AA', 'mia.roberts@example.com', '0201234568', '07891234569', '1975-08-15'),
-  ('Evelyn', NULL, 'Evans', 'Mrs', '101 Oak Avenue', NULL, 'Bristol', 'BS1 1AA', 'evelyn.evans@example.com', '0142348579', '07872234568', '1973-11-25'),
-  ('Jack', 'William', 'Harris', 'Mr', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', 'jack.harris@example.com', '0142345670', '07871234570', '1977-12-20'),
-  ('Daniel', 'Thomas', 'Anderson', 'Mr', '101 Cedar Street', NULL, 'Bristol', 'BS1 1AB', 'daniel.anderson@example.com', '0201234569', '07891234571', '1979-03-30');
-
+  ('Sophie', NULL, 'Roberts', 'Dr', '123 Maple Street', NULL, 'London', 'SW1A 2AA', 'sophie.roberts@gmail.com', '0113256780', '07912345679', '1988-09-15'),
+  ('John', NULL, 'Smith', 'Dr', '789 Elm Street', NULL, 'London', 'SW1A 2AA', 'john.smith@gmail.com', '0201234567', '07891234567', '1980-03-25'),
+  ('David', NULL, 'Clark', 'Dr', '789 Pine Avenue', NULL, 'Bristol', 'BS1 1AA', 'david.clark@gmail.com', '0123456789', '07712345678', '1978-09-12'),
+  ('Michael', NULL, 'Johnson', 'Dr', '123 Cedar Street', NULL, 'London', 'SW1A 2AA', 'michael.johnson@gmail.com', '0131234567', '07723456789', '1983-02-15'),
+  ('Emily', 'Grace', 'Wilson', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'emily.wilson@gmail.com', '0113256781', '07912345680', '1982-06-25'),
+  ('Noah', 'Edward', 'Wilson', 'Dr', '123 Birch Avenue', NULL, 'London', 'SW1A 2AB', 'noah.wilson@gmail.com', '0203456790', '07892345679', '1976-06-30'),
+  ('Amelia', NULL, 'Thompson', 'Dr', '456 Oak Avenue', NULL, 'Manchester', 'M1 1AA', 'amelia.thompson@gmail.com', '0202345678', '07891234568', '1978-08-05'),
+  ('Ethan', 'William', 'White', 'Dr', '789 Pine Avenue', NULL, 'Glasgow', 'G1 1AA', 'ethan.white@gmail.com', '0162345679', '07987654322', '1983-11-20'),
+  ('William', 'Daniel', 'Thomas', 'Dr', '789 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'william.thomas@gmail.com', '0161234568', '07987554322', '1980-10-30'),
+  ('Isabella', NULL, 'Harris', 'Dr', '456 Maple Street', NULL, 'Manchester', 'M1 2AB', 'isabella.harris@gmail.com', '0163456791', '07998765433', '1979-09-25'),
+  ('James', 'Alexander', 'Brown', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'james.brown@gmail.com', '0112345670', '07871234568', '1984-12-10'),
+  ('Charlotte', NULL, 'Wilson', 'Dr', '101 Elm Street', NULL, 'Bristol', 'BS2 1AB', 'charlotte.wilson@gmail.com', '0142345679', '07876543211', '1977-02-05'),
+  ('Laura', 'James', 'Taylor', 'Ms', '456 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'laura.taylor@gmail.com', '0201234512', '07891232567', '1985-05-20'),
+  ('Jane', NULL, 'Doe', 'Mrs', '987 Oak Avenue', NULL, 'Manchester', 'M1 2AA', 'jAne.doe@gmail.com', '0161234567', '07987654321', '1975-07-10'),
+  ('Emily', 'Anne', 'Harris', 'Mrs', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', 'emily.harris@gmail.com', '0203456789', '07892345678', '1977-11-30'),
+  ('Daniel', 'James', 'Anderson', 'Mr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'dan.anderson@gmail.com', '0163456789', '07998765432', '1982-06-25'),
+  ('Sophia', NULL, 'Wilson', 'Ms', '101 Maple Street', NULL, 'Bristol', 'BS2 1AB', 'sophia.wilson@gmail.com', '0142345678', '07871234567', '1980-09-18'),
+  ('Oliver', 'Robert', 'Martin', 'Mr', '789 Elm Street', NULL, 'London', 'SW1A 1AA', 'oliver.martin@gmail.com', '0113456789', '07912345678', '1975-04-10'),
+  ('Ava', NULL, 'Davis', 'Mrs', '101 Cedar Street', NULL, 'Bristol', 'BS1 1AA', 'ava.davis@gmail.com', '0141234578', '07876543210', '1981-03-15'),
+  ('Benjamin', 'Michael', 'Lee', 'Mr', '789 Pine Avenue', NULL, 'London', 'SW1A 1AA', 'benjamin.lee@gmail.com', '0112345671', '07901234569', '1982-05-20'),
+  ('Mia', NULL, 'Roberts', 'Dr', '456 Cedar Street', NULL, 'Manchester', 'M1 1AA', 'mia.roberts@gmail.com', '0201234568', '07891234569', '1975-08-15'),
+  ('Evelyn', NULL, 'Evans', 'Mrs', '101 Oak Avenue', NULL, 'Bristol', 'BS1 1AA', 'evelyn.evans@gmail.com', '0142348579', '07872234568', '1973-11-25'),
+  ('Jack', 'William', 'Harris', 'Mr', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', 'jack.harris@gmail.com', '0142345670', '07871234570', '1977-12-20'),
+  ('Daniel', 'Thomas', 'Anderson', 'Mr', '101 Cedar Street', NULL, 'Bristol', 'BS1 1AB', 'daniel.anderson@gmail.com', '0201234569', '07891234571', '1979-03-30');
 
 -- ----------------------------
 -- Records of EMERGENCY_CONTACT
@@ -217,99 +279,117 @@ VALUES
 -- ------------------------
 INSERT INTO staff_contact (contact_id, staff_id)
 VALUES
+	(2, 2),
+	(12, 3),
+	(20, 4),
+	(5, 8),
+	(30, 9),
+	(29, 10),
+	(3, 11),
+	(19, 13),
+	(29, 15),
+	(22, 16),
+	(27, 19),
+	(26, 20),
+	(7, 22),
+	(29, 23),
+	(22, 24),
+	(31, 1),
+	(2, 5),
+	(22, 6),
+	(9, 7),
+	(29, 12),
+	(2, 14),
+	(7, 17),
+	(7, 18),
+	(3, 21);
 
 -- --------------------------
 -- Records of STUDENT_CONTACT
 -- --------------------------
 INSERT INTO student_contact (contact_id, student_id)
 VALUES
+	(2, 2),
+	(20, 4),
+	(16, 7),
+	(19, 8),
+	(30, 9),
+	(16, 10),
+	(30, 11),
+	(4, 1),
+	(30, 3),
+	(19, 5),
+	(16, 6);
+
+-- ---------------------
+-- Records of STAFF_ROLE
+-- ---------------------
+INSERT INTO staff_role (staff_id, role_id) VALUES
+	(1, 1),
+	(1, 2),
+	(2, 1),
+	(2, 2),
+	(3, 1),
+	(3, 2),
+	(3, 3),
+	(4, 1),
+	(5, 1),
+	(5, 2),
+	(6, 1),
+	(6, 5),
+	(6, 3),
+	(7, 1),
+	(7, 5),
+	(8, 1),
+	(9, 1),
+	(9, 2),
+	(10, 1),
+	(11, 1),
+	(12, 1),
+	(12, 2),
+	(13, 1),
+	(14, 1),
+	(15, 1),
+	(15, 2),
+	(16, 1),
+	(17, 1),
+	(18, 9),
+	(19, 18),
+	(20, 9),
+	(21, 10),
+	(22, 17),
+	(23, 18),
+	(24, 17);
 
 -- ---------------------------
 -- Records of STAFF_DEPARTMENT
 -- ---------------------------
 INSERT INTO staff_department (staff_id, dep_id, date_assinged)
 VALUES
-
--- -----------------------
--- Records of STAFF_BRANCH
--- -----------------------
-INSERT INTO staff_department (staff_id, branch_id, date_assinged)
-VALUES
-
-
--- -------------------
--- Records of BUILDING
--- -------------------
-INSERT INTO building (branch_id, building_name, building_alt_name, building_type, building_addr1, building_addr2, building_city, building_postcode, building_country)
-VALUES
-  (1, 'Turing Hall', 'STEM Innovation Centre', 'Educational', '12 Science Way', 'South Bank', 'London', 'SW1A 1AA', 'United Kingdom'),
-  (1, 'Ada Lovelace Building', 'Administrative Office', 'Administrative', '98 King Street', 'Mayfair', 'London', 'SW1A 1AB', 'United Kingdom'),
-  (2, 'Anthony Burgess Hall', 'Humanities and Arts Centre', 'Educational', '21 University Street', NULL, 'Manchester', 'M1 1AA', 'United Kingdom'),
-  (2, 'Pankhurst Building', 'Finance and HR Office', 'Administrative', '15 Queens Avenue', NULL, 'Manchester', 'M1 2AB', 'United Kingdom'),
-  (3, 'James Watt Building', 'Technology and Science Wing', 'Educational', '10 Research Road', NULL, 'Birmingham', 'B1 1AA', 'United Kingdom'),
-  (3, 'Priestley House', 'Administrative Block', 'Administrative', '22 Green Park', NULL, 'Birmingham', 'B1 1BB', 'United Kingdom'),
-  (4, 'Adam Smith Centre', 'Vocational Skills Hub', 'Educational', '5 Industry Lane', NULL, 'Edinburgh', 'EH1 1AA', 'United Kingdom'),
-  (5, 'Kelvin Science Building', 'STEM Centre', 'Educational', '3 Knowledge Crescent', NULL, 'Glasgow', 'G2 1AB', 'United Kingdom'),
-  (5, 'Mackintosh Arts Building', 'Humanities and Arts Wing', 'Educational', '5 University Avenue', NULL, 'Glasgow', 'G2 1AD', 'United Kingdom'),
-  (5, 'Adam Smith Administration Block', NULL, 'Administrative', '8 College Gardens', NULL, 'Glasgow', 'G2 2AB', 'United Kingdom');
-
--- ---------------
--- Records of ROOM
--- ---------------
-INSERT INTO room (building_id, room_name, room_alt_name, room_type, room_capacity, room_floor)
-VALUES
-  (1, 'Arts Building 1.01', 'AB 1.01', 'Lecture Theatre', 100, 1),
-  (1, 'Arts Building 1.02', 'AB 1.02', 'Computer Lab', 40, 1),
-  (1, 'Arts Building 1.03', 'AB 1.03', 'Creative Arts Studio', 30, 1),
-  (1, 'Arts Building 1.04', 'AB 1.04', 'Practical Room', 25, 1),
-  (1, 'Arts Building 1.05', 'AB 1.05', 'Office', 1, 1),
-  (1, 'Arts Building 1.06', 'AB 1.06', 'Office', 1, 1),
-  (1, 'Arts Building 1.07', 'AB 1.07', 'Office', 1, 1),
-  (1, 'Arts Building 1.08', 'AB 1.08', 'Office', 1, 1),
-  (1, 'Arts Building 1.09', 'AB 1.09', 'Office', 1, 1),
-  (1, 'Arts Building 2.01', 'AB 2.01', 'Office', 1, 2),
-  (1, 'Arts Building 2.02', 'AB 2.02', 'Office', 1, 2),
-  (1, 'Arts Building 2.03', 'AB 2.03', 'Office', 1, 2),
-  (1, 'Arts Building 2.04', 'AB 2.04', 'Office', 1, 2),
-  (1, 'Arts Building 2.05', 'AB 2.05', 'Music Room', 20, 2),
-  (1, 'Arts Building 2.06', 'AB 2.06', 'Practical Room', 35, 2),
-  (1, 'Arts Building 2.07', 'AB 2.07', 'Art Studio', 25, 2),
-  (2, 'Turing Hall 1.01', 'TH 1.01', 'Computer Lab', 40, 1),
-  (2, 'Turing Hall 1.02', 'TH 1.02', 'Office', 1, 1),
-  (2, 'Turing Hall 1.03', 'TH 1.03', 'Office', 1, 1),
-  (2, 'Turing Hall 1.04', 'TH 1.04', 'Office', 1, 1),
-  (2, 'Turing Hall 1.05', 'TH 1.05', 'Office', 1, 1),
-  (2, 'Turing Hall 2.01', 'TH 2.01', 'Office', 1, 2),
-  (2, 'Turing Hall 2.02', 'TH 2.02', 'Computer Lab', 40, 2),
-  (2, 'Turing Hall 2.03', 'TH 2.03', 'Office', 1, 2),
-  (2, 'Turing Hall 2.04', 'TH 2.04', 'Computer Lab', 40, 2),
-  (3, 'Newton Science Lab 1.01', 'NSL 1.01', 'Practical Room', 35, 1),
-  (3, 'Newton Science Lab 1.02', 'NSL 1.02', 'Biology Lab', 30, 1),
-  (3, 'Newton Science Lab 1.03', 'NSL 1.03', 'Physics Lab', 30, 1),
-  (3, 'Newton Science Lab 2.01', 'NSL 2.01', 'Chemistry Lab', 30, 2),
-  (3, 'Newton Science Lab 2.02', 'NSL 2.02', 'Office', 1, 2),
-  (3, 'Newton Science Lab 2.03', 'NSL 2.03', 'Office', 1, 2),
-  (3, 'Newton Science Lab 2.04', 'NSL 2.04', 'Office', 1, 2),
-  (4, 'Humanities Building 1.01', 'HB 1.01', 'Lecture Theatre', 100, 1),
-  (4, 'Humanities Building 1.02', 'HB 1.02', 'Seminar Room', 20, 1),
-  (4, 'Humanities Building 1.03', 'HB 1.03', 'Office', 1, 1),
-  (4, 'Humanities Building 2.01', 'HB 2.01', 'Office', 1, 2),
-  (4, 'Humanities Building 2.02', 'HB 2.02', 'Office', 1, 2),
-  (4, 'Humanities Building 2.03', 'HB 2.03', 'Practical Room', 25, 2),
-  (5, 'Maths Building 1.01', 'MB 1.01', 'Lecture Theatre', 100, 1),
-  (5, 'Maths Building 1.02', 'MB 1.02', 'Statistics Lab', 30, 1),
-  (5, 'Maths Building 1.03', 'MB 1.03', 'Office', 1, 1),
-  (5, 'Maths Building 2.01', 'MB 2.01', 'Office', 1, 2),
-  (5, 'Maths Building 2.02', 'MB 2.02', 'Office', 1, 2),
-  (6, 'Engineering Building 1.01', 'EB 1.01', 'Practical Room', 40, 1),
-  (6, 'Engineering Building 1.02', 'EB 1.02', 'Workshop Room', 50, 1),
-  (6, 'Engineering Building 1.03', 'EB 1.03', 'Office', 1, 1),
-  (6, 'Engineering Building 2.01', 'EB 2.01', 'Office', 1, 2),
-  (6, 'Engineering Building 2.02', 'EB 2.02', 'Workshop Room', 50, 2),
-  (7, 'Vocational Training Building 1.01', 'VTB 1.01', 'Office', 1, 1),
-  (7, 'Vocational Training Building 1.02', 'VTB 1.02', 'Practical Room', 35, 1),
-  (7, 'Vocational Training Building 1.03', 'VTB 1.03', 'Office', 1, 1),
-  (7, 'Vocational Training Building 2.01', 'VTB 2.01', 'Vocational Lab', 30, 2);
+  (1, 1, '2024-01-13'),
+  (2, 2, '2024-01-13'),
+  (3, 3, '2024-01-13'),
+  (4, 8, '2024-01-13'),
+  (5, 9, '2024-01-13'),
+  (6, 10, '2024-01-13'),
+  (7, 11, '2024-01-13'),
+  (8, 12, '2024-01-13'),
+  (9, 14, '2024-01-13'),
+  (10, 16, '2024-01-13'),
+  (11, 17, '2024-01-13'),
+  (12, 18, '2024-01-13'),
+  (13, 19, '2024-01-13'),
+  (14, 21, '2024-01-13'),
+  (15, 22, '2024-01-13'),
+  (16, 23, '2024-01-13'),
+  (17, 24, '2024-01-13'),
+  (18, 4, '2024-01-13'),
+  (19, 5, '2024-01-13'),
+  (20, 6, '2024-01-13'),
+  (21, 7, '2024-01-13'),
+  (22, 13, '2024-01-13'),
+  (23, 15, '2024-01-13'),
+  (24, 20, '2024-01-13');
 
 -- ----------------------------
 -- Table structure for FACILITY
@@ -327,7 +407,7 @@ VALUES
   (30, 'Hand Tools', 'General hand tools for engineering practicals including screwdrivers and wrenches.', 'Available in Engineering Workshop 1.'),
   (30, 'Vocational Training Equipment', 'Tools for carpentry, plumbing, and electrical work.', 'Available in Vocational Lab 1.'),
   (20, 'Projector Systems', 'Projectors for presentations in seminar rooms.', 'Available in Humanities Seminar Room.'),
-  (40, 'Acoustic Instruments', 'Guitars, violins, and percussion instruments for music education.', 'Available in Music Room 1.'),
+  (40, 'Acoustic Instruments', 'Guitars, violins, and percussion instruments for music education.', 'Available in Studio 1.'),
   (30, 'Digital Cameras', 'Cameras for photography and media courses.', 'Available in Photography Studio 1.'),
   (20, 'Animation Software', 'Software for 2D and 3D animation for creative arts.', 'Available in Animation Lab.'),
   (15, 'Robotics Kits', 'Kits for building and programming robots.', 'Available in Robotics Lab.'),
@@ -427,41 +507,74 @@ VALUES
 -- ----------------------------
 -- Records of DEPARTMENT_COURSE
 -- ----------------------------
-INSERT INTO department_course (dep_id, course_id)
-VALUES
-  (1, 1),
-  (1, 4),
-  (1, 5),
-  (1, 3),
-  (2, 2),
-  (2, 6),
-  (2, 8),
-  (2, 10),
-  (3, 11),
-  (3, 12),
-  (3, 13),
-  (3, 14),
-  (3, 15),
-  (4, 16),
-  (4, 18),
-  (4, 19),
-  (4, 20),
-  (5, 17),
-  (5, 21),
-  (5, 22),
-  (5, 23),
-  (6, 24),
-  (6, 26),
-  (6, 28),
-  (6, 29),
-  (7, 25),
-  (7, 27),
-  (7, 30),
-  (7, 31),
-  (8, 32),
-  (8, 33),
-  (8, 34),
-  (8, 35);
+INSERT INTO department_course (dep_id, course_id) VALUES
+	(1, 1),
+	(1, 3),
+	(1, 4),
+	(1, 5),
+	(2, 2),
+	(2, 6),
+	(2, 7),
+	(2, 8),
+	(2, 9),
+	(2, 10),
+	(3, 24),
+	(3, 25),
+	(8, 11),
+	(8, 12),
+	(8, 13),
+	(8, 14),
+	(8, 15),
+	(8, 21),
+	(8, 22),
+	(9, 16),
+	(9, 17),
+	(9, 18),
+	(9, 19),
+	(9, 20),
+	(10, 24),
+	(10, 25),
+	(11, 21),
+	(11, 22),
+	(11, 23),
+	(11, 24),
+	(13, 26),
+	(13, 27),
+	(13, 28),
+	(13, 29),
+	(13, 30),
+	(15, 1),
+	(15, 3),
+	(15, 4),
+	(15, 5),
+	(16, 2),
+	(16, 6),
+	(16, 7),
+	(16, 8),
+	(16, 9),
+	(16, 10),
+	(17, 24),
+	(17, 25),
+	(19, 2),
+	(19, 6),
+	(19, 7),
+	(19, 8),
+	(19, 9),
+	(19, 10),
+	(20, 11),
+	(20, 12),
+	(20, 13),
+	(20, 14),
+	(20, 15),
+	(20, 21),
+	(20, 22),
+	(21, 16),
+	(21, 17),
+	(21, 18),
+	(21, 19),
+	(21, 20),
+	(22, 24),
+	(22, 25);
 
 -- ----------------------
 -- Records of OFFICE_HOUR
@@ -475,7 +588,7 @@ VALUES
   ('11:00', '13:00', '2024-11-05'),
   ('09:30', '11:30', '2024-11-06'),
   ('13:30', '15:30', '2024-11-07'),
-  ('09:00', '11:00', '2024-11-08'),
+  ('09:00', '11:00', '2024-11-08'),   
   ('13:00', '15:00', '2024-11-09'),
   ('10:00', '12:00', '2024-11-10'),
   ('14:00', '16:00', '2024-11-11'),
@@ -552,35 +665,304 @@ VALUES
   ('11:00', '13:00', '2025-01-21'),
   ('09:30', '11:30', '2025-01-22'),
   ('13:30', '15:30', '2025-01-23');
+  
 -- ----------------------------
 -- Records of STAFF_OFFICE_HOUR
 -- ----------------------------
-INSERT INTO staff_office_hour (staff_id, hour_id)
-VALUES
-
--- ------------------
--- Records of SESSION
--- ------------------
-INSERT INTO session (module_id, room_id, session_type, session_start_time, ession_end_time, session_date, session_feedback, session_mandatory, session_description)
-VALUES
-
--- ------------------------
--- Records of STAFF_SESSION
--- ------------------------
-INSERT INTO staff_session (session_id, staff_id)
-VALUES
-
--- ---------------------
--- Records of ATTENDANCE
--- ---------------------
-INSERT INTO attendance (session_id, student_id, addendance_record)
-VALUES
+INSERT INTO staff_office_hour (staff_id, hour_id) VALUES
+	(1, 1),
+	(1, 8),
+	(1, 15),
+	(1, 22),
+	(1, 29),
+	(1, 36),
+	(1, 43),
+	(1, 50),
+	(1, 57),
+	(1, 64),
+	(1, 71),
+	(1, 78),
+	(2, 7),
+	(2, 14),
+	(2, 21),
+	(2, 28),
+	(2, 35),
+	(2, 42),
+	(2, 49),
+	(2, 56),
+	(2, 63),
+	(2, 70),
+	(2, 77),
+	(2, 84),
+	(3, 4),
+	(3, 11),
+	(3, 18),
+	(3, 25),
+	(3, 32),
+	(3, 39),
+	(3, 46),
+	(3, 53),
+	(3, 60),
+	(3, 67),
+	(3, 74),
+	(3, 81),
+	(3, 4),
+	(3, 11),
+	(3, 18),
+	(3, 25),
+	(3, 32),
+	(3, 39),
+	(3, 46),
+	(3, 53),
+	(3, 60),
+	(3, 67),
+	(3, 74),
+	(3, 81),
+	(4, 4),
+	(4, 11),
+	(4, 18),
+	(4, 25),
+	(4, 32),
+	(4, 39),
+	(4, 46),
+	(4, 53),
+	(4, 60),
+	(4, 67),
+	(4, 74),
+	(4, 81),
+	(4, 6),
+	(4, 13),
+	(4, 20),
+	(4, 27),
+	(4, 34),
+	(4, 41),
+	(4, 48),
+	(4, 55),
+	(4, 62),
+	(4, 69),
+	(4, 76),
+	(4, 83),
+	(5, 7),
+	(5, 14),
+	(5, 21),
+	(5, 28),
+	(5, 35),
+	(5, 42),
+	(5, 49),
+	(5, 56),
+	(5, 63),
+	(5, 70),
+	(5, 77),
+	(5, 84),
+	(6, 1),
+	(6, 8),
+	(6, 15),
+	(6, 22),
+	(6, 29),
+	(6, 36),
+	(6, 43),
+	(6, 50),
+	(6, 57),
+	(6, 64),
+	(6, 71),
+	(6, 78),
+	(7, 3),
+	(7, 10),
+	(7, 17),
+	(7, 24),
+	(7, 31),
+	(7, 38),
+	(7, 45),
+	(7, 52),
+	(7, 59),
+	(7, 66),
+	(7, 73),
+	(7, 80),
+	(12, 7),
+	(12, 14),
+	(12, 21),
+	(12, 28),
+	(12, 35),
+	(12, 42),
+	(12, 49),
+	(12, 56),
+	(12, 63),
+	(12, 70),
+	(12, 77),
+	(12, 84),
+	(12, 7),
+	(12, 14),
+	(12, 21),
+	(12, 28),
+	(12, 35),
+	(12, 42),
+	(12, 49),
+	(12, 56),
+	(12, 63),
+	(12, 70),
+	(12, 77),
+	(12, 84),
+	(13, 6),
+	(13, 13),
+	(13, 20),
+	(13, 27),
+	(13, 34),
+	(13, 41),
+	(13, 48),
+	(13, 55),
+	(13, 62),
+	(13, 69),
+	(13, 76),
+	(13, 83),
+	(14, 3),
+	(14, 10),
+	(14, 17),
+	(14, 24),
+	(14, 31),
+	(14, 38),
+	(14, 45),
+	(14, 52),
+	(14, 59),
+	(14, 66),
+	(14, 73),
+	(14, 80),
+	(15, 7),
+	(15, 14),
+	(15, 21),
+	(15, 28),
+	(15, 35),
+	(15, 42),
+	(15, 49),
+	(15, 56),
+	(15, 63),
+	(15, 70),
+	(15, 77),
+	(15, 84),
+	(15, 1),
+	(15, 8),
+	(15, 15),
+	(15, 22),
+	(15, 29),
+	(15, 36),
+	(15, 43),
+	(15, 50),
+	(15, 57),
+	(15, 64),
+	(15, 71),
+	(15, 78),
+	(16, 4),
+	(16, 11),
+	(16, 18),
+	(16, 25),
+	(16, 32),
+	(16, 39),
+	(16, 46),
+	(16, 53),
+	(16, 60),
+	(16, 67),
+	(16, 74),
+	(16, 81),
+	(16, 1),
+	(16, 8),
+	(16, 15),
+	(16, 22),
+	(16, 29),
+	(16, 36),
+	(16, 43),
+	(16, 50),
+	(16, 57),
+	(16, 64),
+	(16, 71),
+	(16, 78),
+	(17, 7),
+	(17, 14),
+	(17, 21),
+	(17, 28),
+	(17, 35),
+	(17, 42),
+	(17, 49),
+	(17, 56),
+	(17, 63),
+	(17, 70),
+	(17, 77),
+	(17, 84),
+	(17, 1),
+	(17, 8),
+	(17, 15),
+	(17, 22),
+	(17, 29),
+	(17, 36),
+	(17, 43),
+	(17, 50),
+	(17, 57),
+	(17, 64),
+	(17, 71),
+	(17, 78),
+	(18, 6),
+	(18, 13),
+	(18, 20),
+	(18, 27),
+	(18, 34),
+	(18, 41),
+	(18, 48),
+	(18, 55),
+	(18, 62),
+	(18, 69),
+	(18, 76),
+	(18, 83),
+	(19, 3),
+	(19, 10),
+	(19, 17),
+	(19, 24),
+	(19, 31),
+	(19, 38),
+	(19, 45),
+	(19, 52),
+	(19, 59),
+	(19, 66),
+	(19, 73),
+	(19, 80),
+	(24, 3),
+	(24, 10),
+	(24, 17),
+	(24, 24),
+	(24, 31),
+	(24, 38),
+	(24, 45),
+	(24, 52),
+	(24, 59),
+	(24, 66),
+	(24, 73),
+	(24, 80),
+	(24, 1),
+	(24, 8),
+	(24, 15),
+	(24, 22),
+	(24, 29),
+	(24, 36),
+	(24, 43),
+	(24, 50),
+	(24, 57),
+	(24, 64),
+	(24, 71),
+	(24, 78);
 
 -- -------------------------
 -- Records of STUDENT_COURSE
 -- -------------------------
 INSERT INTO student_course (student_id, course_id, progress_perc, feedback, culmative_average, course_rep)
 VALUES
+  (1, 1),
+  (2, 1),
+  (3, 2),
+  (4, 4),
+  (5, 5),
+  (6, 6),
+  (7, 10),
+  (8, 14),
+  (9, 15),
+  (10, 20),
+  (11, 30);
 
 -- -----------------
 -- Records of MODULE
@@ -647,14 +1029,100 @@ VALUES
 -- ------------------------
 -- Records of COURSE_MODULE
 -- ------------------------
-INSERT INTO course_module (course_id, module_id)
-VALUES
+INSERT INTO course_module (course_id, module_id) VALUES
+	(1, 1),
+	(1, 2),
+	(1, 3),
+	(1, 29),
+	(1, 30),
+	(1, 31),
+	(2, 4),
+	(2, 5),
+	(2, 6),
+	(2, 32),
+	(2, 33),
+	(2, 34),
+	(3, 7),
+	(3, 8),
+	(3, 9),
+	(3, 35),
+	(3, 36),
+	(3, 37),
+	(4, 10),
+	(4, 11),
+	(4, 12),
+	(4, 38),
+	(4, 39),
+	(4, 40),
+	(6, 10),
+	(6, 11),
+	(6, 12),
+	(6, 38),
+	(6, 39),
+	(6, 40),
+	(7, 13),
+	(7, 14),
+	(7, 15),
+	(7, 41),
+	(7, 42),
+	(7, 43),
+	(8, 16),
+	(8, 17),
+	(8, 18),
+	(8, 44),
+	(8, 45),
+	(8, 46),
+	(9, 27),
+	(9, 28),
+	(9, 55),
+	(9, 56),
+	(11, 16),
+	(11, 17),
+	(11, 18),
+	(11, 44),
+	(11, 45),
+	(11, 46),
+	(12, 19),
+	(12, 20),
+	(12, 47),
+	(12, 48),
+	(13, 21),
+	(13, 22),
+	(13, 49),
+	(13, 50),
+	(14, 16),
+	(14, 17),
+	(14, 18),
+	(14, 44),
+	(14, 45),
+	(14, 46),
+	(16, 23),
+	(16, 24),
+	(16, 51),
+	(16, 52),
+	(17, 25),
+	(17, 26),
+	(17, 53),
+	(17, 54),
+	(18, 27),
+	(18, 28),
+	(18, 55),
+	(18, 56),
+	(22, 19),
+	(22, 20),
+	(22, 47),
+	(22, 48),
+	(27, 7),
+	(27, 8),
+	(27, 9),
+	(27, 35),
+	(27, 36),
+	(27, 37);
 
 -- -----------------------------
 -- Records of COURSE_COORDINATOR
 -- -----------------------------
-INSERT INTO course_coordinator (staff_id, course_id)
-VALUES
+INSERT INTO course_coordinator (staff_id, course_id) VALUES
 
 -- -----------------------------
 -- Records of MODULE_COORDINATOR
@@ -662,6 +1130,23 @@ VALUES
 INSERT INTO module_coordinator (staff_id, module_id)
 VALUES
 
+-- ------------------
+-- Records of SESSION
+-- ------------------
+INSERT INTO session (room_id, session_type, session_start_time, ession_end_time, session_date, session_feedback, session_mandatory, session_description)
+VALUES
+
+-- ------------------------
+-- Records of STAFF_SESSION
+-- ------------------------
+INSERT INTO staff_session (session_id, staff_id)
+VALUES
+
+-- ---------------------
+-- Records of ATTENDANCE
+-- ---------------------
+INSERT INTO attendance (session_id, student_id, addendance_record)
+VALUES
 
 -- --------------------------------
 -- Records of STUDENT_MODULE_RESULT

@@ -24,7 +24,7 @@ $$ LANGUAGE plpgsql;
 /* 
   Function to generate and return a unique identifier of length specified through parameter (length INT).
 
-  Uses the UIDS table to store all generated uids to ensure that they are all unique. 
+  Uses the UID table to store all generated uids to ensure that they are all unique. 
 */
 CREATE OR REPLACE FUNCTION generate_uid(length INT)
 RETURNS VARCHAR AS $$
@@ -33,11 +33,11 @@ DECLARE
 BEGIN
   string := generate_random_string(length);
 
-  WHILE EXISTS (SELECT uid FROM uids WHERE uid = string) LOOP
+  WHILE EXISTS (SELECT uid FROM uid WHERE uid = string) LOOP
     string := generate_random_string(length);
   END LOOP;
 
-  INSERT INTO uids (uid) VALUES (string);
+  INSERT INTO uid (uid) VALUES (string);
 
   RETURN string;
 END;
@@ -46,7 +46,7 @@ $$ LANGUAGE plpgsql;
 -- ------------------------
 -- Table structure for UIDS
 -- ------------------------
-CREATE TABLE uids (
+CREATE TABLE uid (
   uid VARCHAR(250) PRIMARY KEY
 );
 
@@ -171,7 +171,7 @@ CREATE OR REPLACE FUNCTION update_tuition_after_payment() RETURNS TRIGGER AS $$ 
     tuition_payment AS tp
   WHERE
     tp.tuition_payment_id = NEW.tuition_payment_id
-    AND tuition_id = NEW.tuition_id;
+    AND t.tuition_id = NEW.tuition_id;
 RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
@@ -179,18 +179,6 @@ $$ LANGUAGE plpgsql;
 -- Trigger to update valeus in the tuition table after insert on tuition_payment. 
 CREATE TRIGGER after_student_payments_insert AFTER
 INSERT ON tuition_payment FOR EACH ROW EXECUTE FUNCTION update_tuition_after_payment();
-
--- ------------------------------
--- Table structure for DEPARTMENT
--- ------------------------------
-CREATE TYPE dep_type_enum AS ENUM ('Educational', 'Administrative', 'Operational', 'Maintenance');
-
-CREATE TABLE department (
-  dep_id SERIAL PRIMARY KEY,
-  dep_name VARCHAR(50) NOT NULL,
-  dep_type dep_type_enum NOT NULL,
-  dep_description VARCHAR(200)
-);
 
 -- --------------------------
 -- Table structure for BRANCH
@@ -208,15 +196,18 @@ CREATE TABLE branch (
   branch_email VARCHAR(150) NOT NULL
 );
 
--- -------------------------------------
--- Table structure for BRANCH_DEPARTMENT
--- -------------------------------------
-CREATE TABLE branch_department (
+-- ------------------------------
+-- Table structure for DEPARTMENT
+-- ------------------------------
+CREATE TYPE dep_type_enum AS ENUM ('Educational', 'Administrative', 'Operational', 'Maintenance');
+
+CREATE TABLE department (
+  dep_id SERIAL PRIMARY KEY,
   branch_id INT NOT NULL,
-  dep_id INT NOT NULL,
-  PRIMARY KEY (branch_id, dep_id),
-  FOREIGN KEY (branch_id) REFERENCES branch (branch_id),
-  FOREIGN KEY (dep_id) REFERENCES department (dep_id)
+  dep_name VARCHAR(50) NOT NULL,
+  dep_type dep_type_enum NOT NULL,
+  dep_description VARCHAR(200),
+  FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
 );
 
 -- ------------------------
@@ -225,6 +216,50 @@ CREATE TABLE branch_department (
 CREATE TABLE role (
   role_id SERIAL PRIMARY KEY,
   role_name VARCHAR(50) NOT NULL
+);
+
+-- ----------------------------
+-- Table structure for BUILDING
+-- ----------------------------
+CREATE TABLE building (
+  building_id SERIAL PRIMARY KEY,
+  branch_id INT,
+  building_name VARCHAR(100) NOT NULL,
+  building_alt_name VARCHAR(100),
+  building_type VARCHAR(100) NOT NULL,
+  building_addr1 VARCHAR(50) NOT NULL,
+  building_addr2 VARCHAR(50),
+  building_city VARCHAR(50) NOT NULL,
+  building_postcode VARCHAR(10) NOT NULL,
+  building_country VARCHAR(50) NOT NULL,
+  FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
+);
+
+-- ------------------------
+-- Table structure for ROOM
+-- ------------------------
+CREATE TYPE room_type_enum AS ENUM (
+  'Lecture Theatre',
+  'Computer Lab',
+  'Practical Room',
+  'Office',
+  'Seminar Room',
+  'Studio',
+  'Lab',
+  'Meeting Room',
+  'Workshop',
+  'Auditorium'
+);
+
+CREATE TABLE room (
+  room_id SERIAL PRIMARY KEY,
+  building_id INT,
+  room_name VARCHAR(100) NOT NULL,
+  room_alt_name VARCHAR(100) NOT NULL,
+  room_type room_type_enum NOT NULL,
+  room_capacity INT NOT NULL,
+  room_floor INT NOT NULL,
+  FOREIGN KEY (building_id) REFERENCES building (building_id)
 );
 
 -- -------------------------
@@ -237,7 +272,7 @@ CREATE TABLE staff (
   room_id INT,
   staff_company_email CHAR(22) UNIQUE,
   staff_personal_email VARCHAR(150) NOT NULL UNIQUE,
-  staff_number CHAR(10) NOT NULL UNIQUE,
+  staff_number CHAR(10) UNIQUE,
   staff_fname VARCHAR(50) NOT NULL,
   staff_mname VARCHAR(50),
   staff_lname VARCHAR(50) NOT NULL,
@@ -249,7 +284,7 @@ CREATE TABLE staff (
   staff_landline VARCHAR(30) NOT NULL,
   staff_mobile VARCHAR(15) NOT NULL,
   staff_dob DATE NOT NULL,
-  phone_ext 
+  phone_ext VARCHAR(50),
   FOREIGN KEY (room_id) REFERENCES room (room_id)
 );
 
@@ -374,64 +409,6 @@ CREATE TABLE staff_department (
   FOREIGN KEY (dep_id) REFERENCES department (dep_id)
 );
 
-
--- -------------------------------------
--- Table structure for STAFF_BRANCH
--- -------------------------------------
-CREATE TABLE staff_branch (
-  staff_id INT NOT NULL,
-  branch_id INT NOT NULL,
-  date_assinged DATE NOT NULL,
-  PRIMARY KEY (staff_id, branch_id),
-  FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
-  FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
-);
-
-
--- ----------------------------
--- Table structure for BUILDING
--- ----------------------------
-CREATE TABLE building (
-  building_id SERIAL PRIMARY KEY,
-  branch_id INT,
-  building_name VARCHAR(100) NOT NULL,
-  building_alt_name VARCHAR(100),
-  building_type VARCHAR(100) NOT NULL,
-  building_addr1 VARCHAR(50) NOT NULL,
-  building_addr2 VARCHAR(50),
-  building_city VARCHAR(50) NOT NULL,
-  building_postcode VARCHAR(10) NOT NULL,
-  building_country VARCHAR(50) NOT NULL,
-  FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
-);
-
--- ------------------------
--- Table structure for ROOM
--- ------------------------
-CREATE TYPE room_type_enum AS ENUM (
-  'Lecture Theatre',
-  'Computer Lab',
-  'Practical Room',
-  'Office',
-  'Seminar Room',
-  'Studio',
-  'Research Lab',
-  'Meeting Room',
-  'Workshop',
-  'Auditorium'
-);
-
-CREATE TABLE room (
-  room_id SERIAL PRIMARY KEY,
-  building_id INT,
-  room_name VARCHAR(100) NOT NULL,
-  room_alt_name VARCHAR(100) NOT NULL,
-  room_type room_type_enum NOT NULL,
-  room_capacity INT NOT NULL,
-  room_floor INT NOT NULL,
-  FOREIGN KEY (building_id) REFERENCES building (building_id)
-);
-
 -- ----------------------------
 -- Table structure for FACILITY
 -- ----------------------------
@@ -442,7 +419,6 @@ CREATE TABLE facility (
   facility_description TEXT,
   facility_notes TEXT NOT NULL
 );
-
 
 -- ---------------------------------
 -- Table structure for ROOM_FACILITY
@@ -512,7 +488,6 @@ CREATE TYPE session_type_enum AS ENUM (
 
 CREATE TABLE session (
   session_id SERIAL PRIMARY KEY,
-  module_id INT,
   room_id INT,
   session_type session_type_enum NOT NULL,
   session_start_time VARCHAR(50),
@@ -521,8 +496,7 @@ CREATE TABLE session (
   session_feedback TEXT,
   session_mandatory BOOLEAN NOT NULL,
   session_description TEXT,
-  FOREIGN KEY (room_id) REFERENCES room (room_id),
-  FOREIGN KEY (module_id) REFERENCES module (module_id)
+  FOREIGN KEY (room_id) REFERENCES room (room_id)
 );
 
 -- ---------------------------------
