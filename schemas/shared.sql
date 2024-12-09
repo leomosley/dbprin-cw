@@ -175,6 +175,29 @@ BEGIN
 	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
 	EXECUTE format('
+	CREATE OR REPLACE FUNCTION %I.update_student_attendance()
+	RETURNS TRIGGER AS $inner$
+	BEGIN
+	  UPDATE %I.student
+	  SET student_attendance = (
+	    SELECT ROUND(CAST(SUM(
+	      CASE 
+	        WHEN ss.attendance_record THEN 1 
+	        ELSE 0 
+	      END
+	    ) AS NUMERIC) * 100.0 / NULLIF(COUNT(*), 0), 2)
+	      FROM %I.student_session AS ss
+	      JOIN %I.session AS s ON ss.session_id = s.session_id
+	    WHERE ss.student_id = NEW.student_id
+	      AND (s.session_date < CURRENT_DATE OR (s.session_date = CURRENT_DATE AND s.session_start_time <= CURRENT_TIME))
+	  )
+	  WHERE student_id = NEW.student_id;
+	  RETURN NEW;
+	END;
+	$inner$ LANGUAGE plpgsql;'
+	, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
 	CREATE TABLE %I.staff (
 	  staff_id CHAR(10) DEFAULT (
 	    CONCAT(''s'', to_char(nextval(''shared.staff_id_seq''), ''FM000000000''))
@@ -525,6 +548,13 @@ BEGIN
 	AFTER INSERT ON %I.session
 	FOR EACH ROW
 	EXECUTE FUNCTION %I.link_students_to_session();'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE TRIGGER %I_update_student_attendance_trigger
+	AFTER UPDATE ON %I.student_session
+	FOR EACH ROW
+	EXECUTE FUNCTION %I.update_student_attendance();'
 	, schema_name, schema_name, schema_name);
 
 	EXECUTE format('

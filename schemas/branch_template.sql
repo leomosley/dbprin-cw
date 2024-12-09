@@ -146,26 +146,26 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger function to update student attendance after update on student_session
--- CREATE OR REPLACE FUNCTION branch_template.update_student_attendance()
--- RETURNS TRIGGER AS $$
--- BEGIN
---   UPDATE branch_template.student
---   SET student_attendance = (
---     SELECT ROUND(CAST(SUM(
---       CASE 
---         WHEN ss.attendance_record THEN 1 
---         ELSE 0 
---       END
---     ) AS NUMERIC) * 100.0 / NULLIF(COUNT(*), 0), 2)
---       FROM branch_template.student_session AS ss
---       JOIN branch_template.session AS s ON ss.session_id = s.session_id
---     WHERE ss.student_id = NEW.student_id
---       AND (s.session_date < CURRENT_DATE OR (s.session_date = CURRENT_DATE AND s.session_start_time <= CURRENT_TIME))
---   )
---   WHERE student_id = NEW.student_id;
---   RETURN NEW;
--- END;
--- $$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION branch_template.update_student_attendance()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE branch_template.student
+  SET student_attendance = (
+    SELECT ROUND(CAST(SUM(
+      CASE 
+        WHEN ss.attendance_record THEN 1 
+        ELSE 0 
+      END
+    ) AS NUMERIC) * 100.0 / NULLIF(COUNT(*), 0), 2)
+      FROM branch_template.student_session AS ss
+      JOIN branch_template.session AS s ON ss.session_id = s.session_id
+    WHERE ss.student_id = NEW.student_id
+      AND (s.session_date < CURRENT_DATE OR (s.session_date = CURRENT_DATE AND s.session_start_time <= CURRENT_TIME))
+  )
+  WHERE student_id = NEW.student_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
 /* CREATE TABLES */
 
@@ -537,10 +537,10 @@ FOR EACH ROW
 EXECUTE FUNCTION branch_template.link_students_to_session();
 
 -- Trigger to update student_attendance
--- CREATE TRIGGER branch_template_update_student_attendance_trigger
--- AFTER UPDATE ON branch_template.student_session
--- FOR EACH ROW
--- EXECUTE FUNCTION branch_template.update_student_attendance();
+CREATE TRIGGER branch_template_update_student_attendance_trigger
+AFTER UPDATE ON branch_template.student_session
+FOR EACH ROW
+EXECUTE FUNCTION branch_template.update_student_attendance();
 
 -- ---------------------------------
 -- Table structure for STAFF_CONTACT
