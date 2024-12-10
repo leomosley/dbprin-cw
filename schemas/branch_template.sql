@@ -194,7 +194,7 @@ FOR EACH ROW
 EXECUTE FUNCTION shared.validate_staff();
 
 -- Functional index to enforce case insensitive uniqueness of the staff personal email.
-CREATE UNIQUE INDEX branch_template_unique_staff_personal_email_idx ON branch_template.staff (LOWER(staff_personal_email));
+CREATE UNIQUE INDEX branch_template_idx_unique_staff_personal_email ON branch_template.staff (LOWER(staff_personal_email));
 
 -- ------------------------------
 -- Table structure for STAFF_ROLE
@@ -229,6 +229,12 @@ CREATE TABLE branch_template.course (
   FOREIGN KEY (staff_id) REFERENCES branch_template.staff (staff_id)
 );
 
+-- Composite index to optimise queries joining course and module
+CREATE INDEX branch_template_idx_course_module ON branch_template.course_module (course_id, module_id);
+
+-- Speeds up searches or groupings involving course names
+CREATE INDEX branch_template_idx_course_name ON shared.course (course_name);
+
 -- -------------------------------------
 -- Table structure for DEPARTMENT_COURSE
 -- -------------------------------------
@@ -249,6 +255,12 @@ CREATE TABLE branch_template.module (
   FOREIGN KEY (module_id) REFERENCES shared.module (module_id)
 );
 
+-- Speeds up joins involving module_id (especially with student_module and course_module)
+CREATE INDEX branch_template_idx_module_id ON branch_template.module (module_id);
+
+-- Improves performance for grouping or searching based on module names in analytics views.
+CREATE INDEX branch_template_idx_module_name ON branch_template.module (module_name);
+
 -- ----------------------------------
 -- Table structure for COURSE_MODULE
 -- ----------------------------------
@@ -259,6 +271,9 @@ CREATE TABLE branch_template.course_module (
   FOREIGN KEY (module_id) REFERENCES branch_template.module (module_id),
   FOREIGN KEY (course_id) REFERENCES branch_template.course (course_id)
 );
+
+-- Multi-column index to improve performance for queries involving both course_id and module_id, commonly used together in joins
+CREATE INDEX branch_template_idx_course_module_combined ON branch_template.course_module (course_id, module_id);
 
 -- ---------------------------
 -- Table structure for STUDENT
@@ -285,7 +300,13 @@ CREATE TABLE branch_template.student (
 );
 
 -- Functional index to enforce case insensitive uniqueness of the student personal email.
-CREATE UNIQUE INDEX branch_template_unique_student_personal_email_idx ON branch_template.student (LOWER(student_personal_email));
+CREATE UNIQUE INDEX branch_template_idx_unique_student_personal_email ON branch_template.student (LOWER(student_personal_email));
+
+-- Improves performance for joins or lookups on student_id
+CREATE INDEX branch_template_idx_student_id ON branch_template.student (student_id);
+
+-- Index to optimise for queries calculating averages or grouping based on student attendance
+CREATE INDEX branch_template_idx_student_attendance ON branch_template.student (student_attendance);
 
 -- ----------------------------------
 -- Table structure for STUDENT_COURSE
@@ -323,6 +344,10 @@ CREATE TABLE branch_template.student_module (
   CONSTRAINT valid_grade_percentage CHECK (module_grade >= 0 AND module_grade <= 100),
   CONSTRAINT valid_passed CHECK ((passed = TRUE AND module_grade >= 40) OR (passed = FALSE AND module_grade < 40))
 );
+
+-- Multi-column index to improve performance for joins or queries on both student_id and module_id
+CREATE INDEX branch_template_idx_student_module_combined ON branch_template.student_module (student_id, module_id);
+
 
 -- Trigger to seed student_assessment based of the module they are taking and the assesments it provides (in shared) after insert on student_module
 CREATE TRIGGER branch_template_after_insert_assessment
@@ -503,6 +528,9 @@ CREATE TABLE branch_template.session (
   CONSTRAINT valid_date_range CHECK (session_start_time < session_end_time)
 );
 
+-- Composite index which for queries that filter sessions based on date and start time
+CREATE INDEX branch_template_idx_session_date_time ON branch_template.session (session_date, session_start_time);
+
 -- ---------------------------------
 -- Table structure for STAFF_SESSION
 -- ---------------------------------
@@ -525,6 +553,15 @@ CREATE TABLE branch_template.student_session (
   FOREIGN KEY (session_id) REFERENCES branch_template.session (session_id),
   FOREIGN KEY (student_id) REFERENCES branch_template.student (student_id)
 );
+
+-- Speeds up joins between student_session and session tables, as session_id is frequently used.
+CREATE INDEX branch_template_idx_student_session_id ON branch_template.student_session (session_id);
+
+-- Improves performance when filtering on attendance_record
+CREATE INDEX branch_template_idx_attendance_record ON branch_template.student_session (attendance_record);
+
+-- Partial index where queries where only records with attendance_record = TRUE
+CREATE INDEX branch_template_idx_attendance_record_true ON branch_template.student_session (session_id, student_id) WHERE attendance_record = TRUE;
 
 -- Trigger to link students to session
 CREATE TRIGGER branch_template_after_insert_session_trigger

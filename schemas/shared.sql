@@ -651,6 +651,9 @@ CREATE TABLE shared.branch (
   branch_email VARCHAR(150) NOT NULL
 );
 
+-- Optimises queries and joins involving branches.
+CREATE INDEX shared_idx_branch_id ON shared.branch (branch_id);
+
 -- Trigger to create_schema after insert on branch
 CREATE TRIGGER trigger_create_schema
 AFTER INSERT ON shared.branch
@@ -686,6 +689,9 @@ CREATE TABLE shared.course (
   course_length SMALLINT NOT NULL
 );
 
+-- Optimises performance for attendance calculations and joins on `course_id` in course-specific views.
+CREATE INDEX shared_idx_course_attendance ON branch_b01.course (course_id);
+
 -- -------------------------------------
 -- Table structure for DEPARTMENT_COURSE
 -- -------------------------------------
@@ -716,6 +722,9 @@ CREATE TABLE shared.module (
   module_duration INT NOT NULL, 
   CONSTRAINT valid_duration CHECK (module_duration IN (1, 2))
 );
+
+-- Improves performance for queries joining on module_id in branch-specific attendance views
+CREATE INDEX shared_idx_module_attendance ON branch_b01.module (module_id);
 
 -- ----------------------------------
 -- Table structure for COURSE_MODULE
