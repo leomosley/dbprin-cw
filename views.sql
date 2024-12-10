@@ -1,5 +1,5 @@
 /* CREATE BRANCH SPECIFIC VIEWS */
--- View
+-- View to show each students attendance percentages
 CREATE OR REPLACE VIEW branch_b01.student_attendance AS 
 WITH student_details AS (
   SELECT 
@@ -15,21 +15,38 @@ SELECT
 FROM student_details sd
 ORDER BY "Student ID";
 
--- 
+-- View to show the average attendance percentage for each module
 CREATE OR REPLACE VIEW branch_b01.module_attendance AS 
 SELECT
   m.module_id AS "Module ID",
   shm.module_name AS "Module Name",
   STRING_AGG(DISTINCT c.course_id, ', ') AS "Modules Courses",
-  ROUND(AVG(s.student_attendance), 2) AS "Module Attendance %"
+  ROUND(
+    AVG(
+      CASE
+        WHEN total_students > 0 THEN (attending_students * 100.0) / total_students
+        ELSE 0
+      END
+    ), 2
+  ) AS "Module Attendance %"
 FROM 
   branch_b01.module AS m
   JOIN shared.module AS shm USING (module_id)
-  JOIN branch_b01.student_module AS stm USING (module_id)
-  JOIN branch_b01.student AS s USING (student_id)
+  JOIN branch_b01.session AS ses USING (module_id)
+  LEFT JOIN (
+    SELECT
+      session_id,
+      COUNT(*) AS total_students,
+      SUM(CASE WHEN attendance_record THEN 1 ELSE 0 END) AS attending_students
+    FROM branch_b01.student_session
+    GROUP BY session_id
+  ) AS ss_stats ON ses.session_id = ss_stats.session_id
   JOIN branch_b01.course_module AS cm USING (module_id)
   JOIN shared.course AS c USING (course_id)
-GROUP BY "Module ID", "Module Name"; 
+WHERE 
+  ses.session_date < CURRENT_DATE 
+  OR (ses.session_date = CURRENT_DATE AND ses.session_end_time < CURRENT_TIME)
+GROUP BY "Module ID", "Module Name";
 
 -- 
 CREATE OR REPLACE VIEW branch_b01.course_attendance AS 
@@ -37,16 +54,17 @@ SELECT
   c.course_id AS "Course ID",
   shc.course_name AS "Course Name",
   CONCAT_WS(' ', stf.staff_fname, stf.staff_lname) AS "Course Coordinator",
-  ROUND(AVG(s.student_attendance), 2) AS "Course Attendance %"
+  ROUND(
+    AVG(ma."Module Attendance %"), 2
+  ) AS "Course Attendance %"
 FROM 
   branch_b01.course AS c
   JOIN branch_b01.course_module AS cm USING (course_id)
-  JOIN branch_b01.module AS m USING (module_id)
-  JOIN branch_b01.student_module AS stm USING (module_id)
-  JOIN branch_b01.student AS s USING (student_id)
+  JOIN branch_b01.module_attendance AS ma ON cm.module_id = ma."Module ID"
   JOIN shared.course AS shc USING (course_id)
-  JOIN branch_b01.staff AS stf USING(staff_id) 
+  JOIN branch_b01.staff AS stf USING (staff_id)
 GROUP BY "Course ID", "Course Name", "Course Coordinator";
+
 
 -- 
 CREATE OR REPLACE VIEW branch_b01.student_tuition_details AS
@@ -268,7 +286,7 @@ SELECT
   b.branch_name AS "Branch Name",
   CONCAT(ROUND(saba.avg_student_attendance, 2), '%') AS "Average Student Attendance",
   CONCAT(ROUND(saba.avg_module_attendance, 2), '%') AS "Average Module Attendance",
-  CONCAT(ROUND(saba.avg_course_attendance, 2), '%') AS "Average Module Attendance",
+  CONCAT(ROUND(saba.avg_course_attendance, 2), '%') AS "Average Course Attendance",
   CONCAT(
     saba.top_module_name,
     ' (', ROUND(saba.top_module_attendance, 2), '%)'
