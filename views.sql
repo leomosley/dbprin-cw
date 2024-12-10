@@ -48,7 +48,7 @@ WHERE
   OR (ses.session_date = CURRENT_DATE AND ses.session_end_time < CURRENT_TIME)
 GROUP BY "Module ID", "Module Name";
 
--- 
+-- View to show the average attendance percentage of each course
 CREATE OR REPLACE VIEW branch_b01.course_attendance AS 
 SELECT
   c.course_id AS "Course ID",
@@ -66,7 +66,7 @@ FROM
 GROUP BY "Course ID", "Course Name", "Course Coordinator";
 
 
--- 
+-- View to show the students tuition details
 CREATE OR REPLACE VIEW branch_b01.student_tuition_details AS
 SELECT 
   st.student_id AS "Student ID",
@@ -84,7 +84,7 @@ FROM
 ORDER BY 
   "Student ID", "Tuition ID";
 
--- 
+-- View to show students who have outstanding tuition passed their deadline
 CREATE OR REPLACE VIEW branch_b01.unpaid_tuition_students AS
 SELECT 
   "Student ID",
@@ -100,7 +100,7 @@ WHERE
   AND "Tuition Remaining" > 0
 ORDER BY "Tuition Deadline";
 
--- 
+-- View to show all upcoming session times and dates for each room in branch
 CREATE OR REPLACE VIEW branch_b01.room_session_times AS
 SELECT 
   r.room_id AS "Room ID",
@@ -118,7 +118,7 @@ WHERE
   OR (s.session_date = CURRENT_DATE AND s.session_start_time > CURRENT_TIME) 
 ORDER BY r.room_id, s.session_date, s.session_start_time;
 
--- 
+-- Function to determine if specific room is free at a specific time and date
 CREATE OR REPLACE FUNCTION branch_b01.is_room_available(
   p_room_id INT,
   p_requested_time TIME,
@@ -156,7 +156,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 
+-- Function to find available time slots for a specific room on a specific date
 CREATE OR REPLACE FUNCTION branch_b01.get_day_available_room_time(
   p_room_id INT,
   p_requested_date DATE
@@ -184,6 +184,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 /* CREATE SHARED VIEWS */
+-- Function to retrieve data about attendance in each branch
 CREATE OR REPLACE FUNCTION shared.analyse_branch_attendance()
 RETURNS TABLE (
   branch_id CHAR(3),
@@ -279,7 +280,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 
+-- View to show information about attendance for each branch
+-- Average student, module, and course attendance 
+-- Extremes (worst and best) of module and course attendance
 CREATE OR REPLACE VIEW shared.branch_attendance AS
 SELECT 
   b.branch_id AS "Branch ID",
@@ -308,7 +311,7 @@ FROM
   JOIN shared.branch AS b USING (branch_id)
 ORDER BY b.branch_id;
 
--- 
+-- Function to retrieive information about the number of students in each course at each branch
 CREATE OR REPLACE FUNCTION shared.count_student_course()
 RETURNS TABLE (
   branch_id CHAR(3),
@@ -345,7 +348,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 
+-- View to show number of students in each course across all branches to show course popularity
 CREATE OR REPLACE VIEW shared.course_popularity AS
 SELECT
   c.course_id AS "Course ID",
@@ -355,4 +358,4 @@ FROM
   shared.course AS c
   JOIN shared.count_student_course() AS css USING (course_id)
 GROUP BY "Course ID", "Course Name"
-ORDER BY "Total Students";
+ORDER BY "Total Students" DESC;
