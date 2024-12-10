@@ -7,7 +7,6 @@ CREATE SCHEMA IF NOT EXISTS branch_template;
 CREATE OR REPLACE FUNCTION branch_template.link_module_assessment()
 RETURNS TRIGGER AS $$
 BEGIN
-  RAISE NOTICE 'INSERTING INTO assessment';
   INSERT INTO branch_template.assessment (assessment_id, assessment_set_date, assessment_due_date, assessment_set_time, assessment_due_time, assessment_visble)
   SELECT
     sa.assessment_id,
@@ -26,7 +25,6 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION branch_template.link_students_to_assessment()
 RETURNS TRIGGER AS $$
 BEGIN
-  RAISE NOTICE 'INSERTING INTO student_assessment';
   INSERT INTO branch_template.student_assessment (student_id, assessment_id, grade)
   SELECT 
     NEW.student_id, 
@@ -63,7 +61,6 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION branch_template.link_students_to_session()
 RETURNS TRIGGER AS $$
 BEGIN
-  RAISE NOTICE 'INSERTING INTO student_session';
   INSERT INTO branch_template.student_session (student_id, session_id, attendance_record)
   SELECT 
     sm.student_id, 
@@ -79,7 +76,6 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION branch_template.link_students_to_module()
 RETURNS TRIGGER AS $$
 BEGIN
-  RAISE NOTICE 'INSERTING INTO student_module';
   INSERT INTO branch_template.student_module (student_id, module_id, module_grade, passed)
   SELECT 
     NEW.student_id, 
