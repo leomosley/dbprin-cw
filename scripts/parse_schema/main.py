@@ -1,7 +1,8 @@
 with open('../../schemas/branch_template.sql', 'r') as file:
   content = file.read()
 
-updated_content = content.replace('branch_template', '%I')
+updated_content = content.replace('%', r'%%')
+updated_content = updated_content.replace('branch_template', '%I')
 updated_content = updated_content.replace("'", "''")
 updated_content = updated_content.replace("$$", "$inner$")
 updated_content = "\n".join(
