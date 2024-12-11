@@ -651,6 +651,9 @@ CREATE TABLE shared.branch (
   branch_email VARCHAR(150) NOT NULL
 );
 
+-- Optimises queries and joins involving branches.
+CREATE INDEX shared_idx_branch_id ON shared.branch (branch_id);
+
 -- Trigger to create_schema after insert on branch
 CREATE TRIGGER trigger_create_schema
 AFTER INSERT ON shared.branch
@@ -791,3 +794,122 @@ CREATE TABLE shared.emergency_contact (
   contact_postcode VARCHAR(10) NOT NULL,
   contact_relationship VARCHAR(50) NOT NULL
 );
+
+/* ENABLE RLS AND CREATE FOR SHARED TABLES */
+-- Branch Policy
+ALTER TABLE shared.branch ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_staff_view_policy
+ON shared.branch
+FOR SELECT
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'branch'));
+
+CREATE POLICY branch_admin_update_policy
+ON shared.branch
+FOR UPDATE
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'branch'));
+
+-- Department Policy
+ALTER TABLE shared.department ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY department_staff_view_policy
+ON shared.department
+FOR SELECT
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department'));
+
+CREATE POLICY department_admin_full_policy
+ON shared.department
+FOR ALL
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department'));
+
+-- Course Policy
+ALTER TABLE shared.course ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY course_staff_view_policy
+ON shared.course
+FOR SELECT
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course'));
+
+CREATE POLICY course_admin_full_policy
+ON shared.course
+FOR ALL
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course'));
+
+-- Department Course Policy
+ALTER TABLE shared.department_course ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY department_course_staff_view_policy
+ON shared.department_course
+FOR SELECT
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department_course'));
+
+CREATE POLICY department_course_admin_full_policy
+ON shared.department_course
+FOR ALL
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department_course'));
+
+-- Module Policy
+ALTER TABLE shared.module ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY module_admin_full_policy
+ON shared.module
+FOR ALL
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'module'));
+
+-- Course Module Policy
+ALTER TABLE shared.course_module ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY course_module_staff_view_policy
+ON shared.course_module
+FOR SELECT
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course_module'));
+
+CREATE POLICY course_module_admin_full_policy
+ON shared.course_module
+FOR ALL
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course_module'));
+
+-- Assessment Policy
+ALTER TABLE shared.assessment ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY assessment_admin_full_policy
+ON shared.assessment
+FOR ALL
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'assessment'));
+
+-- Role Policy
+ALTER TABLE shared.role ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY role_admin_full_policy
+ON shared.role
+FOR ALL
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'role'));
+
+-- Facility Policty
+ALTER TABLE shared.facility ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY facility_staff_view_policy
+ON shared.facility
+FOR SELECT
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'facility'));
+
+CREATE POLICY facility_admin_full_policy
+ON shared.facility
+FOR ALL
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'facility'));
+
+-- Room Type
+ALTER TABLE shared.room_type ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY room_type_staff_view_policy
+ON shared.room_type
+FOR SELECT
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'room_type'));
+
+CREATE POLICY room_type_admin_full_policy
+ON shared.room_type
+FOR ALL
+USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'room_type'));
+
+-- Emergency Contact Policy
+ALTER TABLE shared.emergency_contact ENABLE ROW LEVEL SECURITY;
