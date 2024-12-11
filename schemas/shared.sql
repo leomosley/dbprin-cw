@@ -7,6 +7,7 @@ CREATE SCHEMA shared;
 CREATE OR REPLACE FUNCTION shared.validate_staff()
 RETURNS TRIGGER AS $$
 BEGIN
+  RAISE NOTICE 'VALIDATING STAFF INSERT FOR %', NEW.staff_id;
   NEW.staff_company_email := CONCAT(NEW.staff_id, '@ses.edu.org');
 
   IF NEW.staff_personal_email IS NOT NULL THEN 
@@ -15,12 +16,86 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;  
+$$ LANGUAGE plpgsql; 
+
+-- Trigger function to create users and assign roles after insert on staff
+CREATE OR REPLACE FUNCTION shared.create_staff_user() 
+RETURNS TRIGGER AS 
+$$
+BEGIN
+  RAISE NOTICE 'CREATE STAFF USER %', NEW.staff_id;
+  EXECUTE format('DROP ROLE IF EXISTS %I;', NEW.staff_id);
+  EXECUTE format('
+  CREATE ROLE %I WITH LOGIN;
+  GRANT staff_role TO %I;'
+  , NEW.staff_id, NEW.staff_id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to create users and assign roles after insert on student
+CREATE OR REPLACE FUNCTION shared.create_student_user() 
+RETURNS TRIGGER AS 
+$$
+BEGIN
+  RAISE NOTICE 'CREATE STUDENT USER %', NEW.student_id;
+  EXECUTE format('DROP ROLE IF EXISTS %I;', NEW.student_id);
+  EXECUTE format('
+  CREATE ROLE %I WITH LOGIN;
+  GRANT student_role TO %I;'
+  , NEW.student_id, NEW.student_id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to grant admin_staff_role and teachign_staff_role to user after update or insert on staff_role
+CREATE OR REPLACE FUNCTION shared.grant_staff_roles() 
+RETURNS TRIGGER AS 
+$$
+BEGIN
+  IF NEW.role_id = (SELECT role_id FROM shared.role WHERE role_name = 'Admin staff') THEN
+    RAISE NOTICE 'GRANTING ADMIN STAFF PRIVILEGES FOR %', NEW.staff_id;
+    EXECUTE format('
+    GRANT admin_staff_role TO %I;'
+    , NEW.staff_id);
+  END IF;
+  IF NEW.role_id IN (SELECT role_id FROM shared.role WHERE role_name IN ('Lecturer', 'Teaching Assistant')) THEN
+    RAISE NOTICE 'GRANTING TEACHING STAFF PRIVILEGES FOR %', NEW.staff_id;
+    EXECUTE format('
+    GRANT teaching_staff_role TO %I;'
+    , NEW.staff_id);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to revoke admin_staff_role or teaching_staff_role to user after update or delete on staff_role
+CREATE OR REPLACE FUNCTION shared.revoke_staff_roles()
+RETURNS TRIGGER AS 
+$$
+BEGIN
+  IF OLD.role_id = (SELECT role_id FROM shared.role WHERE role_name = 'Admin staff') THEN
+    RAISE NOTICE 'REVOKING ADMIN STAFF PRIVILEGES FOR %', OLD.staff_id;
+    EXECUTE format('
+    REVOKE admin_staff_role FROM %I;', 
+    OLD.staff_id);
+  END IF;
+  IF OLD.role_id IN (SELECT role_id FROM shared.role WHERE role_name IN ('Lecturer', 'Teaching Assistant')) THEN
+    RAISE NOTICE 'REVOKING TEACHING STAFF PRIVILEGES FOR %', OLD.staff_id;
+    EXECUTE format('
+    REVOKE teaching_staff_role FROM %I;'
+    , OLD.staff_id);
+  END IF;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
 
 -- Function to dynamically create schema
 CREATE OR REPLACE FUNCTION shared.create_schema(schema_name TEXT)
 RETURNS void AS $$
 BEGIN
+  RAISE NOTICE 'CREATING SCHEMA %', schema_name;
+
 	EXECUTE format('
 	CREATE SCHEMA IF NOT EXISTS %I;'
 	, schema_name);
@@ -29,7 +104,6 @@ BEGIN
 	CREATE OR REPLACE FUNCTION %I.link_module_assessment()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  RAISE NOTICE ''INSERTING INTO assessment'';
 	  INSERT INTO %I.assessment (assessment_id, assessment_set_date, assessment_due_date, assessment_set_time, assessment_due_time, assessment_visble)
 	  SELECT
 	    sa.assessment_id,
@@ -49,7 +123,6 @@ BEGIN
 	CREATE OR REPLACE FUNCTION %I.link_students_to_assessment()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  RAISE NOTICE ''INSERTING INTO student_assessment'';
 	  INSERT INTO %I.student_assessment (student_id, assessment_id, grade)
 	  SELECT 
 	    NEW.student_id, 
@@ -88,7 +161,6 @@ BEGIN
 	CREATE OR REPLACE FUNCTION %I.link_students_to_session()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  RAISE NOTICE ''INSERTING INTO student_session'';
 	  INSERT INTO %I.student_session (student_id, session_id, attendance_record)
 	  SELECT 
 	    sm.student_id, 
@@ -105,7 +177,6 @@ BEGIN
 	CREATE OR REPLACE FUNCTION %I.link_students_to_module()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  RAISE NOTICE ''INSERTING INTO student_module'';
 	  INSERT INTO %I.student_module (student_id, module_id, module_grade, passed)
 	  SELECT 
 	    NEW.student_id, 
@@ -219,14 +290,21 @@ BEGIN
 	, schema_name);
 
 	EXECUTE format('
-	CREATE TRIGGER before_staff_insert
+	CREATE TRIGGER %I_before_staff_insert
 	BEFORE INSERT ON %I.staff
 	FOR EACH ROW
 	EXECUTE FUNCTION shared.validate_staff();'
-	, schema_name);
+	, schema_name, schema_name);
 
 	EXECUTE format('
-	CREATE UNIQUE INDEX %I_unique_staff_personal_email_idx ON %I.staff (LOWER(staff_personal_email));'
+	CREATE TRIGGER %I_trigger_create_student_user
+	AFTER INSERT ON %I.staff
+	FOR EACH ROW
+	EXECUTE FUNCTION shared.create_staff_user();'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE UNIQUE INDEX %I_idx_unique_staff_personal_email ON %I.staff (LOWER(staff_personal_email));'
 	, schema_name, schema_name);
 
 	EXECUTE format('
@@ -237,6 +315,20 @@ BEGIN
 	  FOREIGN KEY (staff_id) REFERENCES %I.staff (staff_id),
 	  FOREIGN KEY (role_id) REFERENCES shared.role (role_id)
 	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE TRIGGER %I_trigger_grant_staff_roles
+	AFTER INSERT OR UPDATE ON %I.staff_role
+	FOR EACH ROW
+	EXECUTE FUNCTION shared.grant_staff_roles();'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE TRIGGER %I_trigger_revoke_roles
+	AFTER DELETE OR UPDATE ON %I.staff_role
+	FOR EACH ROW
+	EXECUTE FUNCTION shared.revoke_staff_roles();'
 	, schema_name, schema_name);
 
 	EXECUTE format('
@@ -260,6 +352,10 @@ BEGIN
 	, schema_name, schema_name);
 
 	EXECUTE format('
+	CREATE INDEX %I_idx_course_attendance ON %I.course (course_id);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
 	CREATE TABLE %I.department_course (
 	  dep_id CHAR(7) NOT NULL,
 	  course_id CHAR(7) NOT NULL,
@@ -278,6 +374,11 @@ BEGIN
 	, schema_name);
 
 	EXECUTE format('
+	CREATE INDEX %I_idx_module_id ON %I.module (module_id);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_module_attendance ON %I.module (module_id);
 	CREATE TABLE %I.course_module (
 	  module_id CHAR(7) NOT NULL,
 	  course_id CHAR(7) NOT NULL,
@@ -285,7 +386,11 @@ BEGIN
 	  FOREIGN KEY (module_id) REFERENCES %I.module (module_id),
 	  FOREIGN KEY (course_id) REFERENCES %I.course (course_id)
 	);'
-	, schema_name, schema_name, schema_name);
+	, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_course_module_combined ON %I.course_module (course_id, module_id);'
+	, schema_name, schema_name);
 
 	EXECUTE format('
 	CREATE TABLE %I.student (
@@ -311,7 +416,22 @@ BEGIN
 	, schema_name);
 
 	EXECUTE format('
-	CREATE UNIQUE INDEX %I_unique_student_personal_email_idx ON %I.student (LOWER(student_personal_email));'
+	CREATE TRIGGER %I_trigger_create_student_user
+	AFTER INSERT ON %I.student
+	FOR EACH ROW
+	EXECUTE FUNCTION shared.create_student_user();'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE UNIQUE INDEX %I_idx_unique_student_personal_email ON %I.student (LOWER(student_personal_email));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_student_id ON %I.student (student_id);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_student_attendance ON %I.student (student_attendance);'
 	, schema_name, schema_name);
 
 	EXECUTE format('
@@ -347,6 +467,10 @@ BEGIN
 	  CONSTRAINT valid_passed CHECK ((passed = TRUE AND module_grade >= 40) OR (passed = FALSE AND module_grade < 40))
 	);'
 	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_student_module_combined ON %I.student_module (student_id, module_id);'
+	, schema_name, schema_name);
 
 	EXECUTE format('
 	CREATE TRIGGER %I_after_insert_assessment
@@ -523,6 +647,10 @@ BEGIN
 	, schema_name, schema_name, schema_name);
 
 	EXECUTE format('
+	CREATE INDEX %I_idx_session_date_time ON %I.session (session_date, session_start_time);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
 	CREATE TABLE %I.staff_session (
 	  staff_id CHAR(10) NOT NULL,
 	  session_id CHAR(10) NOT NULL,
@@ -542,6 +670,18 @@ BEGIN
 	  FOREIGN KEY (student_id) REFERENCES %I.student (student_id)
 	);'
 	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_student_session_id ON %I.student_session (session_id);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_attendance_record ON %I.student_session (attendance_record);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_attendance_record_true ON %I.student_session (session_id, student_id) WHERE attendance_record = TRUE;'
+	, schema_name, schema_name);
 
 	EXECUTE format('
 	CREATE TRIGGER %I_after_insert_session_trigger
@@ -603,6 +743,60 @@ BEGIN
 	  FOREIGN KEY (assignment_id) REFERENCES %I.assignment (assignment_id)
 	);'
 	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT USAGE ON SCHEMA %I TO student_role;'
+	, schema_name);
+
+	EXECUTE format('
+	GRANT USAGE ON SCHEMA %I TO staff_role;
+	GRANT USAGE ON SCHEMA %I TO teaching_staff_role;'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT SELECT ON %I.session, %I.student, %I.module TO teaching_staff_role;
+	GRANT SELECT ON %I.student_session TO teaching_staff_role;'
+	, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT UPDATE (attendance_record) ON %I.student_session TO teaching_staff_role;'
+	, schema_name);
+
+	EXECUTE format('
+	GRANT USAGE ON SCHEMA %I TO admin_staff_role;'
+	, schema_name);
+
+	EXECUTE format('
+	GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA %I TO admin_staff_role;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY course_student_view_policy
+	ON shared.course
+	FOR SELECT
+	USING (course_id IN (SELECT course_id FROM %I.student_course WHERE student_id = CURRENT_USER));'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY module_student_view_policy
+	ON shared.module
+	FOR SELECT
+	USING (module_id IN (SELECT module_id FROM %I.student_module WHERE student_id = CURRENT_USER));'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY assessment_student_view_policy
+	ON shared.assessment
+	FOR SELECT
+	USING (module_id IN (SELECT module_id FROM %I.student_module WHERE student_id = CURRENT_USER));'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY emergency_contact_student_view_policy
+	ON shared.emergency_contact
+	FOR SELECT
+	USING (contact_id IN (SELECT contact_id FROM %I.student_contact WHERE student_id = CURRENT_USER));'
+	, schema_name);
 END; 
 $$ LANGUAGE plpgsql;
 
@@ -630,6 +824,19 @@ CREATE SEQUENCE shared.session_id_seq;
 CREATE SEQUENCE shared.tuition_payment_reference_seq;
 CREATE SEQUENCE shared.student_id_seq;
 CREATE SEQUENCE shared.staff_id_seq;
+
+/* CREATE SHARED ROLES */
+-- Student role
+CREATE ROLE student_role NOLOGIN;
+
+-- Staff role
+CREATE ROLE staff_role NOLOGIN;
+
+-- Teaching staff role
+CREATE ROLE teaching_staff_role NOLOGIN;
+
+-- Admin staff role
+CREATE ROLE admin_staff_role NOLOGIN;
 
 /* CREATE SHARED TABLES */
 
@@ -689,6 +896,9 @@ CREATE TABLE shared.course (
   course_length SMALLINT NOT NULL
 );
 
+-- Speeds up searches or groupings involving course names
+CREATE INDEX shared_idx_course_name ON shared.course (course_name);
+
 -- -------------------------------------
 -- Table structure for DEPARTMENT_COURSE
 -- -------------------------------------
@@ -719,6 +929,9 @@ CREATE TABLE shared.module (
   module_duration INT NOT NULL, 
   CONSTRAINT valid_duration CHECK (module_duration IN (1, 2))
 );
+
+-- Improves performance for grouping or searching based on module names in analytics views.
+CREATE INDEX shared_idx_module_name ON shared.module (module_name);
 
 -- ----------------------------------
 -- Table structure for COURSE_MODULE
@@ -802,12 +1015,12 @@ ALTER TABLE shared.branch ENABLE ROW LEVEL SECURITY;
 CREATE POLICY branch_staff_view_policy
 ON shared.branch
 FOR SELECT
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'branch'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'branch'));
 
 CREATE POLICY branch_admin_update_policy
 ON shared.branch
 FOR UPDATE
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'branch'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'branch'));
 
 -- Department Policy
 ALTER TABLE shared.department ENABLE ROW LEVEL SECURITY;
@@ -815,12 +1028,12 @@ ALTER TABLE shared.department ENABLE ROW LEVEL SECURITY;
 CREATE POLICY department_staff_view_policy
 ON shared.department
 FOR SELECT
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department'));
 
 CREATE POLICY department_admin_full_policy
 ON shared.department
 FOR ALL
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department'));
 
 -- Course Policy
 ALTER TABLE shared.course ENABLE ROW LEVEL SECURITY;
@@ -828,12 +1041,12 @@ ALTER TABLE shared.course ENABLE ROW LEVEL SECURITY;
 CREATE POLICY course_staff_view_policy
 ON shared.course
 FOR SELECT
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course'));
 
 CREATE POLICY course_admin_full_policy
 ON shared.course
 FOR ALL
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course'));
 
 -- Department Course Policy
 ALTER TABLE shared.department_course ENABLE ROW LEVEL SECURITY;
@@ -841,12 +1054,12 @@ ALTER TABLE shared.department_course ENABLE ROW LEVEL SECURITY;
 CREATE POLICY department_course_staff_view_policy
 ON shared.department_course
 FOR SELECT
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department_course'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department_course'));
 
 CREATE POLICY department_course_admin_full_policy
 ON shared.department_course
 FOR ALL
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department_course'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department_course'));
 
 -- Module Policy
 ALTER TABLE shared.module ENABLE ROW LEVEL SECURITY;
@@ -854,7 +1067,7 @@ ALTER TABLE shared.module ENABLE ROW LEVEL SECURITY;
 CREATE POLICY module_admin_full_policy
 ON shared.module
 FOR ALL
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'module'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'module'));
 
 -- Course Module Policy
 ALTER TABLE shared.course_module ENABLE ROW LEVEL SECURITY;
@@ -862,12 +1075,12 @@ ALTER TABLE shared.course_module ENABLE ROW LEVEL SECURITY;
 CREATE POLICY course_module_staff_view_policy
 ON shared.course_module
 FOR SELECT
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course_module'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course_module'));
 
 CREATE POLICY course_module_admin_full_policy
 ON shared.course_module
 FOR ALL
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course_module'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course_module'));
 
 -- Assessment Policy
 ALTER TABLE shared.assessment ENABLE ROW LEVEL SECURITY;
@@ -875,7 +1088,7 @@ ALTER TABLE shared.assessment ENABLE ROW LEVEL SECURITY;
 CREATE POLICY assessment_admin_full_policy
 ON shared.assessment
 FOR ALL
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'assessment'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'assessment'));
 
 -- Role Policy
 ALTER TABLE shared.role ENABLE ROW LEVEL SECURITY;
@@ -883,7 +1096,7 @@ ALTER TABLE shared.role ENABLE ROW LEVEL SECURITY;
 CREATE POLICY role_admin_full_policy
 ON shared.role
 FOR ALL
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'role'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'role'));
 
 -- Facility Policty
 ALTER TABLE shared.facility ENABLE ROW LEVEL SECURITY;
@@ -891,12 +1104,12 @@ ALTER TABLE shared.facility ENABLE ROW LEVEL SECURITY;
 CREATE POLICY facility_staff_view_policy
 ON shared.facility
 FOR SELECT
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'facility'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'facility'));
 
 CREATE POLICY facility_admin_full_policy
 ON shared.facility
 FOR ALL
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'facility'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'facility'));
 
 -- Room Type
 ALTER TABLE shared.room_type ENABLE ROW LEVEL SECURITY;
@@ -904,12 +1117,12 @@ ALTER TABLE shared.room_type ENABLE ROW LEVEL SECURITY;
 CREATE POLICY room_type_staff_view_policy
 ON shared.room_type
 FOR SELECT
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'room_type'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'room_type'));
 
 CREATE POLICY room_type_admin_full_policy
 ON shared.room_type
 FOR ALL
-USING (current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'room_type'));
+USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'room_type'));
 
 -- Emergency Contact Policy
 ALTER TABLE shared.emergency_contact ENABLE ROW LEVEL SECURITY;

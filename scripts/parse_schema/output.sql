@@ -10,7 +10,6 @@ BEGIN
 	CREATE OR REPLACE FUNCTION %I.link_module_assessment()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  RAISE NOTICE ''INSERTING INTO assessment'';
 	  INSERT INTO %I.assessment (assessment_id, assessment_set_date, assessment_due_date, assessment_set_time, assessment_due_time, assessment_visble)
 	  SELECT
 	    sa.assessment_id,
@@ -30,7 +29,6 @@ BEGIN
 	CREATE OR REPLACE FUNCTION %I.link_students_to_assessment()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  RAISE NOTICE ''INSERTING INTO student_assessment'';
 	  INSERT INTO %I.student_assessment (student_id, assessment_id, grade)
 	  SELECT 
 	    NEW.student_id, 
@@ -69,7 +67,6 @@ BEGIN
 	CREATE OR REPLACE FUNCTION %I.link_students_to_session()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  RAISE NOTICE ''INSERTING INTO student_session'';
 	  INSERT INTO %I.student_session (student_id, session_id, attendance_record)
 	  SELECT 
 	    sm.student_id, 
@@ -86,7 +83,6 @@ BEGIN
 	CREATE OR REPLACE FUNCTION %I.link_students_to_module()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  RAISE NOTICE ''INSERTING INTO student_module'';
 	  INSERT INTO %I.student_module (student_id, module_id, module_grade, passed)
 	  SELECT 
 	    NEW.student_id, 
@@ -200,14 +196,21 @@ BEGIN
 	, schema_name);
 
 	EXECUTE format('
-	CREATE TRIGGER before_staff_insert
+	CREATE TRIGGER %I_before_staff_insert
 	BEFORE INSERT ON %I.staff
 	FOR EACH ROW
 	EXECUTE FUNCTION shared.validate_staff();'
-	, schema_name);
+	, schema_name, schema_name);
 
 	EXECUTE format('
-	CREATE UNIQUE INDEX %I_unique_staff_personal_email_idx ON %I.staff (LOWER(staff_personal_email));'
+	CREATE TRIGGER %I_trigger_create_student_user
+	AFTER INSERT ON %I.staff
+	FOR EACH ROW
+	EXECUTE FUNCTION shared.create_staff_user();'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE UNIQUE INDEX %I_idx_unique_staff_personal_email ON %I.staff (LOWER(staff_personal_email));'
 	, schema_name, schema_name);
 
 	EXECUTE format('
@@ -218,6 +221,20 @@ BEGIN
 	  FOREIGN KEY (staff_id) REFERENCES %I.staff (staff_id),
 	  FOREIGN KEY (role_id) REFERENCES shared.role (role_id)
 	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE TRIGGER %I_trigger_grant_staff_roles
+	AFTER INSERT OR UPDATE ON %I.staff_role
+	FOR EACH ROW
+	EXECUTE FUNCTION shared.grant_staff_roles();'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE TRIGGER %I_trigger_revoke_roles
+	AFTER DELETE OR UPDATE ON %I.staff_role
+	FOR EACH ROW
+	EXECUTE FUNCTION shared.revoke_staff_roles();'
 	, schema_name, schema_name);
 
 	EXECUTE format('
@@ -241,6 +258,10 @@ BEGIN
 	, schema_name, schema_name);
 
 	EXECUTE format('
+	CREATE INDEX %I_idx_course_attendance ON %I.course (course_id);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
 	CREATE TABLE %I.department_course (
 	  dep_id CHAR(7) NOT NULL,
 	  course_id CHAR(7) NOT NULL,
@@ -259,6 +280,11 @@ BEGIN
 	, schema_name);
 
 	EXECUTE format('
+	CREATE INDEX %I_idx_module_id ON %I.module (module_id);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_module_attendance ON %I.module (module_id);
 	CREATE TABLE %I.course_module (
 	  module_id CHAR(7) NOT NULL,
 	  course_id CHAR(7) NOT NULL,
@@ -266,7 +292,11 @@ BEGIN
 	  FOREIGN KEY (module_id) REFERENCES %I.module (module_id),
 	  FOREIGN KEY (course_id) REFERENCES %I.course (course_id)
 	);'
-	, schema_name, schema_name, schema_name);
+	, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_course_module_combined ON %I.course_module (course_id, module_id);'
+	, schema_name, schema_name);
 
 	EXECUTE format('
 	CREATE TABLE %I.student (
@@ -292,7 +322,22 @@ BEGIN
 	, schema_name);
 
 	EXECUTE format('
-	CREATE UNIQUE INDEX %I_unique_student_personal_email_idx ON %I.student (LOWER(student_personal_email));'
+	CREATE TRIGGER %I_trigger_create_student_user
+	AFTER INSERT ON %I.student
+	FOR EACH ROW
+	EXECUTE FUNCTION shared.create_student_user();'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE UNIQUE INDEX %I_idx_unique_student_personal_email ON %I.student (LOWER(student_personal_email));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_student_id ON %I.student (student_id);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_student_attendance ON %I.student (student_attendance);'
 	, schema_name, schema_name);
 
 	EXECUTE format('
@@ -328,6 +373,10 @@ BEGIN
 	  CONSTRAINT valid_passed CHECK ((passed = TRUE AND module_grade >= 40) OR (passed = FALSE AND module_grade < 40))
 	);'
 	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_student_module_combined ON %I.student_module (student_id, module_id);'
+	, schema_name, schema_name);
 
 	EXECUTE format('
 	CREATE TRIGGER %I_after_insert_assessment
@@ -504,6 +553,10 @@ BEGIN
 	, schema_name, schema_name, schema_name);
 
 	EXECUTE format('
+	CREATE INDEX %I_idx_session_date_time ON %I.session (session_date, session_start_time);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
 	CREATE TABLE %I.staff_session (
 	  staff_id CHAR(10) NOT NULL,
 	  session_id CHAR(10) NOT NULL,
@@ -523,6 +576,18 @@ BEGIN
 	  FOREIGN KEY (student_id) REFERENCES %I.student (student_id)
 	);'
 	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_student_session_id ON %I.student_session (session_id);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_attendance_record ON %I.student_session (attendance_record);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE INDEX %I_idx_attendance_record_true ON %I.student_session (session_id, student_id) WHERE attendance_record = TRUE;'
+	, schema_name, schema_name);
 
 	EXECUTE format('
 	CREATE TRIGGER %I_after_insert_session_trigger
@@ -584,5 +649,59 @@ BEGIN
 	  FOREIGN KEY (assignment_id) REFERENCES %I.assignment (assignment_id)
 	);'
 	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT USAGE ON SCHEMA %I TO student_role;'
+	, schema_name);
+
+	EXECUTE format('
+	GRANT USAGE ON SCHEMA %I TO staff_role;
+	GRANT USAGE ON SCHEMA %I TO teaching_staff_role;'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT SELECT ON %I.session, %I.student, %I.module TO teaching_staff_role;
+	GRANT SELECT ON %I.student_session TO teaching_staff_role;'
+	, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT UPDATE (attendance_record) ON %I.student_session TO teaching_staff_role;'
+	, schema_name);
+
+	EXECUTE format('
+	GRANT USAGE ON SCHEMA %I TO admin_staff_role;'
+	, schema_name);
+
+	EXECUTE format('
+	GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA %I TO admin_staff_role;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY course_student_view_policy
+	ON shared.course
+	FOR SELECT
+	USING (course_id IN (SELECT course_id FROM %I.student_course WHERE student_id = CURRENT_USER));'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY module_student_view_policy
+	ON shared.module
+	FOR SELECT
+	USING (module_id IN (SELECT module_id FROM %I.student_module WHERE student_id = CURRENT_USER));'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY assessment_student_view_policy
+	ON shared.assessment
+	FOR SELECT
+	USING (module_id IN (SELECT module_id FROM %I.student_module WHERE student_id = CURRENT_USER));'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY emergency_contact_student_view_policy
+	ON shared.emergency_contact
+	FOR SELECT
+	USING (contact_id IN (SELECT contact_id FROM %I.student_contact WHERE student_id = CURRENT_USER));'
+	, schema_name);
 END; 
 $$ LANGUAGE plpgsql;

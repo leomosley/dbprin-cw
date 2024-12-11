@@ -163,19 +163,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger function to create users and assign roles after insert on staff
-CREATE OR REPLACE FUNCTION branch_template.create_staff_user() 
-RETURNS TRIGGER AS 
-$$
-BEGIN
-  EXECUTE format('
-  CREATE USER %I WITH LOGIN PASSWORD %I;
-  GRANT staff_role TO %I;'
-  , NEW.staff_id, NEW.staff_company_email, NEW.staff_id);
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
 /* CREATE TABLES */
 
 -- -------------------------
@@ -206,11 +193,11 @@ BEFORE INSERT ON branch_template.staff
 FOR EACH ROW
 EXECUTE FUNCTION shared.validate_staff();
 
--- Trigger to create users for staff members
-CREATE TRIGGER branch_template_trigger_create_staff_user
+-- Trigger to create user after insert on staff
+CREATE TRIGGER branch_template_trigger_create_student_user
 AFTER INSERT ON branch_template.staff
 FOR EACH ROW
-EXECUTE FUNCTION branch_template.create_staff_user();
+EXECUTE FUNCTION shared.create_staff_user();
 
 -- Functional index to enforce case insensitive uniqueness of the staff personal email.
 CREATE UNIQUE INDEX branch_template_idx_unique_staff_personal_email ON branch_template.staff (LOWER(staff_personal_email));
@@ -225,6 +212,18 @@ CREATE TABLE branch_template.staff_role (
   FOREIGN KEY (staff_id) REFERENCES branch_template.staff (staff_id),
   FOREIGN KEY (role_id) REFERENCES shared.role (role_id)
 );
+
+-- Trigger to grant admin or teaching staff prividges after update or insert on staff_role
+CREATE TRIGGER branch_template_trigger_grant_staff_roles
+AFTER INSERT OR UPDATE ON branch_template.staff_role
+FOR EACH ROW
+EXECUTE FUNCTION shared.grant_staff_roles();
+
+-- Trigger to revoke admin or teaching staff prividges after update or delete on staff_role
+CREATE TRIGGER branch_template_trigger_revoke_roles
+AFTER DELETE OR UPDATE ON branch_template.staff_role
+FOR EACH ROW
+EXECUTE FUNCTION shared.revoke_staff_roles();
 
 -- ------------------------------
 -- Table structure for DEPARTMENT
@@ -248,14 +247,8 @@ CREATE TABLE branch_template.course (
   FOREIGN KEY (staff_id) REFERENCES branch_template.staff (staff_id)
 );
 
--- Composite index to optimise queries joining course and module
-CREATE INDEX branch_template_idx_course_module ON branch_template.course_module (course_id, module_id);
-
--- Speeds up searches or groupings involving course names
-CREATE INDEX branch_template_idx_course_name ON shared.course (course_name);
-
 -- Optimises performance for attendance calculations and joins on course_id in course-specific views
-CREATE INDEX branch_template_idx_course_attendance ON template.course (course_id);
+CREATE INDEX branch_template_idx_course_attendance ON branch_template.course (course_id);
 
 -- -------------------------------------
 -- Table structure for DEPARTMENT_COURSE
@@ -280,11 +273,8 @@ CREATE TABLE branch_template.module (
 -- Speeds up joins involving module_id (especially with student_module and course_module)
 CREATE INDEX branch_template_idx_module_id ON branch_template.module (module_id);
 
--- Improves performance for grouping or searching based on module names in analytics views.
-CREATE INDEX branch_template_idx_module_name ON branch_template.module (module_name);
-
 -- Improves performance for queries joining on module_id in branch-specific attendance views
-CREATE INDEX branch_template_idx_module_attendance ON branch_b01.module (module_id);
+CREATE INDEX branch_template_idx_module_attendance ON branch_template.module (module_id);
 -- ----------------------------------
 -- Table structure for COURSE_MODULE
 -- ----------------------------------
@@ -322,6 +312,12 @@ CREATE TABLE branch_template.student (
   student_attendance DECIMAL(5, 2) DEFAULT (0.00) NOT NULL,
   CONSTRAINT valid_percentage CHECK (student_attendance >= 0 AND student_attendance <= 100)
 );
+
+-- Trigger to create user after insert on student table
+CREATE TRIGGER branch_template_trigger_create_student_user
+AFTER INSERT ON branch_template.student
+FOR EACH ROW
+EXECUTE FUNCTION shared.create_student_user();
 
 -- Functional index to enforce case insensitive uniqueness of the student personal email.
 CREATE UNIQUE INDEX branch_template_idx_unique_student_personal_email ON branch_template.student (LOWER(student_personal_email));
@@ -649,3 +645,44 @@ CREATE TABLE branch_template.staff_assignment (
   FOREIGN KEY (staff_id) REFERENCES branch_template.staff (staff_id),
   FOREIGN KEY (assignment_id) REFERENCES branch_template.assignment (assignment_id)
 );
+
+/* GRANT BRANCH SPECIFIC ACCESS */
+GRANT USAGE ON SCHEMA branch_template TO student_role;
+
+GRANT USAGE ON SCHEMA branch_template TO staff_role;
+GRANT USAGE ON SCHEMA branch_template TO teaching_staff_role;
+
+GRANT SELECT ON branch_template.session, branch_template.student, branch_template.module TO teaching_staff_role;
+GRANT SELECT ON branch_template.student_session TO teaching_staff_role;
+
+GRANT UPDATE (attendance_record) ON branch_template.student_session TO teaching_staff_role;
+
+GRANT USAGE ON SCHEMA branch_template TO admin_staff_role;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA branch_template TO admin_staff_role;
+
+/* BRANCH SPECIFIC POLICIES ON SHARED TABLES */
+
+-- Course Policy
+CREATE POLICY course_student_view_policy
+ON shared.course
+FOR SELECT
+USING (course_id IN (SELECT course_id FROM branch_template.student_course WHERE student_id = CURRENT_USER));
+
+-- Module Policy
+CREATE POLICY module_student_view_policy
+ON shared.module
+FOR SELECT
+USING (module_id IN (SELECT module_id FROM branch_template.student_module WHERE student_id = CURRENT_USER));
+
+-- Assessment Policy
+CREATE POLICY assessment_student_view_policy
+ON shared.assessment
+FOR SELECT
+USING (module_id IN (SELECT module_id FROM branch_template.student_module WHERE student_id = CURRENT_USER));
+
+-- Emergency Contacy Policy
+CREATE POLICY emergency_contact_student_view_policy
+ON shared.emergency_contact
+FOR SELECT
+USING (contact_id IN (SELECT contact_id FROM branch_template.student_contact WHERE student_id = CURRENT_USER));
