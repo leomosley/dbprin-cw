@@ -163,6 +163,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Trigger function to create users and assign roles after insert on staff
+CREATE OR REPLACE FUNCTION branch_template.create_staff_user() 
+RETURNS TRIGGER AS 
+$$
+BEGIN
+  EXECUTE format('
+  CREATE USER %I WITH LOGIN PASSWORD %I;
+  GRANT staff_role TO %I;'
+  , NEW.staff_id, NEW.staff_company_email, NEW.staff_id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 /* CREATE TABLES */
 
 -- -------------------------
@@ -188,10 +201,16 @@ CREATE TABLE branch_template.staff (
 );
 
 -- Trigger to validate staff emails
-CREATE TRIGGER before_staff_insert
+CREATE TRIGGER branch_template_before_staff_insert
 BEFORE INSERT ON branch_template.staff
 FOR EACH ROW
 EXECUTE FUNCTION shared.validate_staff();
+
+-- Trigger to create users for staff members
+CREATE TRIGGER branch_template_trigger_create_staff_user
+AFTER INSERT ON branch_template.staff
+FOR EACH ROW
+EXECUTE FUNCTION branch_template.create_staff_user();
 
 -- Functional index to enforce case insensitive uniqueness of the staff personal email.
 CREATE UNIQUE INDEX branch_template_idx_unique_staff_personal_email ON branch_template.staff (LOWER(staff_personal_email));
@@ -235,6 +254,9 @@ CREATE INDEX branch_template_idx_course_module ON branch_template.course_module 
 -- Speeds up searches or groupings involving course names
 CREATE INDEX branch_template_idx_course_name ON shared.course (course_name);
 
+-- Optimises performance for attendance calculations and joins on course_id in course-specific views
+CREATE INDEX branch_template_idx_course_attendance ON template.course (course_id);
+
 -- -------------------------------------
 -- Table structure for DEPARTMENT_COURSE
 -- -------------------------------------
@@ -261,6 +283,8 @@ CREATE INDEX branch_template_idx_module_id ON branch_template.module (module_id)
 -- Improves performance for grouping or searching based on module names in analytics views.
 CREATE INDEX branch_template_idx_module_name ON branch_template.module (module_name);
 
+-- Improves performance for queries joining on module_id in branch-specific attendance views
+CREATE INDEX branch_template_idx_module_attendance ON branch_b01.module (module_id);
 -- ----------------------------------
 -- Table structure for COURSE_MODULE
 -- ----------------------------------
@@ -347,7 +371,6 @@ CREATE TABLE branch_template.student_module (
 
 -- Multi-column index to improve performance for joins or queries on both student_id and module_id
 CREATE INDEX branch_template_idx_student_module_combined ON branch_template.student_module (student_id, module_id);
-
 
 -- Trigger to seed student_assessment based of the module they are taking and the assesments it provides (in shared) after insert on student_module
 CREATE TRIGGER branch_template_after_insert_assessment
