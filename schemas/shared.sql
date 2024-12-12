@@ -1008,121 +1008,116 @@ CREATE TABLE shared.emergency_contact (
   contact_relationship VARCHAR(50) NOT NULL
 );
 
+/* GRANT ACCESS FOR SHARED SCHEMA */
+-- Grant SELECT access to all tables in the shared schema except emergency_contact and role
+GRANT SELECT ON ALL TABLES IN SCHEMA shared TO student_role;
+REVOKE SELECT ON shared.emergency_contact, shared.role FROM student_role;
+
+-- Grant SELECT access to specific tables in the shared schema
+GRANT SELECT ON shared.role,
+                shared.department,
+                shared.room_type,
+                shared.facility,
+                shared.branch
+TO staff_role;
+
+-- Grant all the permissions of staff_role
+GRANT staff_role TO teaching_staff_role;
+
+-- Grant SELECT access to all tables in the shared schema except emergency_contact
+GRANT SELECT ON ALL TABLES IN SCHEMA shared TO teaching_staff_role;
+REVOKE SELECT ON shared.emergency_contact FROM teaching_staff_role;
+
+-- Grant CREATE and UPDATE access to shared.assessment
+GRANT CREATE, UPDATE ON shared.assessment TO teaching_staff_role;
+
+-- Grant all the permissions of staff_role and allow it to bypass RLS
+GRANT staff_role TO admin_staff_role;
+ALTER ROLE admin_staff_role SET row_security = off;
+
+-- Grant SELECT, UPDATE, CREATE, DELETE access to all tables in all schemas
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA shared TO admin_staff_role;
+
 /* ENABLE RLS AND CREATE FOR SHARED TABLES */
 -- Branch Policy
 ALTER TABLE shared.branch ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY branch_staff_view_policy
+CREATE POLICY access_policy_shared_branch
 ON shared.branch
-FOR SELECT
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'branch'));
-
-CREATE POLICY branch_admin_update_policy
-ON shared.branch
-FOR UPDATE
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'branch'));
+FOR ALL
+USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
 
 -- Department Policy
 ALTER TABLE shared.department ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY department_staff_view_policy
-ON shared.department
-FOR SELECT
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department'));
-
-CREATE POLICY department_admin_full_policy
+CREATE POLICY access_policy_shared_department
 ON shared.department
 FOR ALL
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department'));
+USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
 
 -- Course Policy
 ALTER TABLE shared.course ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY course_staff_view_policy
-ON shared.course
-FOR SELECT
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course'));
-
-CREATE POLICY course_admin_full_policy
+CREATE POLICY access_policy_shared_course
 ON shared.course
 FOR ALL
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course'));
+USING (pg_has_role(CURRENT_USER, 'staff_teaching_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
 
 -- Department Course Policy
 ALTER TABLE shared.department_course ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY department_course_staff_view_policy
-ON shared.department_course
-FOR SELECT
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department_course'));
-
-CREATE POLICY department_course_admin_full_policy
+CREATE POLICY access_policy_shared_department_course
 ON shared.department_course
 FOR ALL
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'department_course'));
+USING (pg_has_role(CURRENT_USER, 'staff_teaching_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
 
 -- Module Policy
 ALTER TABLE shared.module ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY module_admin_full_policy
+CREATE POLICY access_policy_shared_module
 ON shared.module
 FOR ALL
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'module'));
+USING (pg_has_role(CURRENT_USER, 'staff_teaching_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
 
 -- Course Module Policy
 ALTER TABLE shared.course_module ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY course_module_staff_view_policy
-ON shared.course_module
-FOR SELECT
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course_module'));
-
-CREATE POLICY course_module_admin_full_policy
+CREATE POLICY access_policy_shared_course_module
 ON shared.course_module
 FOR ALL
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'course_module'));
+USING (pg_has_role(CURRENT_USER, 'staff_teaching_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
 
 -- Assessment Policy
 ALTER TABLE shared.assessment ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY assessment_admin_full_policy
+CREATE POLICY staff_access_policy_shared_assessment
 ON shared.assessment
 FOR ALL
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'assessment'));
+USING (pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE'));
 
 -- Role Policy
 ALTER TABLE shared.role ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY role_admin_full_policy
+CREATE POLICY access_policy_shared_role
 ON shared.role
 FOR ALL
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'role'));
+USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE'));
 
 -- Facility Policty
 ALTER TABLE shared.facility ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY facility_staff_view_policy
-ON shared.facility
-FOR SELECT
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'facility'));
-
-CREATE POLICY facility_admin_full_policy
+CREATE POLICY access_policy_shared_facilitiy
 ON shared.facility
 FOR ALL
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'facility'));
+USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE'));
 
--- Room Type
+-- Room Type Policy
 ALTER TABLE shared.room_type ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY room_type_staff_view_policy
-ON shared.room_type
-FOR SELECT
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'room_type'));
-
-CREATE POLICY room_type_admin_full_policy
-ON shared.room_type
+CREATE POLICY access_policy_shared_facilitiy
+ON shared.facility
 FOR ALL
-USING (CURRENT_USER IN (SELECT grantee FROM information_schema.role_table_grants WHERE table_name = 'room_type'));
+USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
 
 -- Emergency Contact Policy
 ALTER TABLE shared.emergency_contact ENABLE ROW LEVEL SECURITY;

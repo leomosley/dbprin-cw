@@ -647,42 +647,430 @@ CREATE TABLE branch_template.staff_assignment (
 );
 
 /* GRANT BRANCH SPECIFIC ACCESS */
-GRANT USAGE ON SCHEMA branch_template TO student_role;
+-- Grant SELECT access to all tables in the branch_template schema except the excluded tables
+GRANT SELECT ON ALL TABLES IN SCHEMA branch_template TO student_role;
+REVOKE SELECT ON branch_template.staff,
+                 branch_template.staff_role,
+                 branch_template.staff_department,
+                 branch_template.staff_session,
+                 branch_template.staff_contact,
+                 branch_template.student_contact,
+                 branch_template.assignment,
+                 branch_template.staff_assignment
+FROM student_role;
 
-GRANT USAGE ON SCHEMA branch_template TO staff_role;
-GRANT USAGE ON SCHEMA branch_template TO teaching_staff_role;
+-- Grant SELECT access to specific tables in the branch_template schema
+GRANT SELECT ON branch_template.staff,
+                branch_template.staff_role,
+                branch_template.staff_department,
+                branch_template.assignment,
+                branch_template.staff_assignment,
+                branch_template.room,
+                branch_template.building,
+                branch_template.room_facility
+TO staff_role;
 
-GRANT SELECT ON branch_template.session, branch_template.student, branch_template.module TO teaching_staff_role;
-GRANT SELECT ON branch_template.student_session TO teaching_staff_role;
+-- Grant SELECT and UPDATE access to specific tables in branch_template schema
+GRANT SELECT, UPDATE ON branch_template.staff_session,
+                         branch_template.session,
+                         branch_template.student_assessment,
+                         branch_template.student_module,
+                         branch_template.student_course,
+                         branch_template.assessment
+TO teaching_staff_role;
 
-GRANT UPDATE (attendance_record) ON branch_template.student_session TO teaching_staff_role;
+-- Grant SELECT access to branch_template.course, branch_template.department_course,
+-- branch_template.module, branch_template.course_module
+GRANT SELECT ON branch_template.course,
+                branch_template.department_course,
+                branch_template.module,
+                branch_template.course_module
+TO teaching_staff_role;
 
-GRANT USAGE ON SCHEMA branch_template TO admin_staff_role;
-
+-- Grant SELECT, UPDATE, CREATE, DELETE access to all tables in all schemas
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA branch_template TO admin_staff_role;
 
-/* BRANCH SPECIFIC POLICIES ON SHARED TABLES */
-
--- Course Policy
-CREATE POLICY course_student_view_policy
-ON shared.course
-FOR SELECT
-USING (course_id IN (SELECT course_id FROM branch_template.student_course WHERE student_id = CURRENT_USER));
-
--- Module Policy
-CREATE POLICY module_student_view_policy
-ON shared.module
-FOR SELECT
-USING (module_id IN (SELECT module_id FROM branch_template.student_module WHERE student_id = CURRENT_USER));
-
--- Assessment Policy
-CREATE POLICY assessment_student_view_policy
+/* BRANCH SPECIFIC RLS POLICIES ON SHARED TABLES */
+CREATE POLICY branch_template_student_access_policy_shared_assessment
 ON shared.assessment
 FOR SELECT
-USING (module_id IN (SELECT module_id FROM branch_template.student_module WHERE student_id = CURRENT_USER));
+USING (
+  module_id IN (
+    SELECT module_id 
+    FROM branch_template.student_module 
+    WHERE student_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+  AND assessment_visble = TRUE
+);
 
--- Emergency Contacy Policy
-CREATE POLICY emergency_contact_student_view_policy
-ON shared.emergency_contact
+/* BRANCH SPECIFIC RLS POLICIES ON BRANCH TABLES */
+-- Staff Policy
+ALTER TABLE branch_template.staff ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_access_policy
+ON branch_template.staff
 FOR SELECT
-USING (contact_id IN (SELECT contact_id FROM branch_template.student_contact WHERE student_id = CURRENT_USER));
+USING (
+  pg_has_role(CURRENT_USER, 'staff_role', 'USAGE')
+  AND staff_id = CURRENT_USER 
+);
+
+-- Staff Role Policy
+ALTER TABLE branch_template.staff_role ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_role_access_policy
+ON branch_template.staff_role
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'staff_role', 'USAGE')
+  AND staff_id = CURRENT_USER 
+);
+
+-- Course Policy
+ALTER TABLE branch_template.course ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_teaching_course_access_policy
+ON branch_template.course
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE');
+
+CREATE POLICY branch_template_student_course_access_policy
+ON branch_template.course
+FOR SELECT
+USING (
+  course_id IN (
+    SELECT course_id
+    FROM branch_template.student_course 
+    WHERE student_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+);
+
+-- Department Course Policy
+ALTER TABLE branch_template.department_course ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_teaching_department_course_access_policy
+ON branch_template.course
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE');
+
+CREATE POLICY branch_template_student_department_course_access_policy
+ON branch_template.department_course
+FOR SELECT
+USING (
+  course_id IN (
+    SELECT course_id
+    FROM branch_template.student_course 
+    WHERE student_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+);
+
+-- Module Policy
+ALTER TABLE branch_template.module ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_teaching_module_access_policy
+ON branch_template.module
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE');
+
+CREATE POLICY branch_template_student_module_access_policy
+ON branch_template.module
+FOR SELECT
+USING (
+  module IN (
+    SELECT module_id
+    FROM branch_template.module
+    WHERE student_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+);
+
+-- Course Module Policy
+ALTER TABLE branch_template.course_module ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_teaching_course_module_access_policy
+ON branch_template.course_module
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE');
+
+CREATE POLICY branch_template_student_course_module_access_policy
+ON branch_template.course_module
+FOR SELECT
+USING (
+  module IN (
+    SELECT module_id
+    FROM branch_template.course_module
+    WHERE student_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+);
+
+-- Student Policy
+ALTER TABLE branch_template.student ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_student_access_policy
+ON branch_template.student
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+  AND student_id = CURRENT_USER 
+);
+
+-- Student Course Policy
+ALTER TABLE branch_template.student_course ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_student_course_access_policy
+ON branch_template.student_course
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+  AND student_id = CURRENT_USER 
+);
+
+CREATE POLICY branch_template_staff_teaching_student_course_access_policy
+ON branch_template.student_course
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE');
+
+-- Student Module Policy
+ALTER TABLE branch_template.student_module ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_student_module_access_policy
+ON branch_template.student_module
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+  AND student_id = CURRENT_USER 
+);
+
+CREATE POLICY branch_template_staff_teaching_student_module_access_policy
+ON branch_template.student_module
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE');
+
+-- Assessment Policy
+ALTER TABLE branch_template.assessment ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_teaching_assessment_access_policy
+ON branch_template.assessment
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE');
+
+CREATE POLICY branch_template_assessment_access_policy_student
+ON branch_template.assessment
+FOR SELECT
+USING (
+  assessment_id IN (
+    SELECT assessment_id
+    FROM branch_template.student_assessment
+    WHERE student_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+);
+
+-- Student Assessment Policy
+ALTER TABLE branch_template.student_assessment ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_student_assessment_access_policy
+ON branch_template.student_assessment
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+  AND student_id = CURRENT_USER 
+);
+
+CREATE POLICY branch_template_staff_teaching_student_assessment_access_policy
+ON branch_template.student_assessment
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE');
+
+-- Tuition Policy
+ALTER TABLE branch_template.tuition ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_tuition_access_policy
+ON branch_template.tuition
+FOR SELECT
+USING (
+  tuition_id IN (
+    SELECT t.tuition_id
+    FROM 
+      branch_template.student_tuition AS st
+      JOIN branch_template.tuition AS t USING (tuition_id)
+    WHERE st.student_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE')
+);
+
+-- Student Tuition Policy
+ALTER TABLE branch_template.student_tuition ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_student_tuition_access_policy
+ON branch_template.student_tuition
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+  AND student_id = CURRENT_USER 
+);
+
+-- Tuition Payment Policy
+ALTER TABLE branch_template.tuition_payment ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_tuition_payment_access_policy
+ON branch_template.tuition_payment
+FOR SELECT
+USING (
+  tuition_payment_id IN (
+    SELECT tp.tuition_payment_id
+    FROM 
+      branch_template.student_tuition AS st
+      JOIN branch_template.tuition AS t USING (tuition_id)
+      JOIN branch_template.tuition_payment AS tp USING (tuition_id)
+    WHERE st.student_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE')
+);
+
+-- Staff Department Policy
+ALTER TABLE branch_template.staff_department ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_department_access_policy
+ON branch_template.staff_department
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'staff_role', 'USAGE')
+  AND staff_id = CURRENT_USER 
+);
+
+-- Building Policy
+ALTER TABLE branch_template.building ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_building_access_policy
+ON branch_template.building
+FOR ALL
+USING (
+  pg_has_role(CURRENT_USER, 'staff_role', 'USAGE')
+  OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+);
+
+-- Room Policy
+ALTER TABLE branch_template.room ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_room_access_policy
+ON branch_template.room
+FOR ALL
+USING (
+  pg_has_role(CURRENT_USER, 'staff_role', 'USAGE')
+  OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+);
+
+-- Room Facility Policy
+ALTER TABLE branch_template.room_facility ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_room_facility_access_policy
+ON branch_template.room_facility
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'staff_role', 'USAGE');
+
+-- Session Policy
+ALTER TABLE branch_template.session ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_session_access_policy_staff
+ON branch_template.session
+FOR SELECT
+USING (
+  session_id IN (
+    SELECT session_id
+    FROM branch_template.staff_session
+    WHERE staff_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE')
+);
+
+CREATE POLICY branch_template_session_access_policy_student
+ON branch_template.session
+FOR SELECT
+USING (
+  session_id IN (
+    SELECT session_id
+    FROM branch_template.student_session
+    WHERE student_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+);
+
+-- Staff Session Policy
+ALTER TABLE branch_template.staff_session ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_session_access_policy
+ON branch_template.staff_session
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE')
+  AND staff_id = CURRENT_USER 
+);
+
+-- Student Session Policy
+ALTER TABLE branch_template.student_session ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_student_session_access_policy
+ON branch_template.student_session
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'student_role', 'USAGE')
+  AND student_id = CURRENT_USER 
+);
+
+CREATE POLICY branch_template_staff_teaching_student_session_access_policy
+ON branch_template.student_session
+FOR ALL
+USING pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE');
+
+-- Staff Contact Policy
+ALTER TABLE branch_template.staff_contact ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_contact_access_policy
+ON branch_template.staff_contact
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'staff_role', 'USAGE')
+  AND staff_id = CURRENT_USER 
+);
+
+-- Staff Office Policy
+ALTER TABLE branch_template.staff_office ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_office_access_policy
+ON branch_template.staff_office
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'staff_role', 'USAGE')
+  AND staff_id = CURRENT_USER 
+);
+
+-- Assignment Policy
+ALTER TABLE branch_template.assignment ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_assignment_access_policy
+ON branch_template.assignment
+FOR SELECT
+USING (
+  assignment_id IN (
+    SELECT assignment_id 
+    FROM branch_template.staff_assignment
+    WHERE staff_id = CURRENT_USER
+  )
+  AND pg_has_role(CURRENT_USER, 'staff_role', 'USAGE')
+);
+
+-- Staff Assignment Module Policy
+ALTER TABLE branch_template.staff_assignment ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY branch_template_staff_assignment_access_policy
+ON branch_template.staff_assignment
+FOR SELECT
+USING (
+  pg_has_role(CURRENT_USER, 'staff_role', 'USAGE')
+  AND staff_id = CURRENT_USER 
+);
