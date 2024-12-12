@@ -18,7 +18,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql; 
 
--- Trigger function to create users and assign roles after insert on staff
 CREATE OR REPLACE FUNCTION shared.create_staff_user() 
 RETURNS TRIGGER AS 
 $$
@@ -104,7 +103,7 @@ BEGIN
 	CREATE OR REPLACE FUNCTION %I.link_module_assessment()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  INSERT INTO %I.assessment (assessment_id, assessment_set_date, assessment_due_date, assessment_set_time, assessment_due_time, assessment_visble)
+	  INSERT INTO %I.assessment (assessment_id, assessment_set_date, assessment_due_date, assessment_set_time, assessment_due_time, assessment_visible)
 	  SELECT
 	    sa.assessment_id,
 	    ''2024-12-12'',               
@@ -493,7 +492,7 @@ BEGIN
 	  assessment_due_date DATE NOT NULL,
 	  assessment_set_time TIME  NOT NULL,
 	  assessment_due_time TIME NOT NULL,
-	  assessment_visble BOOLEAN NOT NULL,
+	  assessment_visible BOOLEAN NOT NULL,
 	  PRIMARY KEY (assessment_id),
 	  FOREIGN KEY (assessment_id) REFERENCES shared.assessment (assessment_id),
 	  CONSTRAINT valid_date_range CHECK (assessment_set_date < assessment_due_date OR 
@@ -745,58 +744,522 @@ BEGIN
 	, schema_name, schema_name, schema_name);
 
 	EXECUTE format('
-	GRANT USAGE ON SCHEMA %I TO student_role;'
-	, schema_name);
+	GRANT SELECT ON ALL TABLES IN SCHEMA %I TO student_role;
+	REVOKE SELECT ON %I.staff,
+	                 %I.staff_role,
+	                 %I.staff_department,
+	                 %I.staff_session,
+	                 %I.staff_contact,
+	                 %I.student_contact,
+	                 %I.assignment,
+	                 %I.staff_assignment
+	FROM student_role;'
+	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
 	EXECUTE format('
-	GRANT USAGE ON SCHEMA %I TO staff_role;
-	GRANT USAGE ON SCHEMA %I TO teaching_staff_role;'
-	, schema_name, schema_name);
+	GRANT SELECT ON %I.staff,
+	                %I.staff_role,
+	                %I.staff_department,
+	                %I.assignment,
+	                %I.staff_assignment,
+	                %I.room,
+	                %I.building,
+	                %I.room_facility
+	TO staff_role;'
+	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
 	EXECUTE format('
-	GRANT SELECT ON %I.session, %I.student, %I.module TO teaching_staff_role;
-	GRANT SELECT ON %I.student_session TO teaching_staff_role;'
+	GRANT SELECT, UPDATE ON %I.staff_session,
+	                         %I.session,
+	                         %I.student_assessment,
+	                         %I.student_module,
+	                         %I.student_course,
+	                         %I.assessment
+	TO teaching_staff_role;'
+	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT SELECT ON %I.course,
+	                %I.department_course,
+	                %I.module,
+	                %I.course_module
+	TO teaching_staff_role;'
 	, schema_name, schema_name, schema_name, schema_name);
-
-	EXECUTE format('
-	GRANT UPDATE (attendance_record) ON %I.student_session TO teaching_staff_role;'
-	, schema_name);
-
-	EXECUTE format('
-	GRANT USAGE ON SCHEMA %I TO admin_staff_role;'
-	, schema_name);
 
 	EXECUTE format('
 	GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA %I TO admin_staff_role;'
 	, schema_name);
 
 	EXECUTE format('
-	CREATE POLICY course_student_view_policy
-	ON shared.course
-	FOR SELECT
-	USING (course_id IN (SELECT course_id FROM %I.student_course WHERE student_id = CURRENT_USER));'
+	ALTER TABLE %I.staff ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
 	EXECUTE format('
-	CREATE POLICY module_student_view_policy
-	ON shared.module
+	CREATE POLICY %I_staff_access_policy
+	ON %I.staff
 	FOR SELECT
-	USING (module_id IN (SELECT module_id FROM %I.student_module WHERE student_id = CURRENT_USER));'
+	USING (
+	  pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE'')
+	  AND staff_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.staff_role ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
 	EXECUTE format('
-	CREATE POLICY assessment_student_view_policy
-	ON shared.assessment
+	CREATE POLICY %I_staff_role_access_policy
+	ON %I.staff_role
 	FOR SELECT
-	USING (module_id IN (SELECT module_id FROM %I.student_module WHERE student_id = CURRENT_USER));'
+	USING (
+	  pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE'')
+	  AND staff_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.course ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
 	EXECUTE format('
-	CREATE POLICY emergency_contact_student_view_policy
-	ON shared.emergency_contact
+	CREATE POLICY %I_staff_teaching_course_access_policy
+	ON %I.course
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_course_access_policy
+	ON %I.course
 	FOR SELECT
-	USING (contact_id IN (SELECT contact_id FROM %I.student_contact WHERE student_id = CURRENT_USER));'
+	USING (
+	  course_id IN (
+	    SELECT course_id
+	    FROM %I.student_course 
+	    WHERE student_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.department_course ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_teaching_department_course_access_policy
+	ON %I.course
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_department_course_access_policy
+	ON %I.department_course
+	FOR SELECT
+	USING (
+	  course_id IN (
+	    SELECT course_id
+	    FROM %I.student_course 
+	    WHERE student_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.module ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_teaching_module_access_policy
+	ON %I.module
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_module_access_policy
+	ON %I.module
+	FOR SELECT
+	USING (
+	  module_id IN (
+	    SELECT module_id
+	    FROM %I.student_module
+	    WHERE student_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.course_module ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_teaching_course_module_access_policy
+	ON %I.course_module
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_course_module_access_policy
+	ON %I.course_module
+	FOR SELECT
+	USING (
+	  module_id IN (
+	    SELECT module_id
+	    FROM %I.student_module
+	    WHERE student_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.student ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_access_policy
+	ON %I.student
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	  AND student_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.student_course ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_course_access_policy
+	ON %I.student_course
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	  AND student_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_teaching_student_course_access_policy
+	ON %I.student_course
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.student_module ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_module_access_policy
+	ON %I.student_module
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	  AND student_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_teaching_student_module_access_policy
+	ON %I.student_module
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.assessment ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_teaching_assessment_access_policy
+	ON %I.assessment
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_assessment_access_policy_student
+	ON %I.assessment
+	FOR SELECT
+	USING (
+	  assessment_id IN (
+	    SELECT assessment_id
+	    FROM %I.student_assessment
+	    WHERE student_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	  AND assessment_visible = TRUE
+	);'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.student_assessment ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_assessment_access_policy
+	ON %I.student_assessment
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	  AND student_id = CURRENT_USER 
+	  AND assessment_id IN (
+	    SELECT assessment_id
+	    FROM %I.assessment 
+	    WHERE assessment_visible = TRUE
+	  )
+	);'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_teaching_student_assessment_access_policy
+	ON %I.student_assessment
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.tuition ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_tuition_access_policy
+	ON %I.tuition
+	FOR SELECT
+	USING (
+	  tuition_id IN (
+	    SELECT t.tuition_id
+	    FROM 
+	      %I.student_tuition AS st
+	      JOIN %I.tuition AS t USING (tuition_id)
+	    WHERE st.student_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.student_tuition ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_tuition_access_policy
+	ON %I.student_tuition
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	  AND student_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.tuition_payment ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_tuition_payment_access_policy
+	ON %I.tuition_payment
+	FOR SELECT
+	USING (
+	  tuition_payment_id IN (
+	    SELECT tp.tuition_payment_id
+	    FROM 
+	      %I.student_tuition AS st
+	      JOIN %I.tuition AS t USING (tuition_id)
+	      JOIN %I.tuition_payment AS tp USING (tuition_id)
+	    WHERE st.student_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.staff_department ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_department_access_policy
+	ON %I.staff_department
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE'')
+	  AND staff_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.building ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_building_access_policy
+	ON %I.building
+	FOR ALL
+	USING (
+	  pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE'')
+	  OR pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.room ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_room_access_policy
+	ON %I.room
+	FOR ALL
+	USING (
+	  pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE'')
+	  OR pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.room_facility ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_room_facility_access_policy
+	ON %I.room_facility
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.session ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_session_access_policy_staff
+	ON %I.session
+	FOR SELECT
+	USING (
+	  session_id IN (
+	    SELECT session_id
+	    FROM %I.staff_session
+	    WHERE staff_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_session_access_policy_student
+	ON %I.session
+	FOR SELECT
+	USING (
+	  session_id IN (
+	    SELECT session_id
+	    FROM %I.student_session
+	    WHERE student_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.staff_session ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_session_access_policy
+	ON %I.staff_session
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE'')
+	  AND staff_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.student_session ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_student_session_access_policy
+	ON %I.student_session
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''student_role'', ''USAGE'')
+	  AND student_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_teaching_student_session_access_policy
+	ON %I.student_session
+	FOR ALL
+	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.staff_contact ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_contact_access_policy
+	ON %I.staff_contact
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE'')
+	  AND staff_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.staff_office ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_office_access_policy
+	ON %I.staff_office
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE'')
+	  AND staff_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.assignment ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_assignment_access_policy
+	ON %I.assignment
+	FOR SELECT
+	USING (
+	  assignment_id IN (
+	    SELECT assignment_id 
+	    FROM %I.staff_assignment
+	    WHERE staff_id = CURRENT_USER
+	  )
+	  AND pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE'')
+	);'
+	, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	ALTER TABLE %I.staff_assignment ENABLE ROW LEVEL SECURITY;'
+	, schema_name);
+
+	EXECUTE format('
+	CREATE POLICY %I_staff_assignment_access_policy
+	ON %I.staff_assignment
+	FOR SELECT
+	USING (
+	  pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE'')
+	  AND staff_id = CURRENT_USER 
+	);'
+	, schema_name, schema_name);
 END; 
 $$ LANGUAGE plpgsql;
 
@@ -1095,6 +1558,11 @@ ON shared.assessment
 FOR ALL
 USING (pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE'));
 
+CREATE POLICY student_access_policy_shared_assessment
+ON branch_template.staff
+FOR ALL
+USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE'));
+
 -- Role Policy
 ALTER TABLE shared.role ENABLE ROW LEVEL SECURITY;
 
@@ -1114,8 +1582,8 @@ USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE'));
 -- Room Type Policy
 ALTER TABLE shared.room_type ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY access_policy_shared_facilitiy
-ON shared.facility
+CREATE POLICY access_policy_shared_room_type
+ON shared.room_type
 FOR ALL
 USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
 

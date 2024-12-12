@@ -21,14 +21,14 @@ for section in sections:
 
 final_content = "\n\n".join(wrapped_sections)
 
-wrapped_function = f"""
-CREATE OR REPLACE FUNCTION shared.create_schema(schema_name TEXT)
+wrapped_function = f"""CREATE OR REPLACE FUNCTION shared.create_schema(schema_name TEXT)
 RETURNS void AS $$
 BEGIN
+  RAISE NOTICE 'CREATING SCHEMA %', schema_name;
+
 {final_content}
 END; 
-$$ LANGUAGE plpgsql;
-"""
+$$ LANGUAGE plpgsql;"""
 
 with open('output.sql', 'w') as file:
   file.write(wrapped_function)
