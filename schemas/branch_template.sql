@@ -1,6 +1,69 @@
 /* CREATE SCHEMA */
 CREATE SCHEMA IF NOT EXISTS branch_template;
 
+/* CREATE FUNCTIONS */
+-- Function to determine if specific room is free at a specific time and date
+CREATE OR REPLACE FUNCTION branch_template.is_room_available(
+  p_room_id INT,
+  p_requested_time TIME,
+  p_requested_date DATE
+) 
+RETURNS BOOLEAN AS $$
+DECLARE
+  room_session_count INT;
+BEGIN
+  IF p_requested_time < '09:00:00'::TIME OR p_requested_time > '18:00:00'::TIME THEN
+    RAISE EXCEPTION 'Requested time must be between 09:00 and 18:00';
+  END IF;
+  IF EXTRACT(DOW FROM p_requested_date) IN (0, 6) THEN  -- 0 = Sunday, 6 = Saturday
+    RAISE EXCEPTION 'Requested date cannot be a weekend';
+  END IF;
+  SELECT COUNT(*)
+  INTO room_session_count
+  FROM branch_template.session
+  WHERE 
+    room_id = p_room_id
+    AND session_date = p_requested_date
+    AND (
+      (session_start_time <= p_requested_time AND session_end_time > p_requested_time)  -- requested time overlaps with an ongoing session
+      OR
+      (session_start_time < (p_requested_time + interval '1 minute') AND session_end_time >= (p_requested_time + interval '1 minute'))  -- requested time overlaps with session start time
+    );
+  IF room_session_count > 0 THEN
+    RETURN FALSE;
+  ELSE
+    RETURN TRUE;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to find available time slots for a specific room on a specific date
+CREATE OR REPLACE FUNCTION branch_template.get_day_available_room_time(
+  p_room_id INT,
+  p_requested_date DATE
+)
+RETURNS SETOF TIME AS $$
+DECLARE
+  time_slot_start TIME := '09:00:00'::TIME;
+  time_slot_end TIME := '18:00:00'::TIME;
+  slot_interval INTERVAL := '1 hour';
+BEGIN
+  -- Loop through each time slot from 09:00 to 18:00 in 60-minute intervals
+  FOR time_slot_start IN
+    SELECT time_slot_start + (i * slot_interval) 
+    FROM GENERATE_SERIES(0, (EXTRACT(HOUR FROM time_slot_end - time_slot_start) * 60 / 60) - 1) i
+    WHERE time_slot_start + (i * slot_interval) >= '09:00:00' AND time_slot_start + (i * slot_interval) <= '18:00:00'
+  LOOP
+    -- Use the previously created function to check availability
+    IF branch_template.is_room_available(p_room_id, time_slot_start, p_requested_date) THEN
+      -- If the room is available, return the time slot
+      RETURN QUERY SELECT time_slot_start;
+    END IF;
+  END LOOP;
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
 /* CREATE TRIGGER FUNCTIONS */
 
 -- Trigger function to seed assessment table after insert into module
@@ -183,8 +246,7 @@ CREATE TABLE branch_template.staff (
   staff_city VARCHAR(30) NOT NULL,
   staff_postcode VARCHAR(10) NOT NULL,
   staff_landline VARCHAR(30) NOT NULL,
-  staff_mobile VARCHAR(15) NOT NULL UNIQUE,
-  staff_dob DATE NOT NULL
+  staff_mobile VARCHAR(15) NOT NULL UNIQUE
 );
 
 -- Trigger to validate staff emails
@@ -308,10 +370,15 @@ CREATE TABLE branch_template.student (
   student_postcode VARCHAR(10) NOT NULL,
   student_landline VARCHAR(30),
   student_mobile VARCHAR(15) NOT NULL UNIQUE,
-  student_dob DATE NOT NULL,
   student_attendance DECIMAL(5, 2) DEFAULT (0.00) NOT NULL,
   CONSTRAINT valid_percentage CHECK (student_attendance >= 0 AND student_attendance <= 100)
 );
+
+-- Trigger to validate staff emails
+CREATE TRIGGER branch_template_before_student_insert
+BEFORE INSERT ON branch_template.student
+FOR EACH ROW
+EXECUTE FUNCTION shared.student_email();
 
 -- Trigger to create user after insert on student table
 CREATE TRIGGER branch_template_trigger_create_student_user
@@ -319,7 +386,7 @@ AFTER INSERT ON branch_template.student
 FOR EACH ROW
 EXECUTE FUNCTION shared.create_student_user();
 
--- Functional index to enforce case insensitive uniqueness of the student personal email.
+-- Functional index to enforce case insensitive uniqueness of the student personal email
 CREATE UNIQUE INDEX branch_template_idx_unique_student_personal_email ON branch_template.student (LOWER(student_personal_email));
 
 -- Improves performance for joins or lookups on student_id
@@ -457,7 +524,7 @@ CREATE TABLE branch_template.tuition_payment (
   tuition_payment_reference CHAR(12) DEFAULT (
     CONCAT('py', to_char(nextval('shared.tuition_payment_reference_seq'), 'FM0000000000'))
   ) NOT NULL UNIQUE, 
-  tuition_id INT,
+  tuition_id INT NOT NULL,
   tuition_payment_amount DECIMAL(7, 2) NOT NULL,
   tuition_payment_date DATE NOT NULL,
   tuition_payment_method shared.payment_method_enum NOT NULL,
@@ -476,7 +543,7 @@ EXECUTE FUNCTION branch_template.update_tuition_after_payment();
 CREATE TABLE branch_template.staff_department (
   staff_id CHAR(10) NOT NULL,
   dep_id CHAR(7) NOT NULL,
-  date_assinged DATE NOT NULL,
+  date_assinged DATE NOT NULL DEFAULT CURRENT_DATE,
   PRIMARY KEY (staff_id, dep_id),
   FOREIGN KEY (staff_id) REFERENCES branch_template.staff (staff_id),
   FOREIGN KEY (dep_id) REFERENCES branch_template.department (dep_id)
@@ -632,7 +699,11 @@ CREATE TABLE branch_template.staff_office (
 -- ------------------------------
 CREATE TABLE branch_template.assignment (
   assignment_id SERIAL PRIMARY KEY,
-  assignment_details TEXT NOT NULL
+  assignment_details TEXT NOT NULL,
+  assignment_start_time TIME NOT NULL,
+  assignment_end_time TIME NOT NULL,
+  assignment_date DATE NOT NULL,
+  CONSTRAINT valid_times CHECK (assignment_start_time < assignment_end_time)
 );
 
 -- ------------------------------------
@@ -646,7 +717,292 @@ CREATE TABLE branch_template.staff_assignment (
   FOREIGN KEY (assignment_id) REFERENCES branch_template.assignment (assignment_id)
 );
 
+/* CREATE BRANCH SPECIFIC VIEWS */
+
+-- View to show each students attendance percentages
+CREATE OR REPLACE VIEW branch_template.student_attendance AS 
+WITH student_details AS (
+  SELECT 
+    student_id,
+    CONCAT_WS(' ', student_fname, student_lname) AS full_name,
+    student_edu_email AS email,
+    student_attendance
+  FROM branch_template.student
+)
+SELECT 
+  sd.student_id AS "Student ID",
+  sd.full_name AS "Student Name",
+  sd.email AS "Student Email",
+  sd.student_attendance AS "Attendance %",
+  CASE 
+    WHEN sd.student_attendance > 95 THEN 'Excellent'
+    WHEN sd.student_attendance > 90 THEN 'Good'
+    WHEN sd.student_attendance > 75 THEN 'Satisfactory'
+    WHEN sd.student_attendance > 51 THEN 'Irregular Attendance'
+    WHEN sd.student_attendance > 10 THEN 'Severly Absent'
+    ELSE 'Persitently Absent'
+  END AS "Attendance Rating"
+FROM student_details AS sd
+ORDER BY "Student ID";
+
+-- View to show the average attendance percentage for each module
+CREATE OR REPLACE VIEW branch_template.module_attendance AS 
+SELECT
+  m.module_id AS "Module ID",
+  shm.module_name AS "Module Name",
+  STRING_AGG(DISTINCT c.course_id, ', ') AS "Modules Courses",
+  ROUND(
+    AVG(
+      CASE
+        WHEN total_students > 0 THEN (attending_students * 100.0) / total_students
+        ELSE 0
+      END
+    ), 2
+  ) AS "Module Attendance %"
+FROM 
+  branch_template.module AS m
+  JOIN shared.module AS shm USING (module_id)
+  JOIN branch_template.session AS ses USING (module_id)
+  LEFT JOIN (
+    SELECT
+      session_id,
+      COUNT(*) AS total_students,
+      SUM(CASE WHEN attendance_record THEN 1 ELSE 0 END) AS attending_students
+    FROM branch_template.student_session
+    GROUP BY session_id
+  ) AS ss_stats ON ses.session_id = ss_stats.session_id
+  JOIN branch_template.course_module AS cm USING (module_id)
+  JOIN shared.course AS c USING (course_id)
+WHERE 
+  ses.session_date < CURRENT_DATE 
+  OR (ses.session_date = CURRENT_DATE AND ses.session_end_time < CURRENT_TIME)
+GROUP BY "Module ID", "Module Name";
+
+-- View to show the average attendance percentage of each course
+CREATE OR REPLACE VIEW branch_template.course_attendance AS 
+SELECT
+  c.course_id AS "Course ID",
+  shc.course_name AS "Course Name",
+  CONCAT_WS(' ', stf.staff_fname, stf.staff_lname) AS "Course Coordinator",
+  ROUND(AVG(ma."Module Attendance %"), 2) AS "Course Attendance %"
+FROM 
+  branch_template.course AS c
+  JOIN branch_template.course_module AS cm USING (course_id)
+  JOIN branch_template.module_attendance AS ma ON cm.module_id = ma."Module ID"
+  JOIN shared.course AS shc USING (course_id)
+  JOIN branch_template.staff AS stf USING (staff_id)
+GROUP BY "Course ID", "Course Name", "Course Coordinator";
+
+-- View to show the students tuition details
+CREATE OR REPLACE VIEW branch_template.unpaid_tuition AS
+WITH tuition_summary AS (
+  SELECT
+    st.student_id,
+    STRING_AGG(t.tuition_id::TEXT, ', ') AS tuition_ids,
+    SUM(t.tuition_amount) AS total_tuition,
+    SUM(t.tuition_paid) AS total_paid,
+    SUM(t.tuition_amount) - SUM(t.tuition_paid) AS total_tuition_remaining,
+    ROUND(
+      100 - ((SUM(t.tuition_paid) / NULLIF(SUM(t.tuition_amount), 0)) * 100),
+      2
+    ) AS overall_remaining_percentage,
+    MIN(t.tuition_deadline) AS closest_tuition_deadline
+  FROM
+    branch_template.student_tuition AS st
+    JOIN branch_template.tuition AS t ON st.tuition_id = t.tuition_id
+  WHERE
+    t.tuition_deadline < CURRENT_DATE
+    AND (t.tuition_amount - t.tuition_paid) > 0
+  GROUP BY
+    st.student_id
+)
+SELECT
+  ts.student_id AS "Student ID",
+  CONCAT_WS(' ', 
+    s.student_fname, 
+    CONCAT(LEFT(s.student_lname, 1), REPEAT('*', LENGTH(s.student_lname) - 1))
+  ) AS "Masked Student Name",
+  ts.tuition_ids AS "Tuition IDs",
+  ts.total_tuition AS "Total Tuition",
+  ts.total_paid AS "Total Paid",
+  ts.total_tuition_remaining AS "Total Tuition Remaining",
+  ts.overall_remaining_percentage AS "Overall Remaining Percentage %",
+  ts.closest_tuition_deadline AS "Closest Tuition Deadline",
+  CASE
+    WHEN ts.overall_remaining_percentage >= 75 THEN 'Critical'
+    WHEN ts.overall_remaining_percentage >= 50 THEN 'Warning'
+    ELSE 'Low'
+  END AS "Risk Level"
+FROM
+  tuition_summary AS ts
+  JOIN branch_template.student AS s ON ts.student_id = s.student_id
+ORDER BY
+  ts.total_tuition_remaining DESC,
+  ts.closest_tuition_deadline;
+
+-- View to show all upcoming session times and dates for each room in branch
+CREATE OR REPLACE VIEW branch_template.room_session_times AS
+SELECT 
+  r.room_id AS "Room ID",
+  r.room_alt_name AS "Room Name",
+  rt.type_name AS "Room Type",
+  s.session_start_time AS "Session Start Time",
+  s.session_end_time AS "Session End Time",
+  s.session_date AS "Session Date"
+FROM 
+  branch_template.session AS s
+  JOIN branch_template.room AS r USING (room_id)
+  JOIN shared.room_type AS rt USING (room_type_id)
+WHERE 
+  s.session_date > CURRENT_DATE
+  OR (s.session_date = CURRENT_DATE AND s.session_start_time > CURRENT_TIME) 
+ORDER BY r.room_id, s.session_date, s.session_start_time;
+
+-- View to show students who are low attendane and lower performance
+CREATE OR REPLACE VIEW branch_template.low_performing_students AS
+SELECT 
+  sa."Student ID",
+  sa."Student Name",
+  sa."Student Email",
+  sa."Attendance %",
+  sa."Attendance Rating",
+  STRING_AGG(
+    CONCAT(c.course_id, ' (', c.culmative_average, '%)'),
+    ', '
+  ) AS "Courses Failing"
+FROM 
+  branch_template.student_attendance AS sa
+  LEFT JOIN branch_template.student_course AS c ON sa."Student ID" = c.student_id
+WHERE 
+  sa."Attendance %" < 80
+  AND c.culmative_average < 40
+GROUP BY   
+  sa."Student ID",
+  sa."Student Name",
+  sa."Student Email",
+  sa."Attendance %",
+  sa."Attendance Rating";
+
+-- View to link staff members and their sessions
+CREATE OR REPLACE VIEW branch_template.get_staff_sessions AS 
+SELECT 
+  ss.staff_id,
+  sn.session_date,
+  sn.session_start_time,
+  sn.session_end_time
+FROM
+  branch_template.staff_session AS ss
+  JOIN branch_template.session AS sn USING(session_id)
+WHERE 
+  sn.session_date > CURRENT_DATE
+  OR (sn.session_date = CURRENT_DATE AND sn.session_start_time < CURRENT_TIME);
+
+-- View to link staff members and their assignments
+CREATE OR REPLACE VIEW branch_template.get_staff_assignments AS 
+SELECT 
+  sa.staff_id,
+  a.assignment_date,
+  a.assignment_start_time,
+  a.assignment_end_time
+FROM
+  branch_template.staff_assignment AS sa
+  JOIN branch_template.assignment AS a USING(assignment_id)
+WHERE 
+  a.assignment_date > CURRENT_DATE
+  OR (a.assignment_date = CURRENT_DATE AND a.assignment_start_time < CURRENT_TIME);
+
+-- View to to show times when staff members are busy with either a session or assignment
+CREATE OR REPLACE VIEW branch_template.staff_busy AS
+SELECT 
+  ss.staff_id,
+  ss.session_date AS busy_date,
+  ss.session_start_time AS start_time,
+  ss.session_end_time AS end_time
+FROM 
+  branch_template.get_staff_sessions AS ss
+UNION
+SELECT 
+  sa.staff_id,
+  sa.assignment_date AS busy_date,
+  sa.assignment_start_time AS start_time,
+  sa.assignment_end_time AS end_time
+FROM 
+  branch_template.get_staff_assignments AS sa;
+
+-- View to show date / times staff are available 
+CREATE OR REPLACE VIEW branch_template.staff_availability AS
+WITH date_range AS (
+  SELECT 
+    COALESCE(MIN(busy_date), CURRENT_DATE) AS start_date,
+    COALESCE(MAX(busy_date), CURRENT_DATE) AS end_date
+  FROM branch_template.staff_busy
+),
+teaching_staff AS (
+  SELECT DISTINCT s.staff_id
+  FROM branch_template.staff AS s
+  JOIN branch_template.staff_role AS sr ON s.staff_id = sr.staff_id
+  JOIN shared.role r ON sr.role_id = r.role_id
+  WHERE r.role_name IN ('Lecturer', 'Teaching Assistant')
+),
+time_slots AS (
+  SELECT 
+    s.staff_id,
+    date_series.date AS available_date,
+    (date_series.date + ('09:00:00'::TIME + (slot.hour * INTERVAL '1 hour'))) AS slot_timestamp
+  FROM 
+    teaching_staff AS s,
+    date_range AS dr,
+    generate_series(dr.start_date, dr.end_date, '1 day'::interval) AS date_series(date),
+    generate_series(0, 9) AS slot(hour)
+  WHERE EXTRACT(DOW FROM date_series.date) BETWEEN 1 AND 5
+),
+available_slots AS (
+  SELECT 
+    staff_id,
+    available_date,
+    slot_timestamp,
+    NOT EXISTS (
+      SELECT 1
+      FROM branch_template.staff_busy AS sb
+      WHERE sb.staff_id = time_slots.staff_id
+        AND sb.busy_date = time_slots.available_date::DATE
+        AND sb.start_time::TIME < (time_slots.slot_timestamp + INTERVAL '1 hour')::TIME 
+        AND sb.end_time::TIME > time_slots.slot_timestamp::TIME
+    ) AS is_available
+  FROM time_slots
+)
+SELECT 
+  s.staff_id AS "Staff ID",
+  CONCAT_WS(' ', s.staff_title, s.staff_fname, s.staff_lname) AS "Staff Name",
+  LEFT(as_grouped.available_date::TEXT, 10) AS "Date",
+  STRING_AGG(
+    to_char(as_grouped.slot_timestamp, 'HH24:MI'),
+    ', ' ORDER BY as_grouped.slot_timestamp
+  ) AS "Available Times"
+FROM 
+  branch_template.staff AS s
+  JOIN (
+    SELECT 
+      staff_id, 
+      available_date, 
+      slot_timestamp
+    FROM available_slots
+    WHERE is_available
+  ) AS as_grouped ON s.staff_id = as_grouped.staff_id
+WHERE 
+  as_grouped.available_date > CURRENT_DATE
+GROUP BY 
+  s.staff_id, 
+  s.staff_title, 
+  s.staff_fname, 
+  s.staff_lname, 
+  as_grouped.available_date
+ORDER BY 
+  s.staff_id, 
+  as_grouped.available_date;
+
 /* GRANT BRANCH SPECIFIC ACCESS */
+
 -- Grant SELECT access to all tables in the branch_template schema except the excluded tables
 GRANT SELECT ON ALL TABLES IN SCHEMA branch_template TO student_role;
 REVOKE SELECT ON branch_template.staff,

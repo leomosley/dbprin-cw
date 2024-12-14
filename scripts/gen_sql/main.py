@@ -99,7 +99,38 @@ def link_staff_session(branch_id: str):
 
   return output.rstrip(",") + ";"
 
+def new_branch_inserts():
+  staff_ids = {
+    's000000001' : 's000000008', 
+    's000000002' : 's000000009',  
+    's000000003' : 's000000010',  
+    's000000004' : 's000000011',  
+    's000000005' : 's000000012',  
+    's000000006' : 's000000013',  
+    's000000007' : 's000000014'  
+  }
+
+  student_ids = {
+    'sn00000001' : 'sn00000007', 
+    'sn00000002' : 'sn00000008', 
+    'sn00000003' : 'sn00000009', 
+    'sn00000004' : 'sn00000010', 
+    'sn00000005' : 'sn00000011', 
+    'sn00000006' : 'sn00000012',
+  }
+
+  with open("input/inserts.sql") as inserts:
+    content = inserts.read()
+    
+    for staff_id in staff_ids:
+      content = content.replace(staff_id, staff_ids[staff_id])
+
+    for student_id in student_ids:
+      content = content.replace(student_id, student_ids[student_id])
+  
+    return content
+
 if __name__ == "__main__":
   # save(generate_session(['m000001','m000002','m000003','m000004','m000009','m000010','m000011','m000012'], "b01"), "session")
   # save(link_staff_session("b01"), "staff_session")
-  pass
+  save(new_branch_inserts(), "b02_inserts")

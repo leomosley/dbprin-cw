@@ -1,3 +1,277 @@
+/* SHARED FUNCTIONS */
+
+-- Function to validate staff_id, staff_company_email, staff_personal_email
+CREATE OR REPLACE FUNCTION shared.validate_staff()
+RETURNS TRIGGER AS $$
+BEGIN
+  RAISE NOTICE 'VALIDATING STAFF INSERT FOR %', NEW.staff_id;
+  NEW.staff_company_email := CONCAT(NEW.staff_id, '@ses.edu.org');
+
+  IF NEW.staff_personal_email IS NOT NULL THEN 
+    NEW.staff_personal_email := LOWER(NEW.staff_personal_email);
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql; 
+
+-- Function to create student_edu_email before insert on student
+CREATE OR REPLACE FUNCTION shared.student_email()
+RETURNS TRIGGER AS $$
+BEGIN
+  RAISE NOTICE 'CREATEING STUDENT EDU EMAIL %', NEW.student_id;
+  NEW.student_edu_email := CONCAT(NEW.student_id, '@ses.edu.org');
+
+  IF NEW.student_personal_email IS NOT NULL THEN 
+    NEW.student_personal_email := LOWER(NEW.student_personal_email);
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql; 
+
+-- Trigger function to create users and assign roles after insert on staff
+CREATE OR REPLACE FUNCTION shared.create_staff_user() 
+RETURNS TRIGGER AS 
+$$
+BEGIN
+  RAISE NOTICE 'CREATE STAFF USER %', NEW.staff_id;
+  EXECUTE format('DROP ROLE IF EXISTS %I;', NEW.staff_id);
+  EXECUTE format('
+  CREATE ROLE %I WITH LOGIN;
+  GRANT staff_role TO %I;'
+  , NEW.staff_id, NEW.staff_id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to create users and assign roles after insert on student
+CREATE OR REPLACE FUNCTION shared.create_student_user() 
+RETURNS TRIGGER AS 
+$$
+BEGIN
+  RAISE NOTICE 'CREATE STUDENT USER %', NEW.student_id;
+  EXECUTE format('DROP ROLE IF EXISTS %I;', NEW.student_id);
+  EXECUTE format('
+  CREATE ROLE %I WITH LOGIN;
+  GRANT student_role TO %I;'
+  , NEW.student_id, NEW.student_id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to grant admin_staff_role and teachign_staff_role to user after update or insert on staff_role
+CREATE OR REPLACE FUNCTION shared.grant_staff_roles() 
+RETURNS TRIGGER AS 
+$$
+BEGIN
+  IF NEW.role_id = (SELECT role_id FROM shared.role WHERE role_name = 'Admin staff') THEN
+    RAISE NOTICE 'GRANTING ADMIN STAFF PRIVILEGES FOR %', NEW.staff_id;
+    EXECUTE format('
+    GRANT admin_staff_role TO %I;'
+    , NEW.staff_id);
+  END IF;
+  IF NEW.role_id IN (SELECT role_id FROM shared.role WHERE role_name IN ('Lecturer', 'Teaching Assistant')) THEN
+    RAISE NOTICE 'GRANTING TEACHING STAFF PRIVILEGES FOR %', NEW.staff_id;
+    EXECUTE format('
+    GRANT teaching_staff_role TO %I;'
+    , NEW.staff_id);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to revoke admin_staff_role or teaching_staff_role to user after update or delete on staff_role
+CREATE OR REPLACE FUNCTION shared.revoke_staff_roles()
+RETURNS TRIGGER AS 
+$$
+BEGIN
+  IF OLD.role_id = (SELECT role_id FROM shared.role WHERE role_name = 'Admin staff') THEN
+    RAISE NOTICE 'REVOKING ADMIN STAFF PRIVILEGES FOR %', OLD.staff_id;
+    EXECUTE format('
+    REVOKE admin_staff_role FROM %I;', 
+    OLD.staff_id);
+  END IF;
+  IF OLD.role_id IN (SELECT role_id FROM shared.role WHERE role_name IN ('Lecturer', 'Teaching Assistant')) THEN
+    RAISE NOTICE 'REVOKING TEACHING STAFF PRIVILEGES FOR %', OLD.staff_id;
+    EXECUTE format('
+    REVOKE teaching_staff_role FROM %I;'
+    , OLD.staff_id);
+  END IF;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to retrieve data about attendance in each branch
+CREATE OR REPLACE FUNCTION shared.analyse_branch_attendance()
+RETURNS TABLE (
+  branch_id CHAR(3),
+  avg_student_attendance NUMERIC,
+  avg_module_attendance NUMERIC,
+  avg_course_attendance NUMERIC,
+  top_module_name VARCHAR(50),
+  top_module_attendance NUMERIC,
+  lowest_module_name VARCHAR(50),
+  lowest_module_attendance NUMERIC,
+  top_course_name VARCHAR(50),
+  top_course_attendance NUMERIC,
+  lowest_course_name VARCHAR(50),
+  lowest_course_attendance NUMERIC
+) AS 
+$$
+DECLARE
+  branch RECORD;
+  schema_name TEXT;
+  result RECORD;
+BEGIN
+  FOR branch IN 
+    SELECT b.branch_id FROM shared.branch AS b
+  LOOP
+    schema_name := CONCAT('branch_', branch.branch_id);
+
+    EXECUTE format('
+    SELECT
+      AVG(s.student_attendance) AS avg_student_attendance,
+      AVG(ma."Module Attendance %%") AS avg_module_attendance,
+      AVG(ca."Course Attendance %%") AS avg_course_attendance,
+      (
+        SELECT ma."Module Name"
+        FROM %I.module_attendance AS ma
+        ORDER BY ma."Module Attendance %%" DESC LIMIT 1
+      ) AS top_module_name,
+      (
+        SELECT ma."Module Attendance %%"
+        FROM %I.module_attendance AS ma
+        ORDER BY ma."Module Attendance %%" DESC LIMIT 1
+      ) AS top_module_attendance,
+      (
+        SELECT ma."Module Name"
+        FROM %I.module_attendance AS ma
+        ORDER BY ma."Module Attendance %%" ASC LIMIT 1
+      ) AS lowest_module_name,
+      (
+        SELECT ma."Module Attendance %%"
+        FROM %I.module_attendance AS ma
+        ORDER BY ma."Module Attendance %%" ASC LIMIT 1
+      ) AS lowest_module_attendance,
+      (
+        SELECT ca."Course Name"
+        FROM %I.course_attendance AS ca
+        ORDER BY ca."Course Attendance %%" DESC LIMIT 1
+      ) AS top_course_name,
+      (
+        SELECT ca."Course Attendance %%"
+        FROM %I.course_attendance AS ca
+        ORDER BY ca."Course Attendance %%" DESC LIMIT 1
+      ) AS top_course_attendance,
+      (
+        SELECT ca."Course Name"
+        FROM %I.course_attendance AS ca
+        ORDER BY ca."Course Attendance %%" ASC LIMIT 1
+      ) AS lowest_course_name,
+      (
+        SELECT ca."Course Attendance %%"
+        FROM %I.course_attendance AS ca
+        ORDER BY ca."Course Attendance %%" ASC LIMIT 1
+      ) AS lowest_course_attendance
+    FROM 
+      %I.student AS s, 
+      %I.module_attendance AS ma, 
+      %I.course_attendance AS ca
+    ', schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name)
+    INTO result;
+
+    RETURN QUERY SELECT 
+      branch.branch_id,
+      result.avg_student_attendance,
+      result.avg_module_attendance,
+      result.avg_course_attendance,
+      result.top_module_name,
+      result.top_module_attendance,
+      result.lowest_module_name,
+      result.lowest_module_attendance,
+      result.top_course_name,
+      result.top_course_attendance,
+      result.lowest_course_name,
+      result.lowest_course_attendance;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to retrieive information about the number of students in each course at each branch
+CREATE OR REPLACE FUNCTION shared.count_student_course()
+RETURNS TABLE (
+  branch_id CHAR(3),
+  course_id CHAR(7),
+  count BIGINT
+) AS 
+$$
+DECLARE
+  branch RECORD;
+  schema_name TEXT;
+  result RECORD;
+BEGIN
+  FOR branch IN 
+    SELECT b.branch_id FROM shared.branch AS b
+  LOOP
+    schema_name := CONCAT('branch_', branch.branch_id);
+
+    FOR result IN EXECUTE format('
+      SELECT
+        c.course_id,
+        COUNT(sc.course_id) AS count
+      FROM 
+        %I.course AS c
+        JOIN %I.student_course AS sc USING (course_id)
+      GROUP BY c.course_id
+    ', schema_name, schema_name)
+    LOOP
+      RETURN QUERY SELECT 
+        branch.branch_id,
+        result.course_id,
+        result.count;
+    END LOOP;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to retrieive information about students with lower performance in each branch
+CREATE OR REPLACE FUNCTION shared.get_all_low_performing_students()
+RETURNS TABLE (
+  branch_id TEXT,
+  student_id CHAR(10),
+  name TEXT,
+  email CHAR(22),
+  attendance DECIMAL(5, 2),
+  attendance_rating TEXT,
+  courses_failing TEXT
+) AS 
+$$
+DECLARE
+  branch RECORD;
+  schema_name TEXT;
+BEGIN
+  FOR branch IN 
+    SELECT b.branch_id FROM shared.branch AS b
+  LOOP
+    schema_name := CONCAT('branch_', branch.branch_id);
+
+    RETURN QUERY EXECUTE format('
+      SELECT
+        %L AS branch_id,
+        "Student ID" AS student_id,
+        "Student Name" AS name,
+        "Student Email" AS email,
+        "Attendance %%"::DECIMAL(5, 2) AS attendance,
+        "Attendance Rating" AS attendance_rating,
+        "Courses Failing" AS courses_failing
+      FROM %I.low_performing_students
+    ', branch.branch_id, schema_name);
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to dynamically create schema
 CREATE OR REPLACE FUNCTION shared.create_schema(schema_name TEXT)
 RETURNS void AS $$
 BEGIN
@@ -1531,4 +1805,238 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 END; 
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to execute create_schema with schema_name ('branch_' + branch_id) after insert on branch
+CREATE OR REPLACE FUNCTION shared.after_insert_create_schema()
+RETURNS trigger AS $$
+BEGIN
+  PERFORM shared.create_schema('branch_' || NEW.branch_id);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+/* BRANCH SPECIFC FUNCTIONS */
+
+-- Function to determine if specific room is free at a specific time and date
+CREATE OR REPLACE FUNCTION branch_template.is_room_available(
+  p_room_id INT,
+  p_requested_time TIME,
+  p_requested_date DATE
+) 
+RETURNS BOOLEAN AS $$
+DECLARE
+  room_session_count INT;
+BEGIN
+  IF p_requested_time < '09:00:00'::TIME OR p_requested_time > '18:00:00'::TIME THEN
+    RAISE EXCEPTION 'Requested time must be between 09:00 and 18:00';
+  END IF;
+  IF EXTRACT(DOW FROM p_requested_date) IN (0, 6) THEN  -- 0 = Sunday, 6 = Saturday
+    RAISE EXCEPTION 'Requested date cannot be a weekend';
+  END IF;
+  SELECT COUNT(*)
+  INTO room_session_count
+  FROM branch_template.session
+  WHERE 
+    room_id = p_room_id
+    AND session_date = p_requested_date
+    AND (
+      (session_start_time <= p_requested_time AND session_end_time > p_requested_time)  -- requested time overlaps with an ongoing session
+      OR
+      (session_start_time < (p_requested_time + interval '1 minute') AND session_end_time >= (p_requested_time + interval '1 minute'))  -- requested time overlaps with session start time
+    );
+  IF room_session_count > 0 THEN
+    RETURN FALSE;
+  ELSE
+    RETURN TRUE;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to find available time slots for a specific room on a specific date
+CREATE OR REPLACE FUNCTION branch_template.get_day_available_room_time(
+  p_room_id INT,
+  p_requested_date DATE
+)
+RETURNS SETOF TIME AS $$
+DECLARE
+  time_slot_start TIME := '09:00:00'::TIME;
+  time_slot_end TIME := '18:00:00'::TIME;
+  slot_interval INTERVAL := '1 hour';
+BEGIN
+  -- Loop through each time slot from 09:00 to 18:00 in 60-minute intervals
+  FOR time_slot_start IN
+    SELECT time_slot_start + (i * slot_interval) 
+    FROM GENERATE_SERIES(0, (EXTRACT(HOUR FROM time_slot_end - time_slot_start) * 60 / 60) - 1) i
+    WHERE time_slot_start + (i * slot_interval) >= '09:00:00' AND time_slot_start + (i * slot_interval) <= '18:00:00'
+  LOOP
+    -- Use the previously created function to check availability
+    IF branch_template.is_room_available(p_room_id, time_slot_start, p_requested_date) THEN
+      -- If the room is available, return the time slot
+      RETURN QUERY SELECT time_slot_start;
+    END IF;
+  END LOOP;
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to seed assessment table after insert into module
+CREATE OR REPLACE FUNCTION branch_template.link_module_assessment()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO branch_template.assessment (assessment_id, assessment_set_date, assessment_due_date, assessment_set_time, assessment_due_time, assessment_visible)
+  SELECT
+    sa.assessment_id,
+    '2024-12-12',               
+    '2025-01-12',               
+    '00:00',                 
+    '23:59',                 
+    TRUE                        
+  FROM shared.assessment AS sa
+  WHERE sa.module_id = NEW.module_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to seed student_assessment table after insert into assessment
+CREATE OR REPLACE FUNCTION branch_template.link_students_to_assessment()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO branch_template.student_assessment (student_id, assessment_id, grade)
+  SELECT 
+    NEW.student_id, 
+    a.assessment_id,
+    0.00
+  FROM shared.assessment AS a
+  WHERE a.module_id = NEW.module_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to update tuition after insert into tuition_payment
+CREATE OR REPLACE FUNCTION branch_template.update_tuition_after_payment() RETURNS TRIGGER AS $$ BEGIN
+  UPDATE
+    branch_template.tuition AS t
+  SET
+    tuition_paid = tuition_paid + tp.tuition_payment_amount,
+    tuition_remaining = tuition_remaining - tp.tuition_payment_amount,
+    tuition_remaining_perc = (
+      (
+        tuition_amount - (tuition_paid + tp.tuition_payment_amount)
+      ) / tuition_amount
+    ) * 100
+  FROM
+    branch_template.tuition_payment AS tp
+  WHERE
+    tp.tuition_payment_id = NEW.tuition_payment_id
+    AND t.tuition_id = NEW.tuition_id;
+RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to seed student_session after insert into session
+CREATE OR REPLACE FUNCTION branch_template.link_students_to_session()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO branch_template.student_session (student_id, session_id, attendance_record)
+  SELECT 
+    sm.student_id, 
+    NEW.session_id, 
+    FALSE
+  FROM branch_template.student_module AS sm
+  WHERE sm.module_id = NEW.module_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to seed student_module after insert into module
+CREATE OR REPLACE FUNCTION branch_template.link_students_to_module()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO branch_template.student_module (student_id, module_id, module_grade, passed)
+  SELECT 
+    NEW.student_id, 
+    cm.module_id,
+    0.00,
+    FALSE
+  FROM branch_template.course_module AS cm
+  WHERE cm.course_id = NEW.course_id; 
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to update student_module to calculate their average grade
+CREATE OR REPLACE FUNCTION branch_template.update_module_grade()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE branch_template.student_module
+  SET 
+    module_grade = (
+      SELECT ROUND(COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0), 2)
+      FROM branch_template.student_assessment AS sa
+      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
+      WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
+    ),
+    passed = (
+      SELECT CASE
+        WHEN COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0) >= 40 THEN TRUE
+        ELSE FALSE
+      END
+      FROM branch_template.student_assessment AS sa
+      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
+      WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
+    )
+  WHERE student_id = NEW.student_id
+    AND module_id = (
+      SELECT module_id
+      FROM shared.assessment
+      WHERE assessment_id = NEW.assessment_id
+    );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to update student_course to calculate their average grade
+CREATE OR REPLACE FUNCTION branch_template.update_course_grade()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE branch_template.student_course
+  SET 
+    culmative_average = (
+      SELECT ROUND(COALESCE(AVG(sm.module_grade), 0), 2)
+      FROM branch_template.student_module AS sm
+      JOIN branch_template.course_module AS cm ON sm.module_id = cm.module_id
+      WHERE sm.student_id = NEW.student_id AND cm.course_id = branch_template.student_course.course_id
+    )
+  WHERE student_id = NEW.student_id
+    AND course_id = (
+      SELECT course_id
+      FROM branch_template.course_module
+      WHERE module_id = NEW.module_id
+    );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger function to update student attendance after update on student_session
+CREATE OR REPLACE FUNCTION branch_template.update_student_attendance()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE branch_template.student
+  SET student_attendance = (
+    SELECT ROUND(CAST(SUM(
+      CASE 
+        WHEN ss.attendance_record THEN 1 
+        ELSE 0 
+      END
+    ) AS NUMERIC) * 100.0 / NULLIF(COUNT(*), 0), 2)
+      FROM branch_template.student_session AS ss
+      JOIN branch_template.session AS s ON ss.session_id = s.session_id
+    WHERE ss.student_id = NEW.student_id
+      AND (s.session_date < CURRENT_DATE OR (s.session_date = CURRENT_DATE AND s.session_start_time <= CURRENT_TIME))
+  )
+  WHERE student_id = NEW.student_id;
+  RETURN NEW;
+END;
 $$ LANGUAGE plpgsql;

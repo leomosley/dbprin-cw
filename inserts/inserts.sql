@@ -1,4 +1,3 @@
-/* Shared inserts */
 -- Records of BRANCH
 INSERT INTO shared.branch (branch_name, branch_status, branch_addr1, branch_addr2, branch_postcode, branch_contact_number, branch_email) 
 VALUES
@@ -341,18 +340,16 @@ VALUES
   ('madison.mitchell@hotmail.com', '07699123456', 'Madison', NULL, 'Mitchell', '7 Cherry Street', NULL, 'Newcastle', 'NE2 3QY', 'Sister'),
   ('nathan.miller@gmail.com', '07700123456', 'Nathan', NULL, 'Miller', '4 Birch Lane', NULL, 'Sheffield', 'S1 9PL', 'Brother');
 
-/* Branch b01 inserts */
-
 -- Records of STAFF
-INSERT INTO branch_b01.staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile, staff_dob)
+INSERT INTO branch_b01.staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile)
 VALUES
-  ('Sophie', NULL, 'Roberts', 'Dr', '123 Maple Street', NULL, 'London', 'SW1A 2AA', 'sophie.roberts@gmail.com', '0113256780', '07912345679', '1988-09-15'),
-  ('John', NULL, 'Smith', 'Dr', '789 Elm Street', NULL, 'London', 'SW1A 2AA', 'john.smith@gmail.com', '0201234567', '07891234567', '1980-03-25'),
-  ('David', NULL, 'Clark', 'Dr', '789 Pine Avenue', NULL, 'Bristol', 'BS1 1AA', 'david.clark@gmail.com', '0123456789', '07712345678', '1978-09-12'),
-  ('Michael', NULL, 'Johnson', 'Dr', '123 Cedar Street', NULL, 'London', 'SW1A 2AA', 'michael.johnson@gmail.com', '0131234567', '07723456789', '1983-02-15'),
-  ('Emily', 'Grace', 'Wilson', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'emily.wilson@gmail.com', '0113256781', '07912345680', '1982-06-25'),
-  ('Noah', 'Edward', 'Wilson', 'Dr', '123 Birch Avenue', NULL, 'London', 'SW1A 2AB', 'noah.wilson@gmail.com', '0203456790', '07892345679', '1976-06-30'),
-  ('Amelia', NULL, 'Thompson', 'Dr', '456 Oak Avenue', NULL, 'Manchester', 'M1 1AA', 'amelia.thompson@gmail.com', '0202345678', '07891234568', '1978-08-05');
+  ('Sophie', NULL, 'Roberts', 'Dr', '123 Maple Street', NULL, 'London', 'SW1A 2AA', 'sophie.roberts@gmail.com', '0113256780', '07912345679'),
+  ('John', NULL, 'Smith', 'Dr', '789 Elm Street', NULL, 'London', 'SW1A 2AA', 'john.smith@gmail.com', '0201234567', '07891234567'),
+  ('David', NULL, 'Clark', 'Dr', '789 Pine Avenue', NULL, 'Bristol', 'BS1 1AA', 'david.clark@gmail.com', '0123456789', '07712345678'),
+  ('Michael', NULL, 'Johnson', 'Dr', '123 Cedar Street', NULL, 'London', 'SW1A 2AA', 'michael.johnson@gmail.com', '0131234567', '07723456789'),
+  ('Emily', 'Grace', 'Wilson', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'emily.wilson@gmail.com', '0113256781', '07912345680'),
+  ('Noah', 'Edward', 'Wilson', 'Dr', '123 Birch Avenue', NULL, 'London', 'SW1A 2AB', 'noah.wilson@gmail.com', '0203456790', '07892345679'),
+  ('Amelia', NULL, 'Thompson', 'Dr', '456 Oak Avenue', NULL, 'Manchester', 'M1 1AA', 'amelia.thompson@gmail.com', '0202345678', '07891234568');
 
 -- Records of STAFF_ROLE
 INSERT INTO branch_b01.staff_role (staff_id, role_id)
@@ -416,14 +413,14 @@ VALUES
   ('c000006', 'm000012');
 
 -- Records of STUDENT
-INSERT INTO branch_b01.student (student_personal_email, student_fname, student_mname, student_lname, student_pronouns, student_addr1, student_addr2, student_city, student_postcode, student_landline, student_mobile, student_dob, student_attendance)
+INSERT INTO branch_b01.student (student_personal_email, student_fname, student_mname, student_lname, student_pronouns, student_addr1, student_addr2, student_city, student_postcode, student_landline, student_mobile, student_attendance)
 VALUES
-  ('alex.braun@gmail.com', 'Alex', NULL, 'Braun', 'He/Him', '123 Main Street', 'Mayfair', 'London', 'SW1A 1AA', '0201234570', '07891234572', '2003-05-15', 0.00),
-  ('jane.smith@outlook.com', 'Jane', NULL, 'Smith', 'She/Her', '456 Park Avenue', NULL, 'Manchester', 'M1 1AA', '0161234569', '07987654323', '2002-10-20', 0.00),
-  ('JOHN.doe@yahoo.com', 'John', 'James', 'Doe', 'He/Him', '123 Main Street', 'Kensington', 'London', 'SW1A 1AA', '0201234571', '07891234573', '2001-05-15', 0.00),
-  ('emily.johnson@mail.co.uk', 'Emily', NULL, 'Johnson', 'She/Her', '789 Oak Lane', NULL, 'Birmingham', 'B1 1AA', '0123456789', '07712345678', '2003-08-18', 0.00),
-  ('michael.brown@gmail.com', 'Michael', 'Luke', 'Brown', 'He/Him', '1010 Maple Street', NULL, 'Edinburgh', 'EH1 1AA', '0131234567', '07723456789', '2001-12-03', 0.00),
-  ('emma.williams@gmail.com', 'Emma', NULL, 'Williams', 'She/Her', '789 Cedar Street', NULL, 'London', 'SW1A 2AB', '0203456789', '07892345678', '2003-04-15', 0.00);
+  ('alex.braun@gmail.com', 'Alex', NULL, 'Braun', 'He/Him', '123 Main Street', 'Mayfair', 'London', 'SW1A 1AA', '0201234570', '07891234572', 0.00),
+  ('jane.smith@outlook.com', 'Jane', NULL, 'Smith', 'She/Her', '456 Park Avenue', NULL, 'Manchester', 'M1 1AA', '0161234569', '07987654323', 0.00),
+  ('JOHN.doe@yahoo.com', 'John', 'James', 'Doe', 'He/Him', '123 Main Street', 'Kensington', 'London', 'SW1A 1AA', '0201234571', '07891234573', 0.00),
+  ('emily.johnson@mail.co.uk', 'Emily', NULL, 'Johnson', 'She/Her', '789 Oak Lane', NULL, 'Birmingham', 'B1 1AA', '0123456789', '07712345678', 0.00),
+  ('michael.brown@gmail.com', 'Michael', 'Luke', 'Brown', 'He/Him', '1010 Maple Street', NULL, 'Edinburgh', 'EH1 1AA', '0131234567', '07723456789', 0.00),
+  ('emma.williams@gmail.com', 'Emma', NULL, 'Williams', 'She/Her', '789 Cedar Street', NULL, 'London', 'SW1A 2AB', '0203456789', '07892345678', 0.00);
 
 -- Records of STUDENT_COURSE
 INSERT INTO branch_b01.student_course (student_id, course_id, feedback, culmative_average, course_rep)
@@ -442,8 +439,8 @@ VALUES
   (2900.00, 0, 2900.00, 0, '2025-08-05'),
   (3000.00, 0, 3000.00, 0, '2025-07-10'),
   (3100.00, 0, 3100.00, 0, '2025-08-15'),
-  (3200.00, 0, 3200.00, 0, '2025-07-20'),
-  (3300.00, 0, 3300.00, 0, '2025-08-25');
+  (3200.00, 0, 3200.00, 0, '2024-07-20'),
+  (3300.00, 0, 3300.00, 0, '2024-08-25');
 
 -- Records of STUDENT_TUITION
 INSERT INTO branch_b01.student_tuition (student_id, tuition_id)
@@ -1147,13 +1144,13 @@ VALUES
 /* UPDATE SEED DATA */
 -- Assign random grades to all student assessments
 UPDATE branch_b01.student_assessment
-SET grade = ROUND(CAST(random() * 100 AS numeric), 2);
+SET grade = ROUND(CAST((random() * 100) AS numeric), 2);
 
 -- Update attendance records (randomly) for all sessions that have passed
 UPDATE branch_b01.student_session AS ss
 SET attendance_record = (
   CASE 
-    WHEN random() > 0.5 THEN TRUE
+    WHEN RANDOM() > 0.5 THEN TRUE
     ELSE FALSE
   END
 )
@@ -1163,5 +1160,3 @@ WHERE EXISTS (
   WHERE s.session_id = ss.session_id
     AND s.session_date < CURRENT_DATE
 );
-
-/* Branch b02 inserts */
