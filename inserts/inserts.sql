@@ -1,4 +1,3 @@
-/* Shared inserts */
 -- Records of BRANCH
 INSERT INTO shared.branch (branch_name, branch_status, branch_addr1, branch_addr2, branch_postcode, branch_contact_number, branch_email) 
 VALUES
@@ -340,8 +339,6 @@ VALUES
   ('daniel.thomas@yahoo.com', '07688123456', 'Daniel', NULL, 'Thomas', '8 Maple Grove', NULL, 'Birmingham', 'B19 2XT', 'Colleague'),
   ('madison.mitchell@hotmail.com', '07699123456', 'Madison', NULL, 'Mitchell', '7 Cherry Street', NULL, 'Newcastle', 'NE2 3QY', 'Sister'),
   ('nathan.miller@gmail.com', '07700123456', 'Nathan', NULL, 'Miller', '4 Birch Lane', NULL, 'Sheffield', 'S1 9PL', 'Brother');
-
-/* Branch b01 inserts */
 
 -- Records of STAFF
 INSERT INTO branch_b01.staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile)
@@ -1153,7 +1150,7 @@ SET grade = ROUND(CAST((random() * 100) AS numeric), 2);
 UPDATE branch_b01.student_session AS ss
 SET attendance_record = (
   CASE 
-    WHEN RANDOM() > 0.33 THEN TRUE
+    WHEN RANDOM() > 0.5 THEN TRUE
     ELSE FALSE
   END
 )
@@ -1163,5 +1160,3 @@ WHERE EXISTS (
   WHERE s.session_id = ss.session_id
     AND s.session_date < CURRENT_DATE
 );
-
-/* Branch b02 inserts */

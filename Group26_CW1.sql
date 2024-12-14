@@ -105,6 +105,175 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Function to retrieve data about attendance in each branch
+CREATE OR REPLACE FUNCTION shared.analyse_branch_attendance()
+RETURNS TABLE (
+  branch_id CHAR(3),
+  avg_student_attendance NUMERIC,
+  avg_module_attendance NUMERIC,
+  avg_course_attendance NUMERIC,
+  top_module_name VARCHAR(50),
+  top_module_attendance NUMERIC,
+  lowest_module_name VARCHAR(50),
+  lowest_module_attendance NUMERIC,
+  top_course_name VARCHAR(50),
+  top_course_attendance NUMERIC,
+  lowest_course_name VARCHAR(50),
+  lowest_course_attendance NUMERIC
+) AS 
+$$
+DECLARE
+  branch RECORD;
+  schema_name TEXT;
+  result RECORD;
+BEGIN
+  FOR branch IN 
+    SELECT b.branch_id FROM shared.branch AS b
+  LOOP
+    schema_name := CONCAT('branch_', branch.branch_id);
+
+    EXECUTE format('
+    SELECT
+      AVG(s.student_attendance) AS avg_student_attendance,
+      AVG(ma."Module Attendance %%") AS avg_module_attendance,
+      AVG(ca."Course Attendance %%") AS avg_course_attendance,
+      (
+        SELECT ma."Module Name"
+        FROM %I.module_attendance AS ma
+        ORDER BY ma."Module Attendance %%" DESC LIMIT 1
+      ) AS top_module_name,
+      (
+        SELECT ma."Module Attendance %%"
+        FROM %I.module_attendance AS ma
+        ORDER BY ma."Module Attendance %%" DESC LIMIT 1
+      ) AS top_module_attendance,
+      (
+        SELECT ma."Module Name"
+        FROM %I.module_attendance AS ma
+        ORDER BY ma."Module Attendance %%" ASC LIMIT 1
+      ) AS lowest_module_name,
+      (
+        SELECT ma."Module Attendance %%"
+        FROM %I.module_attendance AS ma
+        ORDER BY ma."Module Attendance %%" ASC LIMIT 1
+      ) AS lowest_module_attendance,
+      (
+        SELECT ca."Course Name"
+        FROM %I.course_attendance AS ca
+        ORDER BY ca."Course Attendance %%" DESC LIMIT 1
+      ) AS top_course_name,
+      (
+        SELECT ca."Course Attendance %%"
+        FROM %I.course_attendance AS ca
+        ORDER BY ca."Course Attendance %%" DESC LIMIT 1
+      ) AS top_course_attendance,
+      (
+        SELECT ca."Course Name"
+        FROM %I.course_attendance AS ca
+        ORDER BY ca."Course Attendance %%" ASC LIMIT 1
+      ) AS lowest_course_name,
+      (
+        SELECT ca."Course Attendance %%"
+        FROM %I.course_attendance AS ca
+        ORDER BY ca."Course Attendance %%" ASC LIMIT 1
+      ) AS lowest_course_attendance
+    FROM 
+      %I.student AS s, 
+      %I.module_attendance AS ma, 
+      %I.course_attendance AS ca
+    ', schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name)
+    INTO result;
+
+    RETURN QUERY SELECT 
+      branch.branch_id,
+      result.avg_student_attendance,
+      result.avg_module_attendance,
+      result.avg_course_attendance,
+      result.top_module_name,
+      result.top_module_attendance,
+      result.lowest_module_name,
+      result.lowest_module_attendance,
+      result.top_course_name,
+      result.top_course_attendance,
+      result.lowest_course_name,
+      result.lowest_course_attendance;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to retrieive information about the number of students in each course at each branch
+CREATE OR REPLACE FUNCTION shared.count_student_course()
+RETURNS TABLE (
+  branch_id CHAR(3),
+  course_id CHAR(7),
+  count BIGINT
+) AS 
+$$
+DECLARE
+  branch RECORD;
+  schema_name TEXT;
+  result RECORD;
+BEGIN
+  FOR branch IN 
+    SELECT b.branch_id FROM shared.branch AS b
+  LOOP
+    schema_name := CONCAT('branch_', branch.branch_id);
+
+    FOR result IN EXECUTE format('
+      SELECT
+        c.course_id,
+        COUNT(sc.course_id) AS count
+      FROM 
+        %I.course AS c
+        JOIN %I.student_course AS sc USING (course_id)
+      GROUP BY c.course_id
+    ', schema_name, schema_name)
+    LOOP
+      RETURN QUERY SELECT 
+        branch.branch_id,
+        result.course_id,
+        result.count;
+    END LOOP;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to retrieive information about students with lower performance in each branch
+CREATE OR REPLACE FUNCTION shared.get_all_low_performing_students()
+RETURNS TABLE (
+  branch_id TEXT,
+  student_id CHAR(10),
+  name TEXT,
+  email CHAR(22),
+  attendance DECIMAL(5, 2),
+  attendance_rating TEXT,
+  courses_failing TEXT
+) AS 
+$$
+DECLARE
+  branch RECORD;
+  schema_name TEXT;
+BEGIN
+  FOR branch IN 
+    SELECT b.branch_id FROM shared.branch AS b
+  LOOP
+    schema_name := CONCAT('branch_', branch.branch_id);
+
+    RETURN QUERY EXECUTE format('
+      SELECT
+        %L AS branch_id,
+        "Student ID" AS student_id,
+        "Student Name" AS name,
+        "Student Email" AS email,
+        "Attendance %%"::DECIMAL(5, 2) AS attendance,
+        "Attendance Rating" AS attendance_rating,
+        "Courses Failing" AS courses_failing
+      FROM %I.low_performing_students
+    ', branch.branch_id, schema_name);
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Function to dynamically create schema
 CREATE OR REPLACE FUNCTION shared.create_schema(schema_name TEXT)
 RETURNS void AS $$
@@ -1851,102 +2020,6 @@ CREATE TABLE shared.emergency_contact (
 
 /* CREATE SHARED VIEWS */
 
--- Function to retrieve data about attendance in each branch
-CREATE OR REPLACE FUNCTION shared.analyse_branch_attendance()
-RETURNS TABLE (
-  branch_id CHAR(3),
-  avg_student_attendance NUMERIC,
-  avg_module_attendance NUMERIC,
-  avg_course_attendance NUMERIC,
-  top_module_name VARCHAR(50),
-  top_module_attendance NUMERIC,
-  lowest_module_name VARCHAR(50),
-  lowest_module_attendance NUMERIC,
-  top_course_name VARCHAR(50),
-  top_course_attendance NUMERIC,
-  lowest_course_name VARCHAR(50),
-  lowest_course_attendance NUMERIC
-) AS 
-$$
-DECLARE
-  branch RECORD;
-  schema_name TEXT;
-  result RECORD;
-BEGIN
-  FOR branch IN 
-    SELECT b.branch_id FROM shared.branch AS b
-  LOOP
-    schema_name := CONCAT('branch_', branch.branch_id);
-
-    EXECUTE format('
-    SELECT
-      AVG(s.student_attendance) AS avg_student_attendance,
-      AVG(ma."Module Attendance %%") AS avg_module_attendance,
-      AVG(ca."Course Attendance %%") AS avg_course_attendance,
-      (
-        SELECT ma."Module Name"
-        FROM %I.module_attendance AS ma
-        ORDER BY ma."Module Attendance %%" DESC LIMIT 1
-      ) AS top_module_name,
-      (
-        SELECT ma."Module Attendance %%"
-        FROM %I.module_attendance AS ma
-        ORDER BY ma."Module Attendance %%" DESC LIMIT 1
-      ) AS top_module_attendance,
-      (
-        SELECT ma."Module Name"
-        FROM %I.module_attendance AS ma
-        ORDER BY ma."Module Attendance %%" ASC LIMIT 1
-      ) AS lowest_module_name,
-      (
-        SELECT ma."Module Attendance %%"
-        FROM %I.module_attendance AS ma
-        ORDER BY ma."Module Attendance %%" ASC LIMIT 1
-      ) AS lowest_module_attendance,
-      (
-        SELECT ca."Course Name"
-        FROM %I.course_attendance AS ca
-        ORDER BY ca."Course Attendance %%" DESC LIMIT 1
-      ) AS top_course_name,
-      (
-        SELECT ca."Course Attendance %%"
-        FROM %I.course_attendance AS ca
-        ORDER BY ca."Course Attendance %%" DESC LIMIT 1
-      ) AS top_course_attendance,
-      (
-        SELECT ca."Course Name"
-        FROM %I.course_attendance AS ca
-        ORDER BY ca."Course Attendance %%" ASC LIMIT 1
-      ) AS lowest_course_name,
-      (
-        SELECT ca."Course Attendance %%"
-        FROM %I.course_attendance AS ca
-        ORDER BY ca."Course Attendance %%" ASC LIMIT 1
-      ) AS lowest_course_attendance
-    FROM 
-      %I.student AS s, 
-      %I.module_attendance AS ma, 
-      %I.course_attendance AS ca
-    ', schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name)
-    INTO result;
-
-    RETURN QUERY SELECT 
-      branch.branch_id,
-      result.avg_student_attendance,
-      result.avg_module_attendance,
-      result.avg_course_attendance,
-      result.top_module_name,
-      result.top_module_attendance,
-      result.lowest_module_name,
-      result.lowest_module_attendance,
-      result.top_course_name,
-      result.top_course_attendance,
-      result.lowest_course_name,
-      result.lowest_course_attendance;
-  END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
 -- View to show information about attendance for each branch
 -- Average student, module, and course attendance 
 -- Extremes (worst and best) of module and course attendance
@@ -1978,43 +2051,6 @@ FROM
   JOIN shared.branch AS b USING (branch_id)
 ORDER BY b.branch_id;
 
--- Function to retrieive information about the number of students in each course at each branch
-CREATE OR REPLACE FUNCTION shared.count_student_course()
-RETURNS TABLE (
-  branch_id CHAR(3),
-  course_id CHAR(7),
-  count BIGINT
-) AS 
-$$
-DECLARE
-  branch RECORD;
-  schema_name TEXT;
-  result RECORD;
-BEGIN
-  FOR branch IN 
-    SELECT b.branch_id FROM shared.branch AS b
-  LOOP
-    schema_name := CONCAT('branch_', branch.branch_id);
-
-    FOR result IN EXECUTE format('
-      SELECT
-        c.course_id,
-        COUNT(sc.course_id) AS count
-      FROM 
-        %I.course AS c
-        JOIN %I.student_course AS sc USING (course_id)
-      GROUP BY c.course_id
-    ', schema_name, schema_name)
-    LOOP
-      RETURN QUERY SELECT 
-        branch.branch_id,
-        result.course_id,
-        result.count;
-    END LOOP;
-  END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
 -- View to show number of students in each course across all branches to show course popularity
 CREATE OR REPLACE VIEW shared.course_popularity AS
 SELECT
@@ -2027,43 +2063,7 @@ FROM
 GROUP BY "Course ID", "Course Name"
 ORDER BY "Total Students" DESC;
 
--- Function to retrieive information about students with lower performance in each branch
-CREATE OR REPLACE FUNCTION shared.get_all_low_performing_students()
-RETURNS TABLE (
-  branch_id TEXT,
-  student_id CHAR(10),
-  name TEXT,
-  email CHAR(22),
-  attendance DECIMAL(5, 2),
-  attendance_rating TEXT,
-  courses_failing TEXT
-) AS 
-$$
-DECLARE
-  branch RECORD;
-  schema_name TEXT;
-BEGIN
-  FOR branch IN 
-    SELECT b.branch_id FROM shared.branch AS b
-  LOOP
-    schema_name := CONCAT('branch_', branch.branch_id);
-
-    RETURN QUERY EXECUTE format('
-      SELECT
-        %L AS branch_id,
-        "Student ID" AS student_id,
-        "Student Name" AS name,
-        "Student Email" AS email,
-        "Attendance %%"::DECIMAL(5, 2) AS attendance,
-        "Attendance Rating" AS attendance_rating,
-        "Courses Failing" AS courses_failing
-      FROM %I.low_performing_students
-    ', branch.branch_id, schema_name);
-  END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
--- 
+-- View to show all low performing students across all branches
 CREATE OR REPLACE VIEW shared.branch_low_performing_students AS
 WITH lps AS (
   SELECT * 
@@ -2222,7 +2222,6 @@ USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE') OR pg_has_role(CURRENT_U
 -- Emergency Contact Policy
 ALTER TABLE shared.emergency_contact ENABLE ROW LEVEL SECURITY;
 
-/* Shared inserts */
 -- Records of BRANCH
 INSERT INTO shared.branch (branch_name, branch_status, branch_addr1, branch_addr2, branch_postcode, branch_contact_number, branch_email) 
 VALUES
@@ -2564,8 +2563,6 @@ VALUES
   ('daniel.thomas@yahoo.com', '07688123456', 'Daniel', NULL, 'Thomas', '8 Maple Grove', NULL, 'Birmingham', 'B19 2XT', 'Colleague'),
   ('madison.mitchell@hotmail.com', '07699123456', 'Madison', NULL, 'Mitchell', '7 Cherry Street', NULL, 'Newcastle', 'NE2 3QY', 'Sister'),
   ('nathan.miller@gmail.com', '07700123456', 'Nathan', NULL, 'Miller', '4 Birch Lane', NULL, 'Sheffield', 'S1 9PL', 'Brother');
-
-/* Branch b01 inserts */
 
 -- Records of STAFF
 INSERT INTO branch_b01.staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile)
@@ -3369,6 +3366,7 @@ VALUES
 -- Records of STAFF_ASSIGNMENT
 
 /* UPDATE SEED DATA */
+
 -- Assign random grades to all student assessments
 UPDATE branch_b01.student_assessment
 SET grade = ROUND(CAST((random() * 100) AS numeric), 2);
@@ -3377,7 +3375,7 @@ SET grade = ROUND(CAST((random() * 100) AS numeric), 2);
 UPDATE branch_b01.student_session AS ss
 SET attendance_record = (
   CASE 
-    WHEN RANDOM() > 0.33 THEN TRUE
+    WHEN RANDOM() > 0.5 THEN TRUE
     ELSE FALSE
   END
 )

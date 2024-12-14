@@ -1,7 +1,4 @@
-/* CREATE SHARED SCHEMA */
-CREATE SCHEMA shared;
-
-/* CREATE SHARED FUNCTIONS */
+/* SHARED FUNCTIONS */
 
 -- Function to validate staff_id, staff_company_email, staff_personal_email
 CREATE OR REPLACE FUNCTION shared.validate_staff()
@@ -1820,404 +1817,226 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-/* CREATE SHARED ENUM TYPES */
-CREATE TYPE shared.branch_status_enum AS ENUM ('Closed', 'Open');
-CREATE TYPE shared.dep_type_enum AS ENUM ('Educational', 'Administrative', 'Operational', 'Maintenance');
-CREATE TYPE shared.assessment_type_enum AS ENUM ('Exam', 'Coursework', 'Essay', 'Presentation');
-CREATE TYPE shared.title_enum AS ENUM ('Mr', 'Mrs', 'Ms', 'Dr');
-CREATE TYPE shared.payment_method_enum AS ENUM ('Credit Card', 'Debit Card', 'Direct Debit', 'Bank Transfer');
-CREATE TYPE shared.session_type_enum AS ENUM ('Lecture', 'Practical');
-CREATE TYPE shared.academ_lvl_enum AS ENUM ('L4', 'L5', 'L6', 'L7', 'L8');
+/* BRANCH SPECIFC FUNCTIONS */
 
-/* CREATE SHARED SEQUENCES */
-CREATE SEQUENCE shared.session_id_seq;
-CREATE SEQUENCE shared.tuition_payment_reference_seq;
-CREATE SEQUENCE shared.student_id_seq;
-CREATE SEQUENCE shared.staff_id_seq;
+-- Function to determine if specific room is free at a specific time and date
+CREATE OR REPLACE FUNCTION branch_template.is_room_available(
+  p_room_id INT,
+  p_requested_time TIME,
+  p_requested_date DATE
+) 
+RETURNS BOOLEAN AS $$
+DECLARE
+  room_session_count INT;
+BEGIN
+  IF p_requested_time < '09:00:00'::TIME OR p_requested_time > '18:00:00'::TIME THEN
+    RAISE EXCEPTION 'Requested time must be between 09:00 and 18:00';
+  END IF;
+  IF EXTRACT(DOW FROM p_requested_date) IN (0, 6) THEN  -- 0 = Sunday, 6 = Saturday
+    RAISE EXCEPTION 'Requested date cannot be a weekend';
+  END IF;
+  SELECT COUNT(*)
+  INTO room_session_count
+  FROM branch_template.session
+  WHERE 
+    room_id = p_room_id
+    AND session_date = p_requested_date
+    AND (
+      (session_start_time <= p_requested_time AND session_end_time > p_requested_time)  -- requested time overlaps with an ongoing session
+      OR
+      (session_start_time < (p_requested_time + interval '1 minute') AND session_end_time >= (p_requested_time + interval '1 minute'))  -- requested time overlaps with session start time
+    );
+  IF room_session_count > 0 THEN
+    RETURN FALSE;
+  ELSE
+    RETURN TRUE;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
 
-/* CREATE SHARED ROLES */
--- Student role
-CREATE ROLE student_role NOLOGIN;
-
--- Staff role
-CREATE ROLE staff_role NOLOGIN;
-
--- Teaching staff role
-CREATE ROLE teaching_staff_role NOLOGIN;
-
--- Admin staff role
-CREATE ROLE admin_staff_role NOLOGIN;
-
-/* CREATE SHARED TABLES */
-
--- --------------------------
--- Table structure for BRANCH
--- --------------------------
-CREATE SEQUENCE shared.branch_id_seq;
-
-CREATE TABLE shared.branch (
-  branch_id CHAR(3) DEFAULT (
-    CONCAT('b', to_char(nextval('shared.branch_id_seq'), 'FM00'))
-  ) PRIMARY KEY,
-  branch_name VARCHAR(50) NOT NULL,
-  branch_status shared.branch_status_enum NOT NULL,
-  branch_addr1 VARCHAR(150) NOT NULL,
-  branch_addr2 VARCHAR(150),
-  branch_postcode VARCHAR(10) NOT NULL,
-  branch_contact_number VARCHAR(15) NOT NULL,
-  branch_email VARCHAR(150) NOT NULL
-);
-
--- Optimises queries and joins involving branches.
-CREATE INDEX shared_idx_branch_id ON shared.branch (branch_id);
-
--- Trigger to create_schema after insert on branch
-CREATE TRIGGER trigger_create_schema
-AFTER INSERT ON shared.branch
-FOR EACH ROW
-EXECUTE FUNCTION shared.after_insert_create_schema();
-
--- ------------------------------
--- Table structure for DEPARTMENT
--- ------------------------------
-CREATE SEQUENCE shared.dep_id_seq;
-
-CREATE TABLE shared.department (
-  dep_id char(7) DEFAULT (
-    CONCAT('d', to_char(nextval('shared.dep_id_seq'), 'FM000000'))
-  ) PRIMARY KEY,
-  dep_name VARCHAR(50) NOT NULL,
-  dep_type shared.dep_type_enum NOT NULL,
-  dep_description TEXT
-);
-
--- --------------------------
--- Table structure for COURSE
--- --------------------------
-CREATE SEQUENCE shared.course_id_seq;
-
-CREATE TABLE shared.course (
-  course_id CHAR(7) DEFAULT (
-    CONCAT('c', to_char(nextval('shared.course_id_seq'), 'FM000000'))
-  ) PRIMARY KEY,
-  course_name VARCHAR(50) NOT NULL,
-  course_description TEXT,
-  course_entry_requirements TEXT,
-  course_length SMALLINT NOT NULL
-);
-
--- Speeds up searches or groupings involving course names
-CREATE INDEX shared_idx_course_name ON shared.course (course_name);
-
--- -------------------------------------
--- Table structure for DEPARTMENT_COURSE
--- -------------------------------------
-CREATE TABLE shared.department_course (
-  dep_id CHAR(7) NOT NULL,
-  course_id CHAR(7) NOT NULL,
-  PRIMARY KEY (dep_id, course_id),
-  FOREIGN KEY (dep_id) REFERENCES shared.department (dep_id),
-  FOREIGN KEY (course_id) REFERENCES shared.course (course_id)
-);
-
--- --------------------------
--- Table structure for MODULE
--- --------------------------
-CREATE SEQUENCE shared.module_id_seq;
-
-CREATE TABLE shared.module (
-  module_id CHAR(7) DEFAULT (
-    CONCAT('m', to_char(nextval('shared.module_id_seq'), 'FM000000'))
-  ) PRIMARY KEY,
-  module_name VARCHAR(50) NOT NULL,
-  module_description TEXT,
-  academ_lvl shared.academ_lvl_enum NOT NULL,
-  module_credits INT NOT NULL,
-  module_status VARCHAR(20) NOT NULL,
-  last_reviewed DATE NOT NULL,
-  notional_hours DECIMAL(5, 2) NOT NULL,
-  module_duration INT NOT NULL, 
-  CONSTRAINT valid_duration CHECK (module_duration IN (1, 2))
-);
-
--- Improves performance for grouping or searching based on module names in analytics views.
-CREATE INDEX shared_idx_module_name ON shared.module (module_name);
-
--- ----------------------------------
--- Table structure for COURSE_MODULE
--- ----------------------------------
-CREATE TABLE shared.course_module (
-  course_id CHAR(7) NOT NULL,
-  module_id CHAR(7) NOT NULL,
-  PRIMARY KEY (course_id, module_id),
-  FOREIGN KEY (course_id) REFERENCES shared.course (course_id),
-  FOREIGN KEY (module_id) REFERENCES shared.module (module_id)
-);
-
--- ------------------------------
--- Table structure for ASSESSMENT
--- ------------------------------
-CREATE SEQUENCE shared.assessment_id_seq;
-
-CREATE TABLE shared.assessment (
-  assessment_id CHAR(10) DEFAULT (
-    CONCAT('a', to_char(nextval('shared.assessment_id_seq'), 'FM000000000'))
-  ) PRIMARY KEY,
-  module_id CHAR(7) NOT NULL,
-  assessment_title VARCHAR(50) NOT NULL,
-  assessment_description TEXT,
-  assessment_type shared.assessment_type_enum NOT NULL,
-  assessment_weighting DECIMAL(5, 2) NOT NULL,
-  assessment_attachment TEXT,
-  FOREIGN KEY (module_id) REFERENCES shared.module (module_id),
-  CONSTRAINT valid_weight CHECK (assessment_weighting >= 0 AND assessment_weighting <= 100)
-);
-
--- ------------------------
--- Table structure for ROLE
--- ------------------------
-CREATE TABLE shared.role (
-  role_id SERIAL PRIMARY KEY,
-  role_name VARCHAR(50) NOT NULL
-);
-
--- ----------------------------
--- Table structure for FACILITY
--- ----------------------------
-CREATE TABLE shared.facility (
-  facility_id SERIAL PRIMARY KEY,
-  facility_total_quantity INT,
-  facility_name VARCHAR(100) NOT NULL,
-  facility_description TEXT,
-  facility_notes TEXT
-);
-
--- -----------------------------
--- Table structure for ROOM_TYPE
--- -----------------------------
-CREATE TABLE shared.room_type (
-  room_type_id SERIAL PRIMARY KEY,
-  type_name VARCHAR(100) NOT NULL,
-  type_description TEXT
-);
-
--- -------------------------------------
--- Table structure for EMERGENCY_CONTACT
--- -------------------------------------
-CREATE TABLE shared.emergency_contact (
-  contact_id SERIAL PRIMARY KEY,
-  contact_email VARCHAR(150) NOT NULL UNIQUE,
-  contact_phone CHAR(15) NOT NULL UNIQUE,
-  contact_fname VARCHAR(100) NOT NULL,
-  contact_wname VARCHAR(100),
-  contact_lname VARCHAR(100) NOT NULL,
-  contact_addr1 VARCHAR(150) NOT NULL,
-  contact_addr2 VARCHAR(150),
-  contact_city VARCHAR(100) NOT NULL,
-  contact_postcode VARCHAR(10) NOT NULL,
-  contact_relationship VARCHAR(50) NOT NULL
-);
-
-/* CREATE SHARED VIEWS */
-
--- View to show information about attendance for each branch
--- Average student, module, and course attendance 
--- Extremes (worst and best) of module and course attendance
-CREATE OR REPLACE VIEW shared.branch_attendance AS
-SELECT 
-  b.branch_id AS "Branch ID",
-  b.branch_name AS "Branch Name",
-  CONCAT(ROUND(saba.avg_student_attendance, 2), '%') AS "Average Student Attendance",
-  CONCAT(ROUND(saba.avg_module_attendance, 2), '%') AS "Average Module Attendance",
-  CONCAT(ROUND(saba.avg_course_attendance, 2), '%') AS "Average Course Attendance",
-  CONCAT(
-    saba.top_module_name,
-    ' (', ROUND(saba.top_module_attendance, 2), '%)'
-  ) AS "Best Module Attendance",
-  CONCAT(
-    saba.lowest_module_name,
-    ' (', ROUND(saba.lowest_module_attendance, 2), '%)'
-  ) AS "Worst Module Attendance",
-  CONCAT(
-    saba.top_course_name,
-    ' (', ROUND(saba.top_course_attendance, 2), '%)'
-  ) AS "Best Course Attendance",
-  CONCAT(
-    saba.lowest_course_name,
-    ' (', ROUND(saba.lowest_course_attendance, 2), '%)'
-  ) AS "Worst Course Attendance"
-FROM 
-  shared.analyse_branch_attendance() AS saba
-  JOIN shared.branch AS b USING (branch_id)
-ORDER BY b.branch_id;
-
--- View to show number of students in each course across all branches to show course popularity
-CREATE OR REPLACE VIEW shared.course_popularity AS
-SELECT
-  c.course_id AS "Course ID",
-  c.course_name AS "Course Name",
-  SUM(css.count) AS "Total Students"
-FROM
-  shared.course AS c
-  JOIN shared.count_student_course() AS css USING (course_id)
-GROUP BY "Course ID", "Course Name"
-ORDER BY "Total Students" DESC;
-
--- View to show all low performing students across all branches
-CREATE OR REPLACE VIEW shared.branch_low_performing_students AS
-WITH lps AS (
-  SELECT * 
-  FROM shared.get_all_low_performing_students()
+-- Function to find available time slots for a specific room on a specific date
+CREATE OR REPLACE FUNCTION branch_template.get_day_available_room_time(
+  p_room_id INT,
+  p_requested_date DATE
 )
-SELECT 
-  lps.branch_id AS "Branch ID",
-  bt.total_low_performing_students AS "Branch Total Low Performing Students",
-  ROUND(
-    (bt.total_low_performing_students * 100.0) / ts.total_students_in_branch, 
-    2
-  ) AS "Percentage of Students Failing",
-  lps.student_id AS "Student ID",
-  lps.name AS "Student Name",
-  lps.email AS "Student Email",
-  lps.attendance AS "Attendance %",
-  lps.attendance_rating AS "Attendance Rating",
-  lps.courses_failing AS "Courses Failing"
-FROM 
-  lps
-  JOIN (
-    SELECT 
-      branch_id, 
-      COUNT(*) AS total_low_performing_students
-    FROM lps
-    GROUP BY branch_id
-  ) AS bt USING (branch_id)
-  JOIN (
-    SELECT 
-      branch_id, 
-      COUNT(*) AS total_students_in_branch
-    FROM lps
-    GROUP BY branch_id
-  ) AS ts USING (branch_id)
-ORDER BY 
-  "Branch ID",
-  "Attendance %";
+RETURNS SETOF TIME AS $$
+DECLARE
+  time_slot_start TIME := '09:00:00'::TIME;
+  time_slot_end TIME := '18:00:00'::TIME;
+  slot_interval INTERVAL := '1 hour';
+BEGIN
+  -- Loop through each time slot from 09:00 to 18:00 in 60-minute intervals
+  FOR time_slot_start IN
+    SELECT time_slot_start + (i * slot_interval) 
+    FROM GENERATE_SERIES(0, (EXTRACT(HOUR FROM time_slot_end - time_slot_start) * 60 / 60) - 1) i
+    WHERE time_slot_start + (i * slot_interval) >= '09:00:00' AND time_slot_start + (i * slot_interval) <= '18:00:00'
+  LOOP
+    -- Use the previously created function to check availability
+    IF branch_template.is_room_available(p_room_id, time_slot_start, p_requested_date) THEN
+      -- If the room is available, return the time slot
+      RETURN QUERY SELECT time_slot_start;
+    END IF;
+  END LOOP;
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
 
-/* GRANT ACCESS FOR SHARED SCHEMA */
+-- Trigger function to seed assessment table after insert into module
+CREATE OR REPLACE FUNCTION branch_template.link_module_assessment()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO branch_template.assessment (assessment_id, assessment_set_date, assessment_due_date, assessment_set_time, assessment_due_time, assessment_visible)
+  SELECT
+    sa.assessment_id,
+    '2024-12-12',               
+    '2025-01-12',               
+    '00:00',                 
+    '23:59',                 
+    TRUE                        
+  FROM shared.assessment AS sa
+  WHERE sa.module_id = NEW.module_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Grant SELECT access to all tables in the shared schema except emergency_contact and role
-GRANT SELECT ON ALL TABLES IN SCHEMA shared TO student_role;
-REVOKE SELECT ON shared.emergency_contact, shared.role FROM student_role;
+-- Trigger function to seed student_assessment table after insert into assessment
+CREATE OR REPLACE FUNCTION branch_template.link_students_to_assessment()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO branch_template.student_assessment (student_id, assessment_id, grade)
+  SELECT 
+    NEW.student_id, 
+    a.assessment_id,
+    0.00
+  FROM shared.assessment AS a
+  WHERE a.module_id = NEW.module_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Grant SELECT access to specific tables in the shared schema
-GRANT SELECT ON shared.role,
-                shared.department,
-                shared.room_type,
-                shared.facility,
-                shared.branch
-TO staff_role;
+-- Trigger function to update tuition after insert into tuition_payment
+CREATE OR REPLACE FUNCTION branch_template.update_tuition_after_payment() RETURNS TRIGGER AS $$ BEGIN
+  UPDATE
+    branch_template.tuition AS t
+  SET
+    tuition_paid = tuition_paid + tp.tuition_payment_amount,
+    tuition_remaining = tuition_remaining - tp.tuition_payment_amount,
+    tuition_remaining_perc = (
+      (
+        tuition_amount - (tuition_paid + tp.tuition_payment_amount)
+      ) / tuition_amount
+    ) * 100
+  FROM
+    branch_template.tuition_payment AS tp
+  WHERE
+    tp.tuition_payment_id = NEW.tuition_payment_id
+    AND t.tuition_id = NEW.tuition_id;
+RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
 
--- Grant all the permissions of staff_role
-GRANT staff_role TO teaching_staff_role;
+-- Trigger function to seed student_session after insert into session
+CREATE OR REPLACE FUNCTION branch_template.link_students_to_session()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO branch_template.student_session (student_id, session_id, attendance_record)
+  SELECT 
+    sm.student_id, 
+    NEW.session_id, 
+    FALSE
+  FROM branch_template.student_module AS sm
+  WHERE sm.module_id = NEW.module_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Grant SELECT access to all tables in the shared schema except emergency_contact
-GRANT SELECT ON ALL TABLES IN SCHEMA shared TO teaching_staff_role;
-REVOKE SELECT ON shared.emergency_contact FROM teaching_staff_role;
+-- Trigger function to seed student_module after insert into module
+CREATE OR REPLACE FUNCTION branch_template.link_students_to_module()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO branch_template.student_module (student_id, module_id, module_grade, passed)
+  SELECT 
+    NEW.student_id, 
+    cm.module_id,
+    0.00,
+    FALSE
+  FROM branch_template.course_module AS cm
+  WHERE cm.course_id = NEW.course_id; 
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Grant CREATE and UPDATE access to shared.assessment
-GRANT CREATE, UPDATE ON shared.assessment TO teaching_staff_role;
+-- Trigger function to update student_module to calculate their average grade
+CREATE OR REPLACE FUNCTION branch_template.update_module_grade()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE branch_template.student_module
+  SET 
+    module_grade = (
+      SELECT ROUND(COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0), 2)
+      FROM branch_template.student_assessment AS sa
+      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
+      WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
+    ),
+    passed = (
+      SELECT CASE
+        WHEN COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0) >= 40 THEN TRUE
+        ELSE FALSE
+      END
+      FROM branch_template.student_assessment AS sa
+      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
+      WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
+    )
+  WHERE student_id = NEW.student_id
+    AND module_id = (
+      SELECT module_id
+      FROM shared.assessment
+      WHERE assessment_id = NEW.assessment_id
+    );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Grant all the permissions of staff_role and allow it to bypass RLS
-GRANT staff_role TO admin_staff_role;
-ALTER ROLE admin_staff_role SET row_security = off;
+-- Trigger function to update student_course to calculate their average grade
+CREATE OR REPLACE FUNCTION branch_template.update_course_grade()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE branch_template.student_course
+  SET 
+    culmative_average = (
+      SELECT ROUND(COALESCE(AVG(sm.module_grade), 0), 2)
+      FROM branch_template.student_module AS sm
+      JOIN branch_template.course_module AS cm ON sm.module_id = cm.module_id
+      WHERE sm.student_id = NEW.student_id AND cm.course_id = branch_template.student_course.course_id
+    )
+  WHERE student_id = NEW.student_id
+    AND course_id = (
+      SELECT course_id
+      FROM branch_template.course_module
+      WHERE module_id = NEW.module_id
+    );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Grant SELECT, UPDATE, CREATE, DELETE access to all tables in all schemas
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA shared TO admin_staff_role;
-
-/* ENABLE RLS AND CREATE FOR SHARED TABLES */
--- Branch Policy
-ALTER TABLE shared.branch ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY access_policy_shared_branch
-ON shared.branch
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
-
--- Department Policy
-ALTER TABLE shared.department ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY access_policy_shared_department
-ON shared.department
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
-
--- Course Policy
-ALTER TABLE shared.course ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY access_policy_shared_course
-ON shared.course
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_teaching_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
-
--- Department Course Policy
-ALTER TABLE shared.department_course ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY access_policy_shared_department_course
-ON shared.department_course
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_teaching_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
-
--- Module Policy
-ALTER TABLE shared.module ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY access_policy_shared_module
-ON shared.module
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_teaching_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
-
--- Course Module Policy
-ALTER TABLE shared.course_module ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY access_policy_shared_course_module
-ON shared.course_module
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_teaching_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
-
--- Assessment Policy
-ALTER TABLE shared.assessment ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY staff_access_policy_shared_assessment
-ON shared.assessment
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE'));
-
-CREATE POLICY student_access_policy_shared_assessment
-ON branch_template.staff
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE'));
-
--- Role Policy
-ALTER TABLE shared.role ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY access_policy_shared_role
-ON shared.role
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE'));
-
--- Facility Policty
-ALTER TABLE shared.facility ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY access_policy_shared_facilitiy
-ON shared.facility
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE'));
-
--- Room Type Policy
-ALTER TABLE shared.room_type ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY access_policy_shared_room_type
-ON shared.room_type
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE') OR pg_has_role(CURRENT_USER, 'student_role', 'USAGE'));
-
--- Emergency Contact Policy
-ALTER TABLE shared.emergency_contact ENABLE ROW LEVEL SECURITY;
+-- Trigger function to update student attendance after update on student_session
+CREATE OR REPLACE FUNCTION branch_template.update_student_attendance()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE branch_template.student
+  SET student_attendance = (
+    SELECT ROUND(CAST(SUM(
+      CASE 
+        WHEN ss.attendance_record THEN 1 
+        ELSE 0 
+      END
+    ) AS NUMERIC) * 100.0 / NULLIF(COUNT(*), 0), 2)
+      FROM branch_template.student_session AS ss
+      JOIN branch_template.session AS s ON ss.session_id = s.session_id
+    WHERE ss.student_id = NEW.student_id
+      AND (s.session_date < CURRENT_DATE OR (s.session_date = CURRENT_DATE AND s.session_start_time <= CURRENT_TIME))
+  )
+  WHERE student_id = NEW.student_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
