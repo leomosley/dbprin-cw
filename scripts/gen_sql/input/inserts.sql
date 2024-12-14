@@ -1,381 +1,36 @@
-/* Shared inserts */
--- Records of BRANCH
-INSERT INTO shared.branch (branch_name, branch_status, branch_addr1, branch_addr2, branch_postcode, branch_contact_number, branch_email) 
-VALUES
-  ('SES London', 'Open', '123 High Street', 'Westminster', 'SW1A 1AA', '020 7946 0958', 'london@ses.edu.org');
-  -- ('SES Manchester', 'Open', '45 Oxford Road', 'Manchester City Centre', 'M1 5QA', '0161 306 6000', 'manchester@ses.edu.org');
-
--- Records of DEPARTMENT
-INSERT INTO shared.department (dep_name, dep_type, dep_description) 
-VALUES
-  ('Mathematics', 'Educational', 'Department of Mathematics'),
-  ('Arts', 'Educational', 'Department of Arts'),
-  ('Computing', 'Educational', 'Department of Computing'),
-  ('Humanities', 'Educational', 'Department of Humanities'),
-  ('Science', 'Educational', 'Department of Science'),
-  ('Vocational Training', 'Educational', 'Department of Vocational Training'),
-  ('Finance', 'Administrative', NULL),
-  ('Facilities and Maintenance', 'Maintenance', NULL),
-  ('SES Operations', 'Operational', 'Manages the SES operations and infrastructure'),
-  ('Human Resources', 'Administrative', NULL);
-
--- Records of COURSE
-INSERT INTO shared.course (course_name, course_description, course_entry_requirements, course_length)
-VALUES
-  ('Advanced Calculus', 'A deep dive into calculus, focusing on multivariable calculus and real analysis.', 'A-level Mathematics or equivalent.', 3),
-  ('Machine Learning', 'An introduction to machine learning algorithms and their mathematical foundations.', 'A-level Mathematics and Programming experience.', 3 ),
-  ('Modern Art Techniques', 'Explores various techniques and styles used in modern art, with practical workshops.', 'Portfolio submission required.', 3),
-  ('Art History and Critique', 'A comprehensive study of art history from antiquity to the present day.', 'A-level History or equivalent.', 3),
-  ('Software Engineering', 'Focuses on the principles of software design, testing, and project management.', 'A-level Mathematics or equivalent.', 3),
-  ('Cybersecurity', 'An in-depth look at cybersecurity principles, including threat analysis and defense mechanisms.', 'A-level Mathematics and Programming experience.', 3),
-  ('Philosophy and Ethics', 'Explores philosophical questions and their relevance to modern ethical issues.', 'A-level English Literature or equivalent.', 3),
-  ('World History', 'A study of major historical events and their global impact.', 'A-level History or equivalent.', 3),
-  ('Biotechnology', 'Covers the principles of biotechnology and its applications in healthcare and agriculture.', 'A-level Biology and Chemistry.', 3),
-  ('Astrophysics', 'An introduction to the physics of stars, galaxies, and the universe.', 'A-level Mathematics and Physics.', 3),
-  ('Culinary Arts', 'Provides training in professional cooking techniques and food safety.', 'Basic GCSEs required.', 2),
-  ('Construction Technology', 'Covers modern construction techniques and safety protocols.', 'Basic GCSEs required.', 2);
-
--- Records of DEPARTMENT_COURSE
-INSERT INTO shared.department_course (dep_id, course_id)
-VALUES
-  ('d000001' , 'c000001'),
-  ('d000001' , 'c000002'),
-  ('d000002' , 'c000003'),
-  ('d000002' , 'c000004'),
-  ('d000003' , 'c000005'),
-  ('d000003' , 'c000006'),
-  ('d000003' , 'c000002'),
-  ('d000004' , 'c000007'),
-  ('d000004' , 'c000008'),
-  ('d000005' , 'c000009'),
-  ('d000005' , 'c000010'),
-  ('d000006' , 'c000011'),
-  ('d000006' , 'c000012');
-
--- Records for MODULE
-INSERT INTO shared.module (module_name, module_description, academ_lvl, module_credits, module_status, last_reviewed, notional_hours, module_duration)
-VALUES
-  ('Multivariable Calculus', 'Explores multivariable functions, partial derivatives, and multiple integrals.', 'L7', 20, 'Active', '2024-12-01', 200.00, 2),
-  ('Real Analysis', 'Covers limits, continuity, differentiation, and integration on real number sets.', 'L7', 20, 'Active', '2024-12-01', 180.00, 2),
-  ('Supervised Learning', 'Introduction to supervised learning algorithms and their applications.', 'L4', 20, 'Active', '2024-12-01', 200.00, 2),
-  ('Neural Networks', 'Covers the basics of artificial neural networks and deep learning.', 'L5', 20, 'Active', '2024-12-01', 190.00, 1),
-  ('Abstract Painting', 'Hands-on techniques for creating abstract art.', 'L6', 20, 'Active', '2024-12-01', 200.00, 1),
-  ('Digital Art Methods', 'Explores the use of digital tools in modern art creation.', 'L5', 20, 'Active', '2024-12-01', 140.00, 2),
-  ('Renaissance Art', 'A study of Renaissance art and its historical significance.', 'L5', 20, 'Active', '2024-12-01', 180.00, 2),
-  ('Contemporary Art Movements', 'Analysis of art movements in the 20th and 21st centuries.', 'L6', 20, 'Active', '2024-12-01', 170.00, 1),
-  ('Agile Development', 'Covers principles and practices of Agile development.', 'L5', 20, 'Active', '2024-12-01', 180.00, 2),
-  ('Software Testing', 'Focuses on testing methodologies and quality assurance.', 'L4', 20, 'Active', '2024-12-01', 190.00, 2),
-  ('Cryptography', 'Introduction to cryptographic principles and practices.', 'L4', 20, 'Active', '2024-12-01', 200.00, 2),
-  ('Network Security', 'Focuses on securing computer networks against threats.', 'L4', 20, 'Active', '2024-12-01', 190.00, 1),
-  ('Moral Philosophy', 'Explores ethical theories and moral decision-making.', 'L5', 20, 'Active', '2024-12-01', 200.00, 1),
-  ('Political Philosophy', 'Analyzes the philosophical foundations of political systems.', 'L5', 20, 'Active', '2024-12-01', 160.00, 2),
-  ('Ancient Civilizations', 'Study of ancient civilizations and their cultural impact.', 'L5', 20, 'Active', '2024-12-01', 170.00, 2),
-  ('Modern Conflicts', 'Examines key conflicts in modern history.', 'L6', 20, 'Active', '2024-12-01', 160.00, 1),
-  ('Genetic Engineering', 'Introduction to genetic modification techniques.', 'L4', 20, 'Active', '2024-12-01', 200.00, 2),
-  ('Bioinformatics', 'Covers computational tools for biological data analysis.', 'L6', 20, 'Active', '2024-12-01', 190.00, 2),
-  ('Stellar Physics', 'Study of the physical properties of stars.', 'L4', 20, 'Active', '2024-12-01', 180.00, 2),
-  ('Cosmology', 'Introduction to the study of the universe.', 'L4', 20, 'Active', '2024-12-01', 170.00, 1),
-  ('Pastry Techniques', 'Covers the techniques for making pastries and desserts.', 'L5', 20, 'Active', '2024-12-01', 200.00, 1),
-  ('Savory Dishes', 'Training in preparation of savory meals.', 'L6', 20, 'Active', '2024-12-01', 160.00, 2),
-  ('Building Materials', 'Study of materials used in modern construction.', 'L5', 20, 'Active', '2024-12-01', 200.00, 2),
-  ('Construction Safety', 'Focus on safety protocols and regulations.', 'L4', 20, 'Active', '2024-12-01', 160.00, 1);
-
--- Records for COURSE_MODULE
-INSERT INTO shared.course_module (course_id, module_id) 
-VALUES
-  ('c000001', 'm000001'),
-  ('c000001', 'm000002'),
-  ('c000002', 'm000003'),
-  ('c000002', 'm000004'),
-  ('c000003', 'm000005'),
-  ('c000003', 'm000006'),
-  ('c000004', 'm000007'),
-  ('c000004', 'm000008'),
-  ('c000005', 'm000009'),
-  ('c000005', 'm000010'),
-  ('c000006', 'm000011'),
-  ('c000006', 'm000012'),
-  ('c000007', 'm000013'),
-  ('c000007', 'm000014'),
-  ('c000008', 'm000015'),
-  ('c000008', 'm000016'),
-  ('c000009', 'm000017'),
-  ('c000009', 'm000018'),
-  ('c000010', 'm000019'),
-  ('c000010', 'm000020'),
-  ('c000011', 'm000021'),
-  ('c000011', 'm000022'),
-  ('c000012', 'm000023'),
-  ('c000012', 'm000024');
-
--- Records for ASSESSMENT
-INSERT INTO shared.assessment (module_id, assessment_title, assessment_description, assessment_type, assessment_weighting, assessment_attachment)
-VALUES
-  ('m000001', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000001', 'Final Exam',  NULL, 'Exam', 10.00, NULL),
-  ('m000001', 'Coursework Project',  NULL, 'Coursework', 50.00, NULL),
-  ('m000001', 'Essay', NULL, 'Essay', 30.00, NULL),
-  ('m000001', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000001', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000002', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000002', 'Final Exam',  NULL, 'Exam', 50.00, NULL),
-  ('m000002', 'Coursework Project',  NULL, 'Coursework', 30.00, NULL),
-  ('m000002', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000002', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000002', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000003', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000003', 'Final Exam',  NULL, 'Exam', 50.00, NULL),
-  ('m000003', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000003', 'Essay', NULL, 'Essay', 30.00, NULL),
-  ('m000003', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000003', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000004', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000004', 'Final Exam',  NULL, 'Exam', 50.00, NULL),
-  ('m000004', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000004', 'Essay', NULL, 'Essay', 30.00, NULL),
-  ('m000004', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000004', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000005', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000005', 'Final Exam',  NULL, 'Exam', 10.00, NULL),
-  ('m000005', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000005', 'Essay', NULL, 'Essay', 30.00, NULL),
-  ('m000005', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000005', 'Presentation', NULL, 'Presentation', 50.00, NULL),
-  ('m000006', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000006', 'Final Exam',  NULL, 'Exam', 10.00, NULL),
-  ('m000006', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000006', 'Essay', NULL, 'Essay', 50.00, NULL),
-  ('m000006', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000006', 'Presentation', NULL, 'Presentation', 30.00, NULL),
-  ('m000007', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000007', 'Final Exam',  NULL, 'Exam', 30.00, NULL),
-  ('m000007', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000007', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000007', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000007', 'Presentation', NULL, 'Presentation', 50.00, NULL),
-  ('m000008', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000008', 'Final Exam',  NULL, 'Exam', 10.00, NULL),
-  ('m000008', 'Coursework Project',  NULL, 'Coursework', 50.00, NULL),
-  ('m000008', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000008', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000008', 'Presentation', NULL, 'Presentation', 30.00, NULL),
-  ('m000009', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000009', 'Final Exam',  NULL, 'Exam', 50.00, NULL),
-  ('m000009', 'Coursework Project',  NULL, 'Coursework', 30.00, NULL),
-  ('m000009', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000009', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000009', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000010', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000010', 'Final Exam',  NULL, 'Exam', 10.00, NULL),
-  ('m000010', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000010', 'Essay', NULL, 'Essay', 50.00, NULL),
-  ('m000010', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000010', 'Presentation', NULL, 'Presentation', 30.00, NULL),
-  ('m000011', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000011', 'Final Exam',  NULL, 'Exam', 30.00, NULL),
-  ('m000011', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000011', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000011', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000011', 'Presentation', NULL, 'Presentation', 50.00, NULL),
-  ('m000012', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000012', 'Final Exam',  NULL, 'Exam', 50.00, NULL),
-  ('m000012', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000012', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000012', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000012', 'Presentation', NULL, 'Presentation', 30.00, NULL),
-  ('m000013', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000013', 'Final Exam',  NULL, 'Exam', 10.00, NULL),
-  ('m000013', 'Coursework Project',  NULL, 'Coursework', 30.00, NULL),
-  ('m000013', 'Essay', NULL, 'Essay', 50.00, NULL),
-  ('m000013', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000013', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000014', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000014', 'Final Exam',  NULL, 'Exam', 50.00, NULL),
-  ('m000014', 'Coursework Project',  NULL, 'Coursework', 30.00, NULL),
-  ('m000014', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000014', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000014', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000015', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000015', 'Final Exam',  NULL, 'Exam', 50.00, NULL),
-  ('m000015', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000015', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000015', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000015', 'Presentation', NULL, 'Presentation', 30.00, NULL),
-  ('m000016', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000016', 'Final Exam',  NULL, 'Exam', 10.00, NULL),
-  ('m000016', 'Coursework Project',  NULL, 'Coursework', 30.00, NULL),
-  ('m000016', 'Essay', NULL, 'Essay', 50.00, NULL),
-  ('m000016', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000016', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000017', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000017', 'Final Exam',  NULL, 'Exam', 10.00, NULL),
-  ('m000017', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000017', 'Essay', NULL, 'Essay', 50.00, NULL),
-  ('m000017', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000017', 'Presentation', NULL, 'Presentation', 30.00, NULL),
-  ('m000018', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000018', 'Final Exam',  NULL, 'Exam', 30.00, NULL),
-  ('m000018', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000018', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000018', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000018', 'Presentation', NULL, 'Presentation', 50.00, NULL),
-  ('m000019', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000019', 'Final Exam',  NULL, 'Exam', 30.00, NULL),
-  ('m000019', 'Coursework Project',  NULL, 'Coursework', 50.00, NULL),
-  ('m000019', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000019', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000019', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000020', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000020', 'Final Exam',  NULL, 'Exam', 50.00, NULL),
-  ('m000020', 'Coursework Project',  NULL, 'Coursework', 30.00, NULL),
-  ('m000020', 'Essay', NULL, 'Essay', 10.00, NULL),
-  ('m000020', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000020', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000021', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000021', 'Final Exam',  NULL, 'Exam', 10.00, NULL),
-  ('m000021', 'Coursework Project',  NULL, 'Coursework', 50.00, NULL),
-  ('m000021', 'Essay', NULL, 'Essay', 30.00, NULL),
-  ('m000021', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000021', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000022', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000022', 'Final Exam',  NULL, 'Exam', 30.00, NULL),
-  ('m000022', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000022', 'Essay', NULL, 'Essay', 50.00, NULL),
-  ('m000022', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000022', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000023', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000023', 'Final Exam',  NULL, 'Exam', 30.00, NULL),
-  ('m000023', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000023', 'Essay', NULL, 'Essay', 50.00, NULL),
-  ('m000023', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000023', 'Presentation', NULL, 'Presentation', 10.00, NULL),
-  ('m000024', 'General Exam', NULL, 'Exam', 0.00, NULL),
-  ('m000024', 'Final Exam',  NULL, 'Exam', 30.00, NULL),
-  ('m000024', 'Coursework Project',  NULL, 'Coursework', 10.00, NULL),
-  ('m000024', 'Essay', NULL, 'Essay', 50.00, NULL),
-  ('m000024', 'Research Essay', NULL, 'Essay', 0.00, NULL),
-  ('m000024', 'Presentation', NULL, 'Presentation', 10.00, NULL);
-
--- Records for ROLE
-INSERT INTO shared.role (role_name) 
-VALUES 
-  ('Lecturer'),
-  ('Teaching Assistant'),
-  ('Accountant'),
-  ('Human Resources Manager'),
-  ('Recruiter'),
-  ('IT Support Specialist'),
-  ('Facilities Manager'),
-  ('Security Officer'),
-  ('Library Assistant'),
-  ('Receptionist'),
-  ('Maintenance Technician'),
-  ('Groundskeeper'),
-	('Admin staff');   
-
--- Records for FACILITY
-INSERT INTO shared.facility (facility_total_quantity, facility_name)
-VALUES
-  (100, 'Desktop Computers'),
-  (20, 'Projectors'),
-  (200, 'Whiteboards'),
-  (5, '3D Printers'),
-  (15, 'Microscopes'),
-  (25, 'Easels'),
-  (30, 'Sound Systems'),
-  (40, 'Keyboards and Musical Instruments'),
-  (10, 'Cooking Stations'),
-  (10, 'Workshop Tools and Machines'),
-  (12, 'Sports Equipment Sets'),
-  (20, 'Printers and Scanners');
-
--- Records for ROOM_TYPE
-INSERT INTO shared.room_type (type_name, type_description)
-VALUES
-  ('Lecture Theatre', 'Large room equipped with seating for lectures and presentations.'),
-  ('Seminar Room', 'Medium-sized room designed for seminars, group discussions, and workshops.'),
-  ('Laboratory', 'Room equipped with specialized tools and equipment for experiments and practical sessions.'),
-  ('Computer Lab', 'Room with computers and software for programming, simulations, and digital training.'),
-  ('Art Studio', 'Creative space for art and design activities, equipped with easels and materials.'),
-  ('Music Room', 'Room designed for music practice and lessons, with soundproofing and instruments.'),
-  ('Conference Room', 'Room for formal meetings, discussions, and small conferences.'),
-  ('Library', 'Quiet space with resources for reading, studying, and research.'),
-  ('Cafeteria', 'Dining area for students and staff, serving meals and refreshments.'),
-  ('Sports Hall', 'Indoor facility for physical activities and sports events.'),
-  ('Workshop', 'Room equipped for vocational training, including tools and machinery.'),
-  ('Examination Hall', 'Room designed for hosting exams and assessments with individual desks.'),
-  ('Office', NULL);
-
--- Records for EMERGENCY_CONTACT
-INSERT INTO shared.emergency_contact (contact_email, contact_phone, contact_fname, contact_wname, contact_lname, contact_addr1, contact_addr2, contact_city, contact_postcode, contact_relationship)
-VALUES
-  ('emily.jones@gmail.com', '07400123456', 'Emily', NULL, 'Jones', '12 Apple Street', 'Flat 4', 'London', 'E1 7HP', 'Mother'),
-  ('john.smith@yahoo.com', '07411123456', 'John', NULL, 'Smith', '23 Pear Lane', NULL, 'Manchester', 'M2 5NG', 'Father'),
-  ('lisa.brown@hotmail.com', '07422123456', 'Lisa', 'Marie', 'Brown', '56 Orange Avenue', 'Apt B', 'Birmingham', 'B12 8PP', 'Sister'),
-  ('michael.green@gmail.com', '07433123456', 'Michael', NULL, 'Green', '78 Plum Road', NULL, 'Leeds', 'LS1 4LT', 'Brother'),
-  ('sarah.white@yahoo.com', '07444123456', 'Sarah', 'Anne', 'White', '34 Peach Street', NULL, 'Bristol', 'BS1 3AU', 'Aunt'),
-  ('david.taylor@hotmail.com', '07455123456', 'David', NULL, 'Taylor', '90 Grape Lane', 'Unit 5', 'Liverpool', 'L1 8JH', 'Uncle'),
-  ('jessica.evans@gmail.com', '07466123456', 'Jessica', 'May', 'Evans', '12 Lime Grove', NULL, 'Glasgow', 'G2 8AZ', 'Friend'),
-  ('mark.johnson@yahoo.com', '07477123456', 'Mark', NULL, 'Johnson', '33 Berry Street', NULL, 'Edinburgh', 'EH1 2AD', 'Cousin'),
-  ('laura.moore@hotmail.com', '07488123456', 'Laura', NULL, 'Moore', '45 Kiwi Road', NULL, 'Cardiff', 'CF10 1AN', 'Colleague'),
-  ('steven.harris@gmail.com', '07499123456', 'Steven', 'John', 'Harris', '22 Cherry Lane', NULL, 'Newcastle', 'NE1 3AF', 'Friend'),
-  ('anna.clark@yahoo.com', '07500123456', 'Anna', NULL, 'Clark', '11 Maple Drive', NULL, 'Sheffield', 'S1 4DN', 'Niece'),
-  ('robert.lewis@hotmail.com', '07511123456', 'Robert', NULL, 'Lewis', '60 Oak Street', NULL, 'Glasgow', 'G3 7HZ', 'Nephew'),
-  ('hannah.walker@gmail.com', '07522123456', 'Hannah', NULL, 'Walker', '14 Pine Road', NULL, 'Manchester', 'M14 6QT', 'Cousin'),
-  ('thomas.wright@yahoo.com', '07533123456', 'Thomas', NULL, 'Wright', '99 Willow Way', NULL, 'Bristol', 'BS8 2HL', 'Brother'),
-  ('megan.james@hotmail.com', '07544123456', 'Megan', NULL, 'James', '88 Cedar Drive', NULL, 'Liverpool', 'L3 5HA', 'Friend'),
-  ('charlie.scott@gmail.com', '07555123456', 'Charlie', 'Anne', 'Scott', '77 Maple Lane', NULL, 'Cardiff', 'CF14 2AB', 'Sister'),
-  ('isabelle.morris@yahoo.com', '07566123456', 'Isabelle', NULL, 'Morris', '66 Birch Street', NULL, 'Sheffield', 'S2 3FL', 'Aunt'),
-  ('matthew.taylor@hotmail.com', '07577123456', 'Matthew', NULL, 'Taylor', '55 Elm Avenue', NULL, 'Newcastle', 'NE6 4BL', 'Uncle'),
-  ('rachel.johnson@gmail.com', '07588123456', 'Rachel', NULL, 'Johnson', '44 Hazel Grove', NULL, 'Edinburgh', 'EH2 4DN', 'Friend'),
-  ('oliver.hall@yahoo.com', '07599123456', 'Oliver', NULL, 'Hall', '33 Cherry Lane', NULL, 'Birmingham', 'B11 2AF', 'Colleague'),
-  ('sophie.anderson@hotmail.com', '07600123456', 'Sophie', NULL, 'Anderson', '22 Peach Street', NULL, 'London', 'E5 9GF', 'Mother'),
-  ('benjamin.kim@gmail.com', '07611123456', 'Benjamin', 'Lee', 'Kim', '11 Pine Road', NULL, 'Leeds', 'LS4 2EF', 'Father'),
-  ('zoe.baker@yahoo.com', '07622123456', 'Zoe', NULL, 'Baker', '50 Palm Avenue', NULL, 'Bristol', 'BS3 5GH', 'Sister'),
-  ('alexander.martinez@hotmail.com', '07633123456', 'Alexander', NULL, 'Martinez', '31 Orchid Lane', NULL, 'Glasgow', 'G41 2QH', 'Brother'),
-  ('victoria.lee@gmail.com', '07644123456', 'Victoria', NULL, 'Lee', '29 Magnolia Street', NULL, 'Manchester', 'M16 4FE', 'Aunt'),
-  ('luke.davis@yahoo.com', '07655123456', 'Luke', NULL, 'Davis', '89 Willow Way', NULL, 'Cardiff', 'CF15 5HP', 'Uncle'),
-  ('natalie.carter@hotmail.com', '07666123456', 'Natalie', NULL, 'Carter', '15 Elm Road', NULL, 'Edinburgh', 'EH3 5JQ', 'Friend'),
-  ('chloe.harris@gmail.com', '07677123456', 'Chloe', NULL, 'Harris', '60 Peach Lane', NULL, 'Liverpool', 'L5 1AD', 'Cousin'),
-  ('daniel.thomas@yahoo.com', '07688123456', 'Daniel', NULL, 'Thomas', '8 Maple Grove', NULL, 'Birmingham', 'B19 2XT', 'Colleague'),
-  ('madison.mitchell@hotmail.com', '07699123456', 'Madison', NULL, 'Mitchell', '7 Cherry Street', NULL, 'Newcastle', 'NE2 3QY', 'Sister'),
-  ('nathan.miller@gmail.com', '07700123456', 'Nathan', NULL, 'Miller', '4 Birch Lane', NULL, 'Sheffield', 'S1 9PL', 'Brother');
-
-/* Branch b01 inserts */
-
 -- Records of STAFF
-INSERT INTO branch_b01.staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile)
+INSERT INTO branch_b02.staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile, staff_dob)
 VALUES
-  ('Sophie', NULL, 'Roberts', 'Dr', '123 Maple Street', NULL, 'London', 'SW1A 2AA', 'sophie.roberts@gmail.com', '0113256780', '07912345679'),
-  ('John', NULL, 'Smith', 'Dr', '789 Elm Street', NULL, 'London', 'SW1A 2AA', 'john.smith@gmail.com', '0201234567', '07891234567'),
-  ('David', NULL, 'Clark', 'Dr', '789 Pine Avenue', NULL, 'Bristol', 'BS1 1AA', 'david.clark@gmail.com', '0123456789', '07712345678'),
-  ('Michael', NULL, 'Johnson', 'Dr', '123 Cedar Street', NULL, 'London', 'SW1A 2AA', 'michael.johnson@gmail.com', '0131234567', '07723456789'),
-  ('Emily', 'Grace', 'Wilson', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'emily.wilson@gmail.com', '0113256781', '07912345680'),
-  ('Noah', 'Edward', 'Wilson', 'Dr', '123 Birch Avenue', NULL, 'London', 'SW1A 2AB', 'noah.wilson@gmail.com', '0203456790', '07892345679'),
-  ('Amelia', NULL, 'Thompson', 'Dr', '456 Oak Avenue', NULL, 'Manchester', 'M1 1AA', 'amelia.thompson@gmail.com', '0202345678', '07891234568');
+	('Ethan', 'William', 'White', 'Dr', '789 Pine Avenue', NULL, 'Glasgow', 'G1 1AA', 'ethan.white@gmail.com', '0162345679', '07987654322', '1983-11-20'),
+  ('William', 'Daniel', 'Thomas', 'Dr', '789 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'william.thomas@gmail.com', '0161234568', '07987554322', '1980-10-30'),
+  ('Isabella', NULL, 'Harris', 'Dr', '456 Maple Street', NULL, 'Manchester', 'M1 2AB', 'isabella.harris@gmail.com', '0163456791', '07998765433', '1979-09-25'),
+  ('James', 'Alexander', 'Brown', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'james.brown@gmail.com', '0112345670', '07871234568', '1984-12-10'),
+  ('Charlotte', NULL, 'Wilson', 'Dr', '101 Elm Street', NULL, 'Bristol', 'BS2 1AB', 'charlotte.wilson@gmail.com', '0142345679', '07876543211', '1977-02-05'),
+  ('Laura', 'James', 'Taylor', 'Ms', '456 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'laura.taylor@gmail.com', '0201234512', '07891232567', '1985-05-20'),
+  ('Jane', NULL, 'Doe', 'Mrs', '987 Oak Avenue', NULL, 'Manchester', 'M1 2AA', 'jAne.doe@gmail.com', '0161234567', '07987654321', '1975-07-10');
 
 -- Records of STAFF_ROLE
-INSERT INTO branch_b01.staff_role (staff_id, role_id)
+INSERT INTO branch_b02.staff_role (staff_id, role_id)
 VALUES
-  ('s000000001', 1),
-  ('s000000002', 2),
-  ('s000000003', 1),
-  ('s000000004', 2),
-  ('s000000005', 3),
-  ('s000000006', 4),
-  ('s000000007', 6);
+  ('s000000008', 1),
+  ('s000000009', 2),
+  ('s000000010', 1),
+  ('s000000011', 2),
+  ('s000000012', 3),
+  ('s000000013', 4),
+  ('s000000014', 6);
 
 -- Records of DEPARTMENT
-INSERT INTO branch_b01.department (dep_id, staff_id)
+INSERT INTO branch_b02.department (dep_id, staff_id)
 VALUES
-  ('d000001', 's000000001'),
+  ('d000001', 's000000008'),
   ('d000003', 's000000003'),
   ('d000007', 's000000005'),
   ('d000010', 's000000006'),
   ('d000009', 's000000007');
 
 -- Records of COURSE
-INSERT INTO branch_b01.course (course_id, staff_id)
+INSERT INTO branch_b02.course (course_id, staff_id)
 VALUES
   ('c000001', 's000000001'),
   ('c000002', 's000000001'),
@@ -383,7 +38,7 @@ VALUES
   ('c000006', 's000000003');
 
 -- Records of DEPARTMENT_COURSE
-INSERT INTO branch_b01.department_course (dep_id, course_id)
+INSERT INTO branch_b02.department_course (dep_id, course_id)
 VALUES
   ('d000001' , 'c000001'),
   ('d000001' , 'c000002'),
@@ -392,7 +47,7 @@ VALUES
   ('d000003' , 'c000002');
 
 -- Records of MODULE
-INSERT INTO branch_b01.module (module_id)
+INSERT INTO branch_b02.module (module_id)
 VALUES
   ('m000001'),
   ('m000002'),
@@ -404,7 +59,7 @@ VALUES
   ('m000012');
 
 -- Records of COURSE_MODULE
-INSERT INTO branch_b01.course_module (course_id, module_id) 
+INSERT INTO branch_b02.course_module (course_id, module_id) 
 VALUES
   ('c000001', 'm000001'),
   ('c000001', 'm000002'),
@@ -416,17 +71,17 @@ VALUES
   ('c000006', 'm000012');
 
 -- Records of STUDENT
-INSERT INTO branch_b01.student (student_personal_email, student_fname, student_mname, student_lname, student_pronouns, student_addr1, student_addr2, student_city, student_postcode, student_landline, student_mobile, student_attendance)
+INSERT INTO branch_b02.student (student_personal_email, student_fname, student_mname, student_lname, student_pronouns, student_addr1, student_addr2, student_city, student_postcode, student_landline, student_mobile, student_dob, student_attendance)
 VALUES
-  ('alex.braun@gmail.com', 'Alex', NULL, 'Braun', 'He/Him', '123 Main Street', 'Mayfair', 'London', 'SW1A 1AA', '0201234570', '07891234572', 0.00),
-  ('jane.smith@outlook.com', 'Jane', NULL, 'Smith', 'She/Her', '456 Park Avenue', NULL, 'Manchester', 'M1 1AA', '0161234569', '07987654323', 0.00),
-  ('JOHN.doe@yahoo.com', 'John', 'James', 'Doe', 'He/Him', '123 Main Street', 'Kensington', 'London', 'SW1A 1AA', '0201234571', '07891234573', 0.00),
-  ('emily.johnson@mail.co.uk', 'Emily', NULL, 'Johnson', 'She/Her', '789 Oak Lane', NULL, 'Birmingham', 'B1 1AA', '0123456789', '07712345678', 0.00),
-  ('michael.brown@gmail.com', 'Michael', 'Luke', 'Brown', 'He/Him', '1010 Maple Street', NULL, 'Edinburgh', 'EH1 1AA', '0131234567', '07723456789', 0.00),
-  ('emma.williams@gmail.com', 'Emma', NULL, 'Williams', 'She/Her', '789 Cedar Street', NULL, 'London', 'SW1A 2AB', '0203456789', '07892345678', 0.00);
+  ('alex.braun@gmail.com', 'Alex', NULL, 'Braun', 'He/Him', '123 Main Street', 'Mayfair', 'London', 'SW1A 1AA', '0201234570', '07891234572', '2003-05-15', 0.00),
+  ('jane.smith@outlook.com', 'Jane', NULL, 'Smith', 'She/Her', '456 Park Avenue', NULL, 'Manchester', 'M1 1AA', '0161234569', '07987654323', '2002-10-20', 0.00),
+  ('JOHN.doe@yahoo.com', 'John', 'James', 'Doe', 'He/Him', '123 Main Street', 'Kensington', 'London', 'SW1A 1AA', '0201234571', '07891234573', '2001-05-15', 0.00),
+  ('emily.johnson@mail.co.uk', 'Emily', NULL, 'Johnson', 'She/Her', '789 Oak Lane', NULL, 'Birmingham', 'B1 1AA', '0123456789', '07712345678', '2003-08-18', 0.00),
+  ('michael.brown@gmail.com', 'Michael', 'Luke', 'Brown', 'He/Him', '1010 Maple Street', NULL, 'Edinburgh', 'EH1 1AA', '0131234567', '07723456789', '2001-12-03', 0.00),
+  ('emma.williams@gmail.com', 'Emma', NULL, 'Williams', 'She/Her', '789 Cedar Street', NULL, 'London', 'SW1A 2AB', '0203456789', '07892345678', '2003-04-15', 0.00);
 
 -- Records of STUDENT_COURSE
-INSERT INTO branch_b01.student_course (student_id, course_id, feedback, culmative_average, course_rep)
+INSERT INTO branch_b02.student_course (student_id, course_id, feedback, culmative_average, course_rep)
 VALUES
   ('sn00000001', 'c000001', NULL, 0.00, TRUE),
   ('sn00000002', 'c000001', NULL, 0.00, FALSE),
@@ -436,17 +91,17 @@ VALUES
   ('sn00000006', 'c000006', NULL, 0.00, FALSE);
 
 -- Records of TUITION
-INSERT INTO branch_b01.tuition (tuition_amount, tuition_paid, tuition_remaining, tuition_remaining_perc, tuition_deadline)
+INSERT INTO branch_b02.tuition (tuition_amount, tuition_paid, tuition_remaining, tuition_remaining_perc, tuition_deadline)
 VALUES
   (2800.00, 0, 2800.00, 0, '2025-07-01'),
   (2900.00, 0, 2900.00, 0, '2025-08-05'),
   (3000.00, 0, 3000.00, 0, '2025-07-10'),
   (3100.00, 0, 3100.00, 0, '2025-08-15'),
-  (3200.00, 0, 3200.00, 0, '2024-07-20'),
-  (3300.00, 0, 3300.00, 0, '2024-08-25');
+  (3200.00, 0, 3200.00, 0, '2025-07-20'),
+  (3300.00, 0, 3300.00, 0, '2025-08-25');
 
 -- Records of STUDENT_TUITION
-INSERT INTO branch_b01.student_tuition (student_id, tuition_id)
+INSERT INTO branch_b02.student_tuition (student_id, tuition_id)
 VALUES
   ('sn00000001', 1),
   ('sn00000002', 2),
@@ -456,7 +111,7 @@ VALUES
   ('sn00000006', 6);
 
 -- Records of TUITION_PAYMENT
-INSERT INTO branch_b01.tuition_payment (tuition_id, tuition_payment_amount, tuition_payment_date, tuition_payment_method)
+INSERT INTO branch_b02.tuition_payment (tuition_id, tuition_payment_amount, tuition_payment_date, tuition_payment_method)
 VALUES
   (1, 300.00, '2025-03-15', 'Bank Transfer'),
   (2, 200.00, '2025-03-20', 'Bank Transfer'),
@@ -466,7 +121,7 @@ VALUES
   (6, 200.00, '2025-05-20', 'Direct Debit');
 
 -- Records of STAFF_DEPARTMENT
-INSERT INTO branch_b01.staff_department (staff_id, dep_id, date_assinged)
+INSERT INTO branch_b02.staff_department (staff_id, dep_id, date_assinged)
 VALUES
   ('s000000001', 'd000001', '2025-02-01'),
   ('s000000002', 'd000001', '2025-02-02'),
@@ -477,13 +132,13 @@ VALUES
   ('s000000007', 'd000009', '2025-05-02');
 
 -- Records of BUILDING
-INSERT INTO branch_b01.building (building_name, building_alt_name, building_type, building_addr1, building_addr2, building_city, building_postcode, building_country)
+INSERT INTO branch_b02.building (building_name, building_alt_name, building_type, building_addr1, building_addr2, building_city, building_postcode, building_country)
 VALUES
   ('Turing Hall', 'TH', 'Educational', '12 Science Way', 'South Bank', 'London', 'SW1A 1AA', 'United Kingdom'),
   ('Ada Lovelace Building', 'ALB', 'Administrative', '98 King Street', 'Mayfair', 'London', 'SW1A 1AB', 'United Kingdom');
 
 -- Records of ROOM
-INSERT INTO branch_b01.room (building_id, room_name, room_alt_name, room_type_id, room_capacity, room_floor)
+INSERT INTO branch_b02.room (building_id, room_name, room_alt_name, room_type_id, room_capacity, room_floor)
 VALUES
   (1, 'Lecture Theatre 1', 'LT1', 1, 100, 1),
   (1, '1.02', 'TH1.01', 4, 40, 1),
@@ -502,7 +157,7 @@ VALUES
   (2, '2.04', 'ALB2.04', 13, 1, 2);
 
 -- Records of ROOM_FACILITY
-INSERT INTO branch_b01.room_facility (room_id, facility_id, quantity)
+INSERT INTO branch_b02.room_facility (room_id, facility_id, quantity)
 VALUES
   (1, 1, 1),
   (1, 2, 2),
@@ -525,7 +180,7 @@ VALUES
   (15, 1, 1);
 
 -- Records of SESSION
-INSERT INTO branch_b01.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+INSERT INTO branch_b02.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
 VALUES
 	(1, 'm000001', 'Lecture', '9:00', '10:00', '2024-11-05', '', TRUE, ''),
 	(2, 'm000001', 'Practical', '10:00', '11:00', '2024-11-05', '', TRUE, ''),
@@ -721,7 +376,7 @@ VALUES
 	(3, 'm000012', 'Practical', '17:00', '18:00', '2025-01-21', '', TRUE, '');
 
 -- Records of STAFF_SESSION
-INSERT INTO branch_b01.staff_session (staff_id, session_id)
+INSERT INTO branch_b02.staff_session (staff_id, session_id)
 VALUES
 	('s000000001', 'sesh000001'),
 	('s000000002', 'sesh000001'),
@@ -1109,7 +764,7 @@ VALUES
 	('s000000003', 'sesh000192');
 
 -- Records of STAFF_CONTACT
-INSERT INTO branch_b01.staff_contact (contact_id, staff_id)
+INSERT INTO branch_b02.staff_contact (contact_id, staff_id)
 VALUES
   (1, 's000000001'),
   (2, 's000000002'),
@@ -1120,7 +775,7 @@ VALUES
   (7, 's000000007');
 
 -- Records of STUDENT_CONTACT
-INSERT INTO branch_b01.student_contact (contact_id, student_id)
+INSERT INTO branch_b02.student_contact (contact_id, student_id)
 VALUES
   (10, 'sn00000001'),
   (1, 'sn00000002'),
@@ -1130,7 +785,7 @@ VALUES
   (11, 'sn00000006');
 
 -- Records of STAFF_OFFICE
-INSERT INTO branch_b01.staff_office (room_id, staff_id)
+INSERT INTO branch_b02.staff_office (room_id, staff_id)
 VALUES
   (4,'s000000001'),
   (5,'s000000002'),
@@ -1146,22 +801,20 @@ VALUES
 
 /* UPDATE SEED DATA */
 -- Assign random grades to all student assessments
-UPDATE branch_b01.student_assessment
-SET grade = ROUND(CAST((random() * 100) AS numeric), 2);
+UPDATE branch_b02.student_assessment
+SET grade = ROUND(CAST(random() * 100 AS numeric), 2);
 
 -- Update attendance records (randomly) for all sessions that have passed
-UPDATE branch_b01.student_session AS ss
+UPDATE branch_b02.student_session AS ss
 SET attendance_record = (
   CASE 
-    WHEN RANDOM() > 0.33 THEN TRUE
+    WHEN random() > 0.25 THEN TRUE
     ELSE FALSE
   END
 )
 WHERE EXISTS (
   SELECT 1
-  FROM branch_b01.session AS s
+  FROM branch_b02.session AS s
   WHERE s.session_id = ss.session_id
     AND s.session_date < CURRENT_DATE
 );
-
-/* Branch b02 inserts */
