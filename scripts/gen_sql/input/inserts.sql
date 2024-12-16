@@ -1,36 +1,37 @@
+
 -- Records of STAFF
-INSERT INTO branch_b02.staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile, staff_dob)
+INSERT INTO branch_b01.staff (staff_fname, staff_mname, staff_lname, staff_title, staff_addr1, staff_addr2, staff_city, staff_postcode, staff_personal_email, staff_landline, staff_mobile)
 VALUES
-	('Ethan', 'William', 'White', 'Dr', '789 Pine Avenue', NULL, 'Glasgow', 'G1 1AA', 'ethan.white@gmail.com', '0162345679', '07987654322', '1983-11-20'),
-  ('William', 'Daniel', 'Thomas', 'Dr', '789 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'william.thomas@gmail.com', '0161234568', '07987554322', '1980-10-30'),
-  ('Isabella', NULL, 'Harris', 'Dr', '456 Maple Street', NULL, 'Manchester', 'M1 2AB', 'isabella.harris@gmail.com', '0163456791', '07998765433', '1979-09-25'),
-  ('James', 'Alexander', 'Brown', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'james.brown@gmail.com', '0112345670', '07871234568', '1984-12-10'),
-  ('Charlotte', NULL, 'Wilson', 'Dr', '101 Elm Street', NULL, 'Bristol', 'BS2 1AB', 'charlotte.wilson@gmail.com', '0142345679', '07876543211', '1977-02-05'),
-  ('Laura', 'James', 'Taylor', 'Ms', '456 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'laura.taylor@gmail.com', '0201234512', '07891232567', '1985-05-20'),
-  ('Jane', NULL, 'Doe', 'Mrs', '987 Oak Avenue', NULL, 'Manchester', 'M1 2AA', 'jAne.doe@gmail.com', '0161234567', '07987654321', '1975-07-10');
+	('Ethan', 'William', 'White', 'Dr', '789 Pine Avenue', NULL, 'Glasgow', 'G1 1AA', 'ethan.white@gmail.com', '0162345679', '07987654322'),
+  ('William', 'Daniel', 'Thomas', 'Dr', '789 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'william.thomas@gmail.com', '0161234568', '07987554322'),
+  ('Isabella', NULL, 'Harris', 'Dr', '456 Maple Street', NULL, 'Manchester', 'M1 2AB', 'isabella.harris@gmail.com', '0163456791', '07998765433'),
+  ('James', 'Alexander', 'Brown', 'Dr', '789 Oak Lane', NULL, 'Glasgow', 'G2 1AB', 'james.brown@gmail.com', '0112345670', '07871234568'),
+  ('Charlotte', NULL, 'Wilson', 'Dr', '101 Elm Street', NULL, 'Bristol', 'BS2 1AB', 'charlotte.wilson@gmail.com', '0142345679', '07876543211'),
+  ('Laura', 'James', 'Taylor', 'Ms', '456 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'laura.taylor@gmail.com', '0201234512', '07891232567'),
+  ('Jane', NULL, 'Doe', 'Mrs', '987 Oak Avenue', NULL, 'Manchester', 'M1 2AA', 'jAne.doe@gmail.com', '0161234567', '07987654321');
 
 -- Records of STAFF_ROLE
-INSERT INTO branch_b02.staff_role (staff_id, role_id)
+INSERT INTO branch_b01.staff_role (staff_id, role_id)
 VALUES
-  ('s000000008', 1),
-  ('s000000009', 2),
-  ('s000000010', 1),
-  ('s000000011', 2),
-  ('s000000012', 3),
-  ('s000000013', 4),
-  ('s000000014', 6);
+  ('s000000001', 1),
+  ('s000000002', 2),
+  ('s000000003', 1),
+  ('s000000004', 2),
+  ('s000000005', 3),
+  ('s000000006', 4),
+  ('s000000007', 6);
 
 -- Records of DEPARTMENT
-INSERT INTO branch_b02.department (dep_id, staff_id)
+INSERT INTO branch_b01.department (dep_id, staff_id)
 VALUES
-  ('d000001', 's000000008'),
+  ('d000001', 's000000001'),
   ('d000003', 's000000003'),
   ('d000007', 's000000005'),
   ('d000010', 's000000006'),
   ('d000009', 's000000007');
 
 -- Records of COURSE
-INSERT INTO branch_b02.course (course_id, staff_id)
+INSERT INTO branch_b01.course (course_id, staff_id)
 VALUES
   ('c000001', 's000000001'),
   ('c000002', 's000000001'),
@@ -38,7 +39,7 @@ VALUES
   ('c000006', 's000000003');
 
 -- Records of DEPARTMENT_COURSE
-INSERT INTO branch_b02.department_course (dep_id, course_id)
+INSERT INTO branch_b01.department_course (dep_id, course_id)
 VALUES
   ('d000001' , 'c000001'),
   ('d000001' , 'c000002'),
@@ -47,7 +48,7 @@ VALUES
   ('d000003' , 'c000002');
 
 -- Records of MODULE
-INSERT INTO branch_b02.module (module_id)
+INSERT INTO branch_b01.module (module_id)
 VALUES
   ('m000001'),
   ('m000002'),
@@ -59,7 +60,7 @@ VALUES
   ('m000012');
 
 -- Records of COURSE_MODULE
-INSERT INTO branch_b02.course_module (course_id, module_id) 
+INSERT INTO branch_b01.course_module (course_id, module_id) 
 VALUES
   ('c000001', 'm000001'),
   ('c000001', 'm000002'),
@@ -71,17 +72,17 @@ VALUES
   ('c000006', 'm000012');
 
 -- Records of STUDENT
-INSERT INTO branch_b02.student (student_personal_email, student_fname, student_mname, student_lname, student_pronouns, student_addr1, student_addr2, student_city, student_postcode, student_landline, student_mobile, student_dob, student_attendance)
+INSERT INTO branch_b01.student (student_personal_email, student_fname, student_mname, student_lname, student_pronouns, student_addr1, student_addr2, student_city, student_postcode, student_landline, student_mobile, student_attendance)
 VALUES
-  ('alex.braun@gmail.com', 'Alex', NULL, 'Braun', 'He/Him', '123 Main Street', 'Mayfair', 'London', 'SW1A 1AA', '0201234570', '07891234572', '2003-05-15', 0.00),
-  ('jane.smith@outlook.com', 'Jane', NULL, 'Smith', 'She/Her', '456 Park Avenue', NULL, 'Manchester', 'M1 1AA', '0161234569', '07987654323', '2002-10-20', 0.00),
-  ('JOHN.doe@yahoo.com', 'John', 'James', 'Doe', 'He/Him', '123 Main Street', 'Kensington', 'London', 'SW1A 1AA', '0201234571', '07891234573', '2001-05-15', 0.00),
-  ('emily.johnson@mail.co.uk', 'Emily', NULL, 'Johnson', 'She/Her', '789 Oak Lane', NULL, 'Birmingham', 'B1 1AA', '0123456789', '07712345678', '2003-08-18', 0.00),
-  ('michael.brown@gmail.com', 'Michael', 'Luke', 'Brown', 'He/Him', '1010 Maple Street', NULL, 'Edinburgh', 'EH1 1AA', '0131234567', '07723456789', '2001-12-03', 0.00),
-  ('emma.williams@gmail.com', 'Emma', NULL, 'Williams', 'She/Her', '789 Cedar Street', NULL, 'London', 'SW1A 2AB', '0203456789', '07892345678', '2003-04-15', 0.00);
+  ('alexander.brown@gmail.com', 'Alexander', 'James', 'Brown', 'He/Him', '456 Birch Avenue', NULL, 'Manchester', 'M1 2AB', '0163456789', '07998765432', 0.00),
+  ('olivia.taylor@gmail.com', 'Olivia', NULL, 'Taylor', 'She/Her', '101 Elm Street', NULL, 'Glasgow', 'G2 1AB', '0142345671', '07871234571', 0.00),
+  ('will.thomas@gmail.com', 'William', 'John', 'Thomas', 'He/Him', '789 Oak Lane', NULL, 'Bristol', 'BS2 1AB', '0113456781', '07912335681', 0.00),
+  ('will.james@gmail.com', 'Will', NULL, 'James', 'He/Him', '125 Cedar Lane', NULL, 'London', 'SW1A 4AB', '0113456780', '07912345581', 0.00),
+  ('amanda.thomas@gmail.com', 'Amanda', NULL, 'Thomas', 'She/Her', '789 Oak Lane', NULL, 'Bristol', 'BS2 1AB', '0113456781', '07912345681', 0.00),
+  ('amanda.james@gmail.com', 'Amanda', NULL, 'James', 'She/Her', '125 Cedar Lane', NULL, 'Bristol', 'BS2 1AB', '0113456281', '07952345681', 0.00);
 
 -- Records of STUDENT_COURSE
-INSERT INTO branch_b02.student_course (student_id, course_id, feedback, culmative_average, course_rep)
+INSERT INTO branch_b01.student_course (student_id, course_id, feedback, culmative_average, course_rep)
 VALUES
   ('sn00000001', 'c000001', NULL, 0.00, TRUE),
   ('sn00000002', 'c000001', NULL, 0.00, FALSE),
@@ -91,17 +92,17 @@ VALUES
   ('sn00000006', 'c000006', NULL, 0.00, FALSE);
 
 -- Records of TUITION
-INSERT INTO branch_b02.tuition (tuition_amount, tuition_paid, tuition_remaining, tuition_remaining_perc, tuition_deadline)
+INSERT INTO branch_b01.tuition (tuition_amount, tuition_paid, tuition_remaining, tuition_remaining_perc, tuition_deadline)
 VALUES
   (2800.00, 0, 2800.00, 0, '2025-07-01'),
   (2900.00, 0, 2900.00, 0, '2025-08-05'),
   (3000.00, 0, 3000.00, 0, '2025-07-10'),
-  (3100.00, 0, 3100.00, 0, '2025-08-15'),
-  (3200.00, 0, 3200.00, 0, '2025-07-20'),
-  (3300.00, 0, 3300.00, 0, '2025-08-25');
+  (3100.00, 0, 3100.00, 0, '2024-08-15'),
+  (3200.00, 0, 3200.00, 0, '2024-07-20'),
+  (3300.00, 0, 3300.00, 0, '2024-08-25');
 
 -- Records of STUDENT_TUITION
-INSERT INTO branch_b02.student_tuition (student_id, tuition_id)
+INSERT INTO branch_b01.student_tuition (student_id, tuition_id)
 VALUES
   ('sn00000001', 1),
   ('sn00000002', 2),
@@ -111,17 +112,17 @@ VALUES
   ('sn00000006', 6);
 
 -- Records of TUITION_PAYMENT
-INSERT INTO branch_b02.tuition_payment (tuition_id, tuition_payment_amount, tuition_payment_date, tuition_payment_method)
+INSERT INTO branch_b01.tuition_payment (tuition_id, tuition_payment_amount, tuition_payment_date, tuition_payment_method)
 VALUES
-  (1, 300.00, '2025-03-15', 'Bank Transfer'),
-  (2, 200.00, '2025-03-20', 'Bank Transfer'),
+  (1, 2800.00, '2025-03-15', 'Bank Transfer'),
+  (2, 1200.00, '2025-03-20', 'Bank Transfer'),
   (3, 400.00, '2025-04-10', 'Direct Debit'),
-  (4, 600.00, '2025-04-20', 'Direct Debit'),
-  (5, 500.00, '2025-05-10', 'Direct Debit'),
-  (6, 200.00, '2025-05-20', 'Direct Debit');
+  (4, 2000.00, '2025-04-20', 'Direct Debit'),
+  (5, 600.00, '2025-05-10', 'Direct Debit'),
+  (6, 900.00, '2025-05-20', 'Direct Debit');
 
 -- Records of STAFF_DEPARTMENT
-INSERT INTO branch_b02.staff_department (staff_id, dep_id, date_assinged)
+INSERT INTO branch_b01.staff_department (staff_id, dep_id, date_assinged)
 VALUES
   ('s000000001', 'd000001', '2025-02-01'),
   ('s000000002', 'd000001', '2025-02-02'),
@@ -134,30 +135,30 @@ VALUES
 -- Records of BUILDING
 INSERT INTO branch_b02.building (building_name, building_alt_name, building_type, building_addr1, building_addr2, building_city, building_postcode, building_country)
 VALUES
-  ('Turing Hall', 'TH', 'Educational', '12 Science Way', 'South Bank', 'London', 'SW1A 1AA', 'United Kingdom'),
-  ('Ada Lovelace Building', 'ALB', 'Administrative', '98 King Street', 'Mayfair', 'London', 'SW1A 1AB', 'United Kingdom');
+  ('Nancy Rothwell', 'NR', 'Educational', '4 Oxford Street', NULL, 'Manchester', 'M1 1AA', 'United Kingdom'),
+  ('Crawford House', 'CH', 'Administrative', '1 Charles Street', NULL, 'Manchester', 'M1 1AB', 'United Kingdom');
 
 -- Records of ROOM
 INSERT INTO branch_b02.room (building_id, room_name, room_alt_name, room_type_id, room_capacity, room_floor)
 VALUES
   (1, 'Lecture Theatre 1', 'LT1', 1, 100, 1),
-  (1, '1.02', 'TH1.01', 4, 40, 1),
-  (1, '1.04', 'TH1.02', 2, 25, 1),
-  (1, '2.01', 'TH2.01', 13, 1, 2),
-  (1, '2.02', 'TH2.02', 13, 1, 2),
-  (1, '2.03', 'TH2.03', 13, 1, 2),
-  (1, '2.04', 'TH2.04', 13, 1, 2),
-  (2, '1.05', 'ALB1.01', 13, 1, 1),
-  (2, '1.05', 'ALB1.02', 13, 1, 1),
-  (2, '1.05', 'ALB1.03', 13, 1, 1),
-  (2, '1.05', 'ALB1.04', 13, 1, 1),
-  (2, '2.01', 'ALB2.01', 13, 1, 2),
-  (2, '2.02', 'ALB2.02', 13, 1, 2),
-  (2, '2.03', 'ALB2.03', 13, 1, 2),
-  (2, '2.04', 'ALB2.04', 13, 1, 2);
+  (1, '1.02', 'NR1.01', 4, 40, 1),
+  (1, '1.04', 'NR1.02', 2, 25, 1),
+  (1, '2.01', 'NR2.01', 13, 1, 2),
+  (1, '2.02', 'NR2.02', 13, 1, 2),
+  (1, '2.03', 'NR2.03', 13, 1, 2),
+  (1, '2.04', 'NR2.04', 13, 1, 2),
+  (2, '1.05', 'CH1.01', 13, 1, 1),
+  (2, '1.05', 'CH1.02', 13, 1, 1),
+  (2, '1.05', 'CH1.03', 13, 1, 1),
+  (2, '1.05', 'CH1.04', 13, 1, 1),
+  (2, '2.01', 'CH2.01', 13, 1, 2),
+  (2, '2.02', 'CH2.02', 13, 1, 2),
+  (2, '2.03', 'CH2.03', 13, 1, 2),
+  (2, '2.04', 'CH2.04', 13, 1, 2);
 
 -- Records of ROOM_FACILITY
-INSERT INTO branch_b02.room_facility (room_id, facility_id, quantity)
+INSERT INTO branch_b01.room_facility (room_id, facility_id, quantity)
 VALUES
   (1, 1, 1),
   (1, 2, 2),
@@ -180,7 +181,7 @@ VALUES
   (15, 1, 1);
 
 -- Records of SESSION
-INSERT INTO branch_b02.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+INSERT INTO branch_b01.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
 VALUES
 	(1, 'm000001', 'Lecture', '9:00', '10:00', '2024-11-05', '', TRUE, ''),
 	(2, 'm000001', 'Practical', '10:00', '11:00', '2024-11-05', '', TRUE, ''),
@@ -376,7 +377,7 @@ VALUES
 	(3, 'm000012', 'Practical', '17:00', '18:00', '2025-01-21', '', TRUE, '');
 
 -- Records of STAFF_SESSION
-INSERT INTO branch_b02.staff_session (staff_id, session_id)
+INSERT INTO branch_b01.staff_session (staff_id, session_id)
 VALUES
 	('s000000001', 'sesh000001'),
 	('s000000002', 'sesh000001'),
@@ -764,7 +765,7 @@ VALUES
 	('s000000003', 'sesh000192');
 
 -- Records of STAFF_CONTACT
-INSERT INTO branch_b02.staff_contact (contact_id, staff_id)
+INSERT INTO branch_b01.staff_contact (contact_id, staff_id)
 VALUES
   (1, 's000000001'),
   (2, 's000000002'),
@@ -775,7 +776,7 @@ VALUES
   (7, 's000000007');
 
 -- Records of STUDENT_CONTACT
-INSERT INTO branch_b02.student_contact (contact_id, student_id)
+INSERT INTO branch_b01.student_contact (contact_id, student_id)
 VALUES
   (10, 'sn00000001'),
   (1, 'sn00000002'),
@@ -785,7 +786,7 @@ VALUES
   (11, 'sn00000006');
 
 -- Records of STAFF_OFFICE
-INSERT INTO branch_b02.staff_office (room_id, staff_id)
+INSERT INTO branch_b01.staff_office (room_id, staff_id)
 VALUES
   (4,'s000000001'),
   (5,'s000000002'),
@@ -801,20 +802,20 @@ VALUES
 
 /* UPDATE SEED DATA */
 -- Assign random grades to all student assessments
-UPDATE branch_b02.student_assessment
-SET grade = ROUND(CAST(random() * 100 AS numeric), 2);
+UPDATE branch_b01.student_assessment
+SET grade = ROUND(CAST((random() * 70) AS numeric), 2);
 
 -- Update attendance records (randomly) for all sessions that have passed
-UPDATE branch_b02.student_session AS ss
+UPDATE branch_b01.student_session AS ss
 SET attendance_record = (
   CASE 
-    WHEN random() > 0.25 THEN TRUE
+    WHEN RANDOM() > 0.75 THEN TRUE
     ELSE FALSE
   END
 )
 WHERE EXISTS (
   SELECT 1
-  FROM branch_b02.session AS s
+  FROM branch_b01.session AS s
   WHERE s.session_id = ss.session_id
     AND s.session_date < CURRENT_DATE
 );

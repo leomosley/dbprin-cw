@@ -1061,6 +1061,29 @@ BEGIN
 	, schema_name);
 
 	EXECUTE format('
+	GRANT SELECT ON %I.student_attendance,
+	                %I.module_attendance,
+	                %I.course_attendance,
+	                %I.unpaid_tuition,
+	                %I.room_session_times,
+	                %I.low_performing_students,
+	                %I.get_staff_sessions,
+	                %I.get_staff_assignments,
+	                %I.staff_busy,
+	                %I.staff_availability
+	TO admin_staff_role;'
+	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT SELECT ON %I.module_attendance,
+	                %I.course_attendance,
+	                %I.room_session_times,
+	                %I.get_staff_sessions,
+	                %I.get_staff_assignments
+	TO teaching_staff_role;'
+	, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
 	ALTER TABLE %I.staff ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
