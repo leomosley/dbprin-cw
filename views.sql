@@ -52,10 +52,6 @@ WITH lps AS (
 SELECT 
   lps.branch_id AS "Branch ID",
   bt.total_low_performing_students AS "Branch Total Low Performing Students",
-  ROUND(
-    (bt.total_low_performing_students * 100.0) / ts.total_students_in_branch, 
-    2
-  ) AS "Percentage of Students Failing",
   lps.student_id AS "Student ID",
   lps.name AS "Student Name",
   lps.email AS "Student Email",
@@ -71,13 +67,6 @@ FROM
     FROM lps
     GROUP BY branch_id
   ) AS bt USING (branch_id)
-  JOIN (
-    SELECT 
-      branch_id, 
-      COUNT(*) AS total_students_in_branch
-    FROM lps
-    GROUP BY branch_id
-  ) AS ts USING (branch_id)
 ORDER BY 
   "Branch ID",
   "Attendance %";

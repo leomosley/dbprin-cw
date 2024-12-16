@@ -1338,6 +1338,29 @@ BEGIN
 	, schema_name);
 
 	EXECUTE format('
+	GRANT SELECT ON %I.student_attendance,
+	                %I.module_attendance,
+	                %I.course_attendance,
+	                %I.unpaid_tuition,
+	                %I.room_session_times,
+	                %I.low_performing_students,
+	                %I.get_staff_sessions,
+	                %I.get_staff_assignments,
+	                %I.staff_busy,
+	                %I.staff_availability
+	TO admin_staff_role;'
+	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT SELECT ON %I.module_attendance,
+	                %I.course_attendance,
+	                %I.room_session_times,
+	                %I.get_staff_sessions,
+	                %I.get_staff_assignments
+	TO teaching_staff_role;'
+	, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
 	ALTER TABLE %I.staff ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
@@ -2072,10 +2095,6 @@ WITH lps AS (
 SELECT 
   lps.branch_id AS "Branch ID",
   bt.total_low_performing_students AS "Branch Total Low Performing Students",
-  ROUND(
-    (bt.total_low_performing_students * 100.0) / ts.total_students_in_branch, 
-    2
-  ) AS "Percentage of Students Failing",
   lps.student_id AS "Student ID",
   lps.name AS "Student Name",
   lps.email AS "Student Email",
@@ -2091,13 +2110,6 @@ FROM
     FROM lps
     GROUP BY branch_id
   ) AS bt USING (branch_id)
-  JOIN (
-    SELECT 
-      branch_id, 
-      COUNT(*) AS total_students_in_branch
-    FROM lps
-    GROUP BY branch_id
-  ) AS ts USING (branch_id)
 ORDER BY 
   "Branch ID",
   "Attendance %";
@@ -2132,6 +2144,12 @@ ALTER ROLE admin_staff_role SET row_security = off;
 
 -- Grant SELECT, UPDATE, CREATE, DELETE access to all tables in all schemas
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA shared TO admin_staff_role;
+
+-- Grant SELECT on shared views for admin staff only
+GRANT SELECT ON shared.branch_attendanc,
+								shared.course_popularity,
+								shared.branch_low_performing_students 
+TO admin_staff_role;
 
 /* ENABLE RLS AND CREATE FOR SHARED TABLES */
 -- Branch Policy

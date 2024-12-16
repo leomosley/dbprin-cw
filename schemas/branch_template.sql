@@ -1046,6 +1046,27 @@ TO teaching_staff_role;
 -- Grant SELECT, UPDATE, CREATE, DELETE access to all tables in all schemas
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA branch_template TO admin_staff_role;
 
+-- Grant SELECT on branch views for admin staff
+GRANT SELECT ON branch_template.student_attendance,
+                branch_template.module_attendance,
+                branch_template.course_attendance,
+                branch_template.unpaid_tuition,
+                branch_template.room_session_times,
+                branch_template.low_performing_students,
+                branch_template.get_staff_sessions,
+                branch_template.get_staff_assignments,
+                branch_template.staff_busy,
+                branch_template.staff_availability
+TO admin_staff_role;
+
+-- Grant SELECT on branch views for teaching staff
+GRANT SELECT ON branch_template.module_attendance,
+                branch_template.course_attendance,
+                branch_template.room_session_times,
+                branch_template.get_staff_sessions,
+                branch_template.get_staff_assignments
+TO teaching_staff_role;
+
 /* BRANCH SPECIFIC RLS POLICIES ON BRANCH TABLES */
 -- Staff Policy
 ALTER TABLE branch_template.staff ENABLE ROW LEVEL SECURITY;
