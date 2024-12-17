@@ -1074,6 +1074,24 @@ INSERT INTO branch_b01.staff_office VALUES (8,'s000000005');
 INSERT INTO branch_b01.staff_office VALUES (9,'s000000006');
 INSERT INTO branch_b01.staff_office VALUES (10,'s000000007');
 
+UPDATE branch_b01.student_assessment
+SET grade = ROUND(CAST((random() * 100) AS numeric), 2);
+
+-- Update attendance records (randomly) for all sessions that have passed
+UPDATE branch_b01.student_session AS ss
+SET attendance_record = (
+  CASE 
+    WHEN RANDOM() > 0.5 THEN TRUE
+    ELSE FALSE
+  END
+)
+WHERE EXISTS (
+  SELECT 1
+  FROM branch_b01.session AS s
+  WHERE s.session_id = ss.session_id
+    AND s.session_date < CURRENT_DATE
+);
+
 -- Records of branch_b02.staff
 INSERT INTO branch_b02.staff VALUES ('Ethan', 'William', 'White', 'Dr', '789 Pine Avenue', NULL, 'Glasgow', 'G1 1AA', 'ethan.white@gmail.com', '0162345679', '07987654322');
 INSERT INTO branch_b02.staff VALUES ('William', 'Daniel', 'Thomas', 'Dr', '789 Elm Street', NULL, 'Glasgow', 'G1 1AA', 'william.thomas@gmail.com', '0161234568', '07987554322');
@@ -1828,3 +1846,21 @@ INSERT INTO branch_b02.staff_office VALUES (7,'s000000011');
 INSERT INTO branch_b02.staff_office VALUES (8,'s000000012');
 INSERT INTO branch_b02.staff_office VALUES (9,'s000000013');
 INSERT INTO branch_b02.staff_office VALUES (10,'s000000014');
+
+UPDATE branch_b02.student_assessment
+SET grade = ROUND(CAST((random() * 70) AS numeric), 2);
+
+-- Update attendance records (randomly) for all sessions that have passed
+UPDATE branch_b02.student_session AS ss
+SET attendance_record = (
+  CASE 
+    WHEN RANDOM() > 0.75 THEN TRUE
+    ELSE FALSE
+  END
+)
+WHERE EXISTS (
+  SELECT 1
+  FROM branch_b02.session AS s
+  WHERE s.session_id = ss.session_id
+    AND s.session_date < CURRENT_DATE
+);
