@@ -13,3 +13,35 @@ with open('../../inserts/b02.sql', 'r') as file:
 
 with open('../../inserts/inserts.sql', 'w') as file:
   file.write(combined)
+
+oneline = ""
+
+split_inserts = combined.split("INSERT INTO")
+
+for group in split_inserts:
+  group = group.strip()
+  table = group.split(" ")[0]
+
+  lines = group.split("\n")
+
+  if len(lines) > 4:
+    lines.pop(0)
+    lines.pop(0)
+    lines.pop()
+    lines.pop()
+
+    oneline += f"\n-- Records of {table}"
+
+    for line in lines:
+      line = line.strip()
+
+      if line and line[0] == "(":
+        line = line.rstrip(",")
+        line = line.rstrip(";")
+
+        oneline += f"\nINSERT INTO {table} VALUES {line};"
+
+    oneline += "\n"
+
+with open('../../inserts/oneline_inserts.sql', 'w') as file:
+  file.write(oneline)
