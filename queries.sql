@@ -1,6 +1,4 @@
-/* 
-  QUERY 1: Module Attendance 
-*/
+/* QUERY 1: Module Attendance */
 SELECT
   m.module_id AS "Module ID",
   shm.module_name AS "Module Name",
@@ -32,9 +30,7 @@ WHERE
   OR (ses.session_date = CURRENT_DATE AND ses.session_end_time < CURRENT_TIME)
 GROUP BY "Module ID", "Module Name";
 
-/* 
-  QUERY 2: Low Performing Students 
-*/
+/* QUERY 2: Low Performing Students */
 WITH lps AS (
   SELECT *
   FROM shared.get_all_low_performing_students()
@@ -61,9 +57,7 @@ ORDER BY
   "Branch ID",
   "Attendance %";
 
-/* 
-  QUERY 3: Unpaid Tuition
-*/
+/* QUERY 3: Unpaid Tuition */
 WITH tuition_summary AS (
   SELECT
     st.student_id,
@@ -109,9 +103,7 @@ ORDER BY
   ts.total_tuition_remaining DESC,
   ts.closest_tuition_deadline;
 
-/* 
-  QUERY 4: Branch Attendance
-*/
+/* QUERY 4: Branch Attendance */
 SELECT
   b.branch_id AS "Branch ID",
   b.branch_name AS "Branch Name",
@@ -139,9 +131,7 @@ FROM
   JOIN shared.branch AS b USING (branch_id)
 ORDER BY b.branch_id;
 
-/* 
-  QUERY 5: Staff Availability
-*/
+/* QUERY 5: Staff Availability */
 WITH date_range AS (
   SELECT
     COALESCE(MIN(busy_date), CURRENT_DATE) AS start_date,

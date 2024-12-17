@@ -245,9 +245,6 @@ VALUES
 	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-10', '', TRUE, ''),
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-17', '', TRUE, ''),
 	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-17', '', TRUE, '');
-
-INSERT INTO branch_b01.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
-VALUES
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-24', '', TRUE, ''),
 	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-24', '', TRUE, ''),
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-31', '', TRUE, ''),
@@ -312,9 +309,6 @@ VALUES
 	(3, 'm000010', 'Practical', '15:00', '16:00', '2024-11-12', '', TRUE, ''),
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-11-19', '', TRUE, ''),
 	(2, 'm000010', 'Practical', '15:00', '16:00', '2024-11-19', '', TRUE, '');
-
-INSERT INTO branch_b01.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
-VALUES
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-11-26', '', TRUE, ''),
 	(2, 'm000010', 'Practical', '15:00', '16:00', '2024-11-26', '', TRUE, ''),
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-12-03', '', TRUE, ''),

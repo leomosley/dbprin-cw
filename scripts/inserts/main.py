@@ -25,7 +25,7 @@ for group in split_inserts:
   lines = group.split("\n")
 
   if len(lines) > 4:
-    lines.pop(0)
+    inserts = lines.pop(0)
     lines.pop(0)
     lines.pop()
     lines.pop()
@@ -39,7 +39,7 @@ for group in split_inserts:
         line = line.rstrip(",")
         line = line.rstrip(";")
 
-        oneline += f"\nINSERT INTO {table} VALUES {line};"
+        oneline += f"\nINSERT INTO {inserts} VALUES {line};"
 
     oneline += "\n"
 
