@@ -152,35 +152,35 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger function to update student_module to calculate their average grade
-CREATE OR REPLACE FUNCTION branch_template.update_module_grade()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE branch_template.student_module
-  SET 
-    module_grade = (
-      SELECT ROUND(COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0), 2)
-      FROM branch_template.student_assessment AS sa
-      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
-      WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
-    ),
-    passed = (
-      SELECT CASE
-        WHEN COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0) >= 40 THEN TRUE
-        ELSE FALSE
-      END
-      FROM branch_template.student_assessment AS sa
-      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
-      WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
-    )
-  WHERE student_id = NEW.student_id
-    AND module_id = (
-      SELECT module_id
-      FROM shared.assessment
-      WHERE assessment_id = NEW.assessment_id
-    );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION branch_template.update_module_grade()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--   UPDATE branch_template.student_module
+--   SET 
+--     module_grade = (
+--       SELECT ROUND(COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0), 2)
+--       FROM branch_template.student_assessment AS sa
+--       JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
+--       WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
+--     ),
+--     passed = (
+--       SELECT CASE
+--         WHEN COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0) >= 40 THEN TRUE
+--         ELSE FALSE
+--       END
+--       FROM branch_template.student_assessment AS sa
+--       JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
+--       WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
+--     )
+--   WHERE student_id = NEW.student_id
+--     AND module_id = (
+--       SELECT module_id
+--       FROM shared.assessment
+--       WHERE assessment_id = NEW.assessment_id
+--     );
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
 -- Trigger function to update student_course to calculate their average grade
 CREATE OR REPLACE FUNCTION branch_template.update_course_grade()
@@ -484,10 +484,10 @@ CREATE TABLE branch_template.student_assessment (
 );
 
 -- Trigger to calcuate their total grade after upadate on student_module
-CREATE TRIGGER branch_template_student_assessment_update
-AFTER UPDATE ON branch_template.student_assessment
-FOR EACH ROW
-EXECUTE FUNCTION branch_template.update_module_grade();
+-- CREATE TRIGGER branch_template_student_assessment_update
+-- AFTER UPDATE ON branch_template.student_assessment
+-- FOR EACH ROW
+-- EXECUTE FUNCTION branch_template.update_module_grade();
 
 -- ---------------------------
 -- Table structure for TUITION

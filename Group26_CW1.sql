@@ -436,38 +436,6 @@ BEGIN
 	, schema_name, schema_name, schema_name);
 
 	EXECUTE format('
-	CREATE OR REPLACE FUNCTION %I.update_module_grade()
-	RETURNS TRIGGER AS $inner$
-	BEGIN
-	  UPDATE %I.student_module
-	  SET 
-	    module_grade = (
-	      SELECT ROUND(COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0), 2)
-	      FROM %I.student_assessment AS sa
-	      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
-	      WHERE sa.student_id = NEW.student_id AND a.module_id = %I.student_module.module_id
-	    ),
-	    passed = (
-	      SELECT CASE
-	        WHEN COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0) >= 40 THEN TRUE
-	        ELSE FALSE
-	      END
-	      FROM %I.student_assessment AS sa
-	      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
-	      WHERE sa.student_id = NEW.student_id AND a.module_id = %I.student_module.module_id
-	    )
-	  WHERE student_id = NEW.student_id
-	    AND module_id = (
-	      SELECT module_id
-	      FROM shared.assessment
-	      WHERE assessment_id = NEW.assessment_id
-	    );
-	  RETURN NEW;
-	END;
-	$inner$ LANGUAGE plpgsql;'
-	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
-
-	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.update_course_grade()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
@@ -769,13 +737,6 @@ BEGIN
 	  FOREIGN KEY (assessment_id) REFERENCES %I.assessment (assessment_id),
 	  CONSTRAINT valid_grade_percentage CHECK (grade >= 0 AND grade <= 100)
 	);'
-	, schema_name, schema_name, schema_name);
-
-	EXECUTE format('
-	CREATE TRIGGER %I_student_assessment_update
-	AFTER UPDATE ON %I.student_assessment
-	FOR EACH ROW
-	EXECUTE FUNCTION %I.update_module_grade();'
 	, schema_name, schema_name, schema_name);
 
 	EXECUTE format('
