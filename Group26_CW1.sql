@@ -22,7 +22,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION shared.student_email()
 RETURNS TRIGGER AS $$
 BEGIN
-  RAISE NOTICE 'CREATEING STUDENT EDU EMAIL %', NEW.student_id;
+  RAISE NOTICE 'CREATING STUDENT EDU EMAIL %', NEW.student_id;
   NEW.student_edu_email := CONCAT(NEW.student_id, '@ses.edu.org');
 
   IF NEW.student_personal_email IS NOT NULL THEN 
@@ -282,7 +282,7 @@ BEGIN
 
 	EXECUTE format('
 	CREATE SCHEMA IF NOT EXISTS %I;'
-	, schema_name);	
+	, schema_name);
 
 	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.is_room_available(
@@ -1338,6 +1338,29 @@ BEGIN
 	, schema_name);
 
 	EXECUTE format('
+	GRANT SELECT ON %I.student_attendance,
+	                %I.module_attendance,
+	                %I.course_attendance,
+	                %I.unpaid_tuition,
+	                %I.room_session_times,
+	                %I.low_performing_students,
+	                %I.get_staff_sessions,
+	                %I.get_staff_assignments,
+	                %I.staff_busy,
+	                %I.staff_availability
+	TO admin_staff_role;'
+	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
+	GRANT SELECT ON %I.module_attendance,
+	                %I.course_attendance,
+	                %I.room_session_times,
+	                %I.get_staff_sessions,
+	                %I.get_staff_assignments
+	TO teaching_staff_role;'
+	, schema_name, schema_name, schema_name, schema_name, schema_name);
+
+	EXECUTE format('
 	ALTER TABLE %I.staff ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
@@ -2112,8 +2135,8 @@ GRANT staff_role TO teaching_staff_role;
 GRANT SELECT ON ALL TABLES IN SCHEMA shared TO teaching_staff_role;
 REVOKE SELECT ON shared.emergency_contact FROM teaching_staff_role;
 
--- Grant CREATE and UPDATE access to shared.assessment
-GRANT CREATE, UPDATE ON shared.assessment TO teaching_staff_role;
+-- Grant INSERT and UPDATE access to shared.assessment
+GRANT INSERT, UPDATE ON shared.assessment TO teaching_staff_role;
 
 -- Grant all the permissions of staff_role and allow it to bypass RLS
 GRANT staff_role TO admin_staff_role;
@@ -2123,9 +2146,7 @@ ALTER ROLE admin_staff_role SET row_security = off;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA shared TO admin_staff_role;
 
 -- Grant SELECT on shared views for admin staff only
-GRANT SELECT ON shared.branch_attendanc,
-								shared.course_popularity,
-								shared.branch_low_performing_students 
+GRANT SELECT ON shared.branch_attendance, shared.course_popularity, shared.branch_low_performing_students 
 TO admin_staff_role;
 
 /* ENABLE RLS AND CREATE FOR SHARED TABLES */
@@ -2184,11 +2205,6 @@ CREATE POLICY staff_access_policy_shared_assessment
 ON shared.assessment
 FOR ALL
 USING (pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE'));
-
-CREATE POLICY student_access_policy_shared_assessment
-ON branch_template.staff
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE'));
 
 -- Role Policy
 ALTER TABLE shared.role ENABLE ROW LEVEL SECURITY;
@@ -2810,7 +2826,10 @@ VALUES
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-10', '', TRUE, ''),
 	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-10', '', TRUE, ''),
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-17', '', TRUE, ''),
-	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-17', '', TRUE, ''),
+	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-17', '', TRUE, '');
+
+INSERT INTO branch_b01.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+VALUES
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-24', '', TRUE, ''),
 	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-24', '', TRUE, ''),
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-31', '', TRUE, ''),
@@ -2874,7 +2893,10 @@ VALUES
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-11-12', '', TRUE, ''),
 	(3, 'm000010', 'Practical', '15:00', '16:00', '2024-11-12', '', TRUE, ''),
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-11-19', '', TRUE, ''),
-	(2, 'm000010', 'Practical', '15:00', '16:00', '2024-11-19', '', TRUE, ''),
+	(2, 'm000010', 'Practical', '15:00', '16:00', '2024-11-19', '', TRUE, '');
+
+INSERT INTO branch_b01.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+VALUES
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-11-26', '', TRUE, ''),
 	(2, 'm000010', 'Practical', '15:00', '16:00', '2024-11-26', '', TRUE, ''),
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-12-03', '', TRUE, ''),
@@ -3043,7 +3065,10 @@ VALUES
 	('s000000002', 'sesh000048'),
 	('s000000001', 'sesh000049'),
 	('s000000002', 'sesh000049'),
-	('s000000001', 'sesh000050'),
+	('s000000001', 'sesh000050');
+
+INSERT INTO branch_b01.staff_session (staff_id, session_id)
+VALUES
 	('s000000002', 'sesh000050'),
 	('s000000001', 'sesh000051'),
 	('s000000002', 'sesh000051'),
@@ -3144,7 +3169,10 @@ VALUES
 	('s000000002', 'sesh000099'),
 	('s000000003', 'sesh000099'),
 	('s000000002', 'sesh000100'),
-	('s000000003', 'sesh000100'),
+	('s000000003', 'sesh000100');
+
+INSERT INTO branch_b01.staff_session (staff_id, session_id)
+VALUES
 	('s000000002', 'sesh000101'),
 	('s000000003', 'sesh000101'),
 	('s000000002', 'sesh000102'),
@@ -3243,7 +3271,10 @@ VALUES
 	('s000000003', 'sesh000148'),
 	('s000000002', 'sesh000149'),
 	('s000000003', 'sesh000149'),
-	('s000000002', 'sesh000150'),
+	('s000000002', 'sesh000150');
+
+INSERT INTO branch_b01.staff_session (staff_id, session_id)
+VALUES
 	('s000000003', 'sesh000150'),
 	('s000000002', 'sesh000151'),
 	('s000000003', 'sesh000151'),
@@ -3641,7 +3672,10 @@ VALUES
 	(3, 'm000015', 'Practical', '12:00', '13:00', '2024-12-31', '', TRUE, ''),
 	(1, 'm000015', 'Lecture', '11:00', '12:00', '2025-01-07', '', TRUE, ''),
 	(2, 'm000015', 'Practical', '12:00', '13:00', '2025-01-07', '', TRUE, ''),
-	(1, 'm000015', 'Lecture', '11:00', '12:00', '2025-01-14', '', TRUE, ''),
+	(1, 'm000015', 'Lecture', '11:00', '12:00', '2025-01-14', '', TRUE, '');
+
+INSERT INTO branch_b02.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+VALUES
 	(3, 'm000015', 'Practical', '12:00', '13:00', '2025-01-14', '', TRUE, ''),
 	(1, 'm000015', 'Lecture', '11:00', '12:00', '2025-01-21', '', TRUE, ''),
 	(2, 'm000015', 'Practical', '12:00', '13:00', '2025-01-21', '', TRUE, ''),
@@ -3713,7 +3747,10 @@ VALUES
 	(3, 'm000018', 'Practical', '15:00', '16:00', '2024-12-31', '', TRUE, ''),
 	(1, 'm000018', 'Lecture', '14:00', '15:00', '2025-01-07', '', TRUE, ''),
 	(2, 'm000018', 'Practical', '15:00', '16:00', '2025-01-07', '', TRUE, ''),
-	(1, 'm000018', 'Lecture', '14:00', '15:00', '2025-01-14', '', TRUE, ''),
+	(1, 'm000018', 'Lecture', '14:00', '15:00', '2025-01-14', '', TRUE, '');
+
+INSERT INTO branch_b02.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+VALUES
 	(2, 'm000018', 'Practical', '15:00', '16:00', '2025-01-14', '', TRUE, ''),
 	(1, 'm000018', 'Lecture', '14:00', '15:00', '2025-01-21', '', TRUE, ''),
 	(3, 'm000018', 'Practical', '15:00', '16:00', '2025-01-21', '', TRUE, ''),
@@ -3882,7 +3919,10 @@ VALUES
 	('s000000008', 'sesh000249'),
 	('s000000009', 'sesh000249'),
 	('s000000008', 'sesh000250'),
-	('s000000009', 'sesh000250'),
+	('s000000009', 'sesh000250');
+
+INSERT INTO branch_b02.staff_session (staff_id, session_id)
+VALUES
 	('s000000008', 'sesh000251'),
 	('s000000009', 'sesh000251'),
 	('s000000008', 'sesh000252'),
@@ -3981,7 +4021,10 @@ VALUES
 	('s000000010', 'sesh000298'),
 	('s000000009', 'sesh000299'),
 	('s000000010', 'sesh000299'),
-	('s000000009', 'sesh000300'),
+	('s000000009', 'sesh000300');
+
+INSERT INTO branch_b02.staff_session (staff_id, session_id)
+VALUES
 	('s000000010', 'sesh000300'),
 	('s000000009', 'sesh000301'),
 	('s000000010', 'sesh000301'),
@@ -4082,7 +4125,10 @@ VALUES
 	('s000000009', 'sesh000349'),
 	('s000000010', 'sesh000349'),
 	('s000000009', 'sesh000350'),
-	('s000000010', 'sesh000350'),
+	('s000000010', 'sesh000350');
+
+INSERT INTO branch_b02.staff_session (staff_id, session_id)
+VALUES
 	('s000000009', 'sesh000351'),
 	('s000000010', 'sesh000351'),
 	('s000000009', 'sesh000352'),

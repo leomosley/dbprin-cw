@@ -22,7 +22,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION shared.student_email()
 RETURNS TRIGGER AS $$
 BEGIN
-  RAISE NOTICE 'CREATEING STUDENT EDU EMAIL %', NEW.student_id;
+  RAISE NOTICE 'CREATING STUDENT EDU EMAIL %', NEW.student_id;
   NEW.student_edu_email := CONCAT(NEW.student_id, '@ses.edu.org');
 
   IF NEW.student_personal_email IS NOT NULL THEN 
@@ -2135,8 +2135,8 @@ GRANT staff_role TO teaching_staff_role;
 GRANT SELECT ON ALL TABLES IN SCHEMA shared TO teaching_staff_role;
 REVOKE SELECT ON shared.emergency_contact FROM teaching_staff_role;
 
--- Grant CREATE and UPDATE access to shared.assessment
-GRANT CREATE, UPDATE ON shared.assessment TO teaching_staff_role;
+-- Grant INSERT and UPDATE access to shared.assessment
+GRANT INSERT, UPDATE ON shared.assessment TO teaching_staff_role;
 
 -- Grant all the permissions of staff_role and allow it to bypass RLS
 GRANT staff_role TO admin_staff_role;
@@ -2146,9 +2146,7 @@ ALTER ROLE admin_staff_role SET row_security = off;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA shared TO admin_staff_role;
 
 -- Grant SELECT on shared views for admin staff only
-GRANT SELECT ON shared.branch_attendanc,
-								shared.course_popularity,
-								shared.branch_low_performing_students 
+GRANT SELECT ON shared.branch_attendance, shared.course_popularity, shared.branch_low_performing_students 
 TO admin_staff_role;
 
 /* ENABLE RLS AND CREATE FOR SHARED TABLES */
@@ -2207,11 +2205,6 @@ CREATE POLICY staff_access_policy_shared_assessment
 ON shared.assessment
 FOR ALL
 USING (pg_has_role(CURRENT_USER, 'teaching_staff_role', 'USAGE'));
-
-CREATE POLICY student_access_policy_shared_assessment
-ON branch_template.staff
-FOR ALL
-USING (pg_has_role(CURRENT_USER, 'staff_role', 'USAGE'));
 
 -- Role Policy
 ALTER TABLE shared.role ENABLE ROW LEVEL SECURITY;

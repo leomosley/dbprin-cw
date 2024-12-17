@@ -591,7 +591,10 @@ VALUES
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-10', '', TRUE, ''),
 	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-10', '', TRUE, ''),
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-17', '', TRUE, ''),
-	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-17', '', TRUE, ''),
+	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-17', '', TRUE, '');
+
+INSERT INTO branch_b01.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+VALUES
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-24', '', TRUE, ''),
 	(2, 'm000003', 'Practical', '12:00', '13:00', '2024-12-24', '', TRUE, ''),
 	(1, 'm000003', 'Lecture', '11:00', '12:00', '2024-12-31', '', TRUE, ''),
@@ -655,7 +658,10 @@ VALUES
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-11-12', '', TRUE, ''),
 	(3, 'm000010', 'Practical', '15:00', '16:00', '2024-11-12', '', TRUE, ''),
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-11-19', '', TRUE, ''),
-	(2, 'm000010', 'Practical', '15:00', '16:00', '2024-11-19', '', TRUE, ''),
+	(2, 'm000010', 'Practical', '15:00', '16:00', '2024-11-19', '', TRUE, '');
+
+INSERT INTO branch_b01.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+VALUES
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-11-26', '', TRUE, ''),
 	(2, 'm000010', 'Practical', '15:00', '16:00', '2024-11-26', '', TRUE, ''),
 	(1, 'm000010', 'Lecture', '14:00', '15:00', '2024-12-03', '', TRUE, ''),
@@ -824,7 +830,10 @@ VALUES
 	('s000000002', 'sesh000048'),
 	('s000000001', 'sesh000049'),
 	('s000000002', 'sesh000049'),
-	('s000000001', 'sesh000050'),
+	('s000000001', 'sesh000050');
+
+INSERT INTO branch_b01.staff_session (staff_id, session_id)
+VALUES
 	('s000000002', 'sesh000050'),
 	('s000000001', 'sesh000051'),
 	('s000000002', 'sesh000051'),
@@ -925,7 +934,10 @@ VALUES
 	('s000000002', 'sesh000099'),
 	('s000000003', 'sesh000099'),
 	('s000000002', 'sesh000100'),
-	('s000000003', 'sesh000100'),
+	('s000000003', 'sesh000100');
+
+INSERT INTO branch_b01.staff_session (staff_id, session_id)
+VALUES
 	('s000000002', 'sesh000101'),
 	('s000000003', 'sesh000101'),
 	('s000000002', 'sesh000102'),
@@ -1024,7 +1036,10 @@ VALUES
 	('s000000003', 'sesh000148'),
 	('s000000002', 'sesh000149'),
 	('s000000003', 'sesh000149'),
-	('s000000002', 'sesh000150'),
+	('s000000002', 'sesh000150');
+
+INSERT INTO branch_b01.staff_session (staff_id, session_id)
+VALUES
 	('s000000003', 'sesh000150'),
 	('s000000002', 'sesh000151'),
 	('s000000003', 'sesh000151'),
@@ -1422,7 +1437,10 @@ VALUES
 	(3, 'm000015', 'Practical', '12:00', '13:00', '2024-12-31', '', TRUE, ''),
 	(1, 'm000015', 'Lecture', '11:00', '12:00', '2025-01-07', '', TRUE, ''),
 	(2, 'm000015', 'Practical', '12:00', '13:00', '2025-01-07', '', TRUE, ''),
-	(1, 'm000015', 'Lecture', '11:00', '12:00', '2025-01-14', '', TRUE, ''),
+	(1, 'm000015', 'Lecture', '11:00', '12:00', '2025-01-14', '', TRUE, '');
+
+INSERT INTO branch_b02.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+VALUES
 	(3, 'm000015', 'Practical', '12:00', '13:00', '2025-01-14', '', TRUE, ''),
 	(1, 'm000015', 'Lecture', '11:00', '12:00', '2025-01-21', '', TRUE, ''),
 	(2, 'm000015', 'Practical', '12:00', '13:00', '2025-01-21', '', TRUE, ''),
@@ -1494,7 +1512,10 @@ VALUES
 	(3, 'm000018', 'Practical', '15:00', '16:00', '2024-12-31', '', TRUE, ''),
 	(1, 'm000018', 'Lecture', '14:00', '15:00', '2025-01-07', '', TRUE, ''),
 	(2, 'm000018', 'Practical', '15:00', '16:00', '2025-01-07', '', TRUE, ''),
-	(1, 'm000018', 'Lecture', '14:00', '15:00', '2025-01-14', '', TRUE, ''),
+	(1, 'm000018', 'Lecture', '14:00', '15:00', '2025-01-14', '', TRUE, '');
+
+INSERT INTO branch_b02.session (room_id, module_id, session_type, session_start_time, session_end_time, session_date, session_feedback, session_mandatory, session_description)
+VALUES
 	(2, 'm000018', 'Practical', '15:00', '16:00', '2025-01-14', '', TRUE, ''),
 	(1, 'm000018', 'Lecture', '14:00', '15:00', '2025-01-21', '', TRUE, ''),
 	(3, 'm000018', 'Practical', '15:00', '16:00', '2025-01-21', '', TRUE, ''),
@@ -1663,7 +1684,10 @@ VALUES
 	('s000000008', 'sesh000249'),
 	('s000000009', 'sesh000249'),
 	('s000000008', 'sesh000250'),
-	('s000000009', 'sesh000250'),
+	('s000000009', 'sesh000250');
+
+INSERT INTO branch_b02.staff_session (staff_id, session_id)
+VALUES
 	('s000000008', 'sesh000251'),
 	('s000000009', 'sesh000251'),
 	('s000000008', 'sesh000252'),
@@ -1762,7 +1786,10 @@ VALUES
 	('s000000010', 'sesh000298'),
 	('s000000009', 'sesh000299'),
 	('s000000010', 'sesh000299'),
-	('s000000009', 'sesh000300'),
+	('s000000009', 'sesh000300');
+
+INSERT INTO branch_b02.staff_session (staff_id, session_id)
+VALUES
 	('s000000010', 'sesh000300'),
 	('s000000009', 'sesh000301'),
 	('s000000010', 'sesh000301'),
@@ -1863,7 +1890,10 @@ VALUES
 	('s000000009', 'sesh000349'),
 	('s000000010', 'sesh000349'),
 	('s000000009', 'sesh000350'),
-	('s000000010', 'sesh000350'),
+	('s000000010', 'sesh000350');
+
+INSERT INTO branch_b02.staff_session (staff_id, session_id)
+VALUES
 	('s000000009', 'sesh000351'),
 	('s000000010', 'sesh000351'),
 	('s000000009', 'sesh000352'),
