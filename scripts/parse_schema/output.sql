@@ -3,10 +3,12 @@ RETURNS void AS $$
 BEGIN
   RAISE NOTICE 'CREATING SCHEMA %', schema_name;
 
+	RAISE NOTICE 'CREATING %', '%;';
 	EXECUTE format('
 	CREATE SCHEMA IF NOT EXISTS %I;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.is_room_available(';
 	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.is_room_available(
 	  p_room_id INT,
@@ -43,6 +45,7 @@ BEGIN
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.get_day_available_room_time(';
 	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.get_day_available_room_time(
 	  p_room_id INT,
@@ -68,6 +71,7 @@ BEGIN
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.link_module_assessment()';
 	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.link_module_assessment()
 	RETURNS TRIGGER AS $inner$
@@ -87,6 +91,7 @@ BEGIN
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.link_students_to_assessment()';
 	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.link_students_to_assessment()
 	RETURNS TRIGGER AS $inner$
@@ -103,6 +108,7 @@ BEGIN
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.update_tuition_after_payment()$inner$';
 	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.update_tuition_after_payment() RETURNS TRIGGER AS $inner$ BEGIN
 	  UPDATE
@@ -125,6 +131,7 @@ BEGIN
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.link_students_to_session()';
 	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.link_students_to_session()
 	RETURNS TRIGGER AS $inner$
@@ -141,6 +148,7 @@ BEGIN
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.link_students_to_module()';
 	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.link_students_to_module()
 	RETURNS TRIGGER AS $inner$
@@ -158,19 +166,18 @@ BEGIN
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.update_module_grade()$inner$';
 	EXECUTE format('
-	CREATE OR REPLACE FUNCTION %I.update_module_grade()
-	RETURNS TRIGGER AS $inner$
-	BEGIN
-	  UPDATE %I.student_module
+	CREATE OR REPLACE FUNCTION %I.update_module_grade() RETURNS TRIGGER AS $inner$ BEGIN
+	  UPDATE %I.student_module AS sm
 	  SET 
-	    module_grade = (
+	    sm.module_grade = (
 	      SELECT ROUND(COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0), 2)
 	      FROM %I.student_assessment AS sa
 	      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
 	      WHERE sa.student_id = NEW.student_id AND a.module_id = %I.student_module.module_id
 	    ),
-	    passed = (
+	    sm.passed = (
 	      SELECT CASE
 	        WHEN COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0) >= 40 THEN TRUE
 	        ELSE FALSE
@@ -179,8 +186,8 @@ BEGIN
 	      JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
 	      WHERE sa.student_id = NEW.student_id AND a.module_id = %I.student_module.module_id
 	    )
-	  WHERE student_id = NEW.student_id
-	    AND module_id = (
+	  WHERE sm.student_id = NEW.student_id
+	    AND sm.module_id = (
 	      SELECT module_id
 	      FROM shared.assessment
 	      WHERE assessment_id = NEW.assessment_id
@@ -190,20 +197,19 @@ BEGIN
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.update_course_grade()$inner$';
 	EXECUTE format('
-	CREATE OR REPLACE FUNCTION %I.update_course_grade()
-	RETURNS TRIGGER AS $inner$
-	BEGIN
-	  UPDATE %I.student_course
+	CREATE OR REPLACE FUNCTION %I.update_course_grade() RETURNS TRIGGER AS $inner$ BEGIN
+	  UPDATE %I.student_course AS sc
 	  SET 
-	    culmative_average = (
+	    sc.culmative_average = (
 	      SELECT ROUND(COALESCE(AVG(sm.module_grade), 0), 2)
 	      FROM %I.student_module AS sm
 	      JOIN %I.course_module AS cm ON sm.module_id = cm.module_id
 	      WHERE sm.student_id = NEW.student_id AND cm.course_id = %I.student_course.course_id
 	    )
-	  WHERE student_id = NEW.student_id
-	    AND course_id = (
+	  WHERE sc.student_id = NEW.student_id
+	    AND sc.course_id = (
 	      SELECT course_id
 	      FROM %I.course_module
 	      WHERE module_id = NEW.module_id
@@ -213,12 +219,13 @@ BEGIN
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.update_student_attendance()';
 	EXECUTE format('
 	CREATE OR REPLACE FUNCTION %I.update_student_attendance()
 	RETURNS TRIGGER AS $inner$
 	BEGIN
-	  UPDATE %I.student
-	  SET student_attendance = (
+	  UPDATE %I.student AS s
+	  SET s.student_attendance = (
 	    SELECT ROUND(CAST(SUM(
 	      CASE 
 	        WHEN ss.attendance_record THEN 1 
@@ -230,12 +237,13 @@ BEGIN
 	    WHERE ss.student_id = NEW.student_id
 	      AND (s.session_date < CURRENT_DATE OR (s.session_date = CURRENT_DATE AND s.session_start_time <= CURRENT_TIME))
 	  )
-	  WHERE student_id = NEW.student_id;
+	  WHERE s.student_id = NEW.student_id;
 	  RETURN NEW;
 	END;
 	$inner$ LANGUAGE plpgsql;'
 	, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff(';
 	EXECUTE format('
 	CREATE TABLE %I.staff (
 	  staff_id CHAR(10) DEFAULT (
@@ -256,6 +264,7 @@ BEGIN
 	);'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_before_staff_insert';
 	EXECUTE format('
 	CREATE TRIGGER %I_before_staff_insert
 	BEFORE INSERT ON %I.staff
@@ -263,6 +272,7 @@ BEGIN
 	EXECUTE FUNCTION shared.validate_staff();'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_trigger_create_student_user';
 	EXECUTE format('
 	CREATE TRIGGER %I_trigger_create_student_user
 	AFTER INSERT ON %I.staff
@@ -270,10 +280,12 @@ BEGIN
 	EXECUTE FUNCTION shared.create_staff_user();'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_unique_staff_personal_email%.staff((staff_personal_email));';
 	EXECUTE format('
 	CREATE UNIQUE INDEX %I_idx_unique_staff_personal_email ON %I.staff (LOWER(staff_personal_email));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_role(';
 	EXECUTE format('
 	CREATE TABLE %I.staff_role (
 	  staff_id CHAR(10) NOT NULL,
@@ -284,6 +296,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_trigger_grant_staff_roles';
 	EXECUTE format('
 	CREATE TRIGGER %I_trigger_grant_staff_roles
 	AFTER INSERT OR UPDATE ON %I.staff_role
@@ -291,6 +304,7 @@ BEGIN
 	EXECUTE FUNCTION shared.grant_staff_roles();'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_trigger_revoke_roles';
 	EXECUTE format('
 	CREATE TRIGGER %I_trigger_revoke_roles
 	AFTER DELETE OR UPDATE ON %I.staff_role
@@ -298,6 +312,7 @@ BEGIN
 	EXECUTE FUNCTION shared.revoke_staff_roles();'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.department(';
 	EXECUTE format('
 	CREATE TABLE %I.department (
 	  dep_id CHAR(7) NOT NULL,
@@ -308,6 +323,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.course(';
 	EXECUTE format('
 	CREATE TABLE %I.course (
 	  course_id CHAR(7) NOT NULL,
@@ -318,10 +334,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_course_attendance%.course(course_id);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_course_attendance ON %I.course (course_id);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.department_course(';
 	EXECUTE format('
 	CREATE TABLE %I.department_course (
 	  dep_id CHAR(7) NOT NULL,
@@ -332,6 +350,7 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.module(';
 	EXECUTE format('
 	CREATE TABLE %I.module (
 	  module_id CHAR(7) NOT NULL,
@@ -340,10 +359,12 @@ BEGIN
 	);'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_module_id%.module(module_id);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_module_id ON %I.module (module_id);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_module_attendance%.module(module_id);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_module_attendance ON %I.module (module_id);
 	CREATE TABLE %I.course_module (
@@ -355,10 +376,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_course_module_combined%.course_module(course_id,module_id);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_course_module_combined ON %I.course_module (course_id, module_id);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student(';
 	EXECUTE format('
 	CREATE TABLE %I.student (
 	  student_id CHAR(10) DEFAULT (
@@ -381,6 +404,7 @@ BEGIN
 	);'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_before_student_insert';
 	EXECUTE format('
 	CREATE TRIGGER %I_before_student_insert
 	BEFORE INSERT ON %I.student
@@ -388,6 +412,7 @@ BEGIN
 	EXECUTE FUNCTION shared.student_email();'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_trigger_create_student_user';
 	EXECUTE format('
 	CREATE TRIGGER %I_trigger_create_student_user
 	AFTER INSERT ON %I.student
@@ -395,18 +420,22 @@ BEGIN
 	EXECUTE FUNCTION shared.create_student_user();'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_unique_student_personal_email%.student((student_personal_email));';
 	EXECUTE format('
 	CREATE UNIQUE INDEX %I_idx_unique_student_personal_email ON %I.student (LOWER(student_personal_email));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_student_id%.student(student_id);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_student_id ON %I.student (student_id);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_student_attendance%.student(student_attendance);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_student_attendance ON %I.student (student_attendance);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_course(';
 	EXECUTE format('
 	CREATE TABLE %I.student_course (
 	  student_id CHAR(10) NOT NULL,
@@ -426,6 +455,7 @@ BEGIN
 	EXECUTE FUNCTION %I.link_students_to_module();'
 	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_module(';
 	EXECUTE format('
 	CREATE TABLE %I.student_module (
 	  student_id CHAR(10) NOT NULL,
@@ -436,15 +466,16 @@ BEGIN
 	  PRIMARY KEY (student_id, module_id),
 	  FOREIGN KEY (student_id) REFERENCES %I.student (student_id),
 	  FOREIGN KEY (module_id) REFERENCES %I.module (module_id),
-	  CONSTRAINT valid_grade_percentage CHECK (module_grade >= 0 AND module_grade <= 100),
-	  CONSTRAINT valid_passed CHECK ((passed = TRUE AND module_grade >= 40) OR (passed = FALSE AND module_grade < 40))
+	  CONSTRAINT valid_grade_percentage CHECK (module_grade >= 0 AND module_grade <= 100)
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_student_module_combined%.student_module(student_id,module_id);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_student_module_combined ON %I.student_module (student_id, module_id);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_after_insert_assessment';
 	EXECUTE format('
 	CREATE TRIGGER %I_after_insert_assessment
 	AFTER INSERT ON %I.student_module
@@ -452,6 +483,7 @@ BEGIN
 	EXECUTE FUNCTION %I.link_students_to_assessment();'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_assessment_update';
 	EXECUTE format('
 	CREATE TRIGGER %I_student_assessment_update
 	AFTER UPDATE ON %I.student_module
@@ -459,6 +491,7 @@ BEGIN
 	EXECUTE FUNCTION %I.update_course_grade();'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.assessment(';
 	EXECUTE format('
 	CREATE TABLE %I.assessment (
 	  assessment_id CHAR(10) NOT NULL,
@@ -474,6 +507,7 @@ BEGIN
 	);'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_after_insert_module';
 	EXECUTE format('
 	CREATE TRIGGER %I_after_insert_module
 	AFTER INSERT ON %I.module
@@ -481,6 +515,7 @@ BEGIN
 	EXECUTE FUNCTION %I.link_module_assessment();'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_assessment(';
 	EXECUTE format('
 	CREATE TABLE %I.student_assessment (
 	  student_id CHAR(10) NOT NULL,
@@ -494,6 +529,7 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_assessment_update';
 	EXECUTE format('
 	CREATE TRIGGER %I_student_assessment_update
 	AFTER UPDATE ON %I.student_assessment
@@ -501,6 +537,7 @@ BEGIN
 	EXECUTE FUNCTION %I.update_module_grade();'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.tuition(';
 	EXECUTE format('
 	CREATE TABLE %I.tuition (
 	  tuition_id SERIAL PRIMARY KEY,
@@ -516,6 +553,7 @@ BEGIN
 	);'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_tuition(';
 	EXECUTE format('
 	CREATE TABLE %I.student_tuition (
 	  student_id CHAR(10) NOT NULL,
@@ -526,6 +564,7 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.tuition_payment(';
 	EXECUTE format('
 	CREATE TABLE %I.tuition_payment (
 	  tuition_payment_id SERIAL PRIMARY KEY,
@@ -540,6 +579,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', 'after_student_payment_insert';
 	EXECUTE format('
 	CREATE TRIGGER after_student_payment_insert 
 	AFTER INSERT ON %I.tuition_payment 
@@ -547,6 +587,7 @@ BEGIN
 	EXECUTE FUNCTION %I.update_tuition_after_payment();'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_department(';
 	EXECUTE format('
 	CREATE TABLE %I.staff_department (
 	  staff_id CHAR(10) NOT NULL,
@@ -558,6 +599,7 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.building(';
 	EXECUTE format('
 	CREATE TABLE %I.building (
 	  building_id SERIAL PRIMARY KEY,
@@ -572,6 +614,7 @@ BEGIN
 	);'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.room(';
 	EXECUTE format('
 	CREATE TABLE %I.room (
 	  room_id SERIAL PRIMARY KEY,
@@ -587,6 +630,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.room_facility(';
 	EXECUTE format('
 	CREATE TABLE %I.room_facility (
 	  room_id INT NOT NULL,
@@ -599,6 +643,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.session(';
 	EXECUTE format('
 	CREATE TABLE %I.session (
 	  session_id CHAR(10) DEFAULT (
@@ -619,10 +664,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_session_date_time%.session(session_date,session_start_time);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_session_date_time ON %I.session (session_date, session_start_time);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_session(';
 	EXECUTE format('
 	CREATE TABLE %I.staff_session (
 	  staff_id CHAR(10) NOT NULL,
@@ -633,6 +680,7 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_session(';
 	EXECUTE format('
 	CREATE TABLE %I.student_session (
 	  session_id CHAR(10) NOT NULL,
@@ -644,18 +692,22 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_student_session_id%.student_session(session_id);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_student_session_id ON %I.student_session (session_id);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_attendance_record%.student_session(attendance_record);';
 	EXECUTE format('
 	CREATE INDEX %I_idx_attendance_record ON %I.student_session (attendance_record);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_idx_attendance_record_true%.student_session(session_id,student_id)attendance_record=;';
 	EXECUTE format('
 	CREATE INDEX %I_idx_attendance_record_true ON %I.student_session (session_id, student_id) WHERE attendance_record = TRUE;'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_after_insert_session_trigger';
 	EXECUTE format('
 	CREATE TRIGGER %I_after_insert_session_trigger
 	AFTER INSERT ON %I.session
@@ -663,6 +715,7 @@ BEGIN
 	EXECUTE FUNCTION %I.link_students_to_session();'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_update_student_attendance_trigger';
 	EXECUTE format('
 	CREATE TRIGGER %I_update_student_attendance_trigger
 	AFTER UPDATE ON %I.student_session
@@ -670,6 +723,7 @@ BEGIN
 	EXECUTE FUNCTION %I.update_student_attendance();'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_contact(';
 	EXECUTE format('
 	CREATE TABLE %I.staff_contact (
 	  contact_id INT NOT NULL,
@@ -680,6 +734,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_contact(';
 	EXECUTE format('
 	CREATE TABLE %I.student_contact (
 	  contact_id INT NOT NULL,
@@ -690,6 +745,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_office(';
 	EXECUTE format('
 	CREATE TABLE %I.staff_office (
 	  room_id INT NOT NULL,
@@ -700,6 +756,7 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.assignment(';
 	EXECUTE format('
 	CREATE TABLE %I.assignment (
 	  assignment_id SERIAL PRIMARY KEY,
@@ -711,6 +768,7 @@ BEGIN
 	);'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_assignment(';
 	EXECUTE format('
 	CREATE TABLE %I.staff_assignment (
 	  staff_id CHAR(10) NOT NULL,
@@ -721,33 +779,27 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_attendance';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.student_attendance AS 
-	WITH student_details AS (
-	  SELECT 
-	    student_id,
-	    CONCAT_WS('' '', student_fname, student_lname) AS full_name,
-	    student_edu_email AS email,
-	    student_attendance
-	  FROM %I.student
-	)
 	SELECT 
-	  sd.student_id AS "Student ID",
-	  sd.full_name AS "Student Name",
-	  sd.email AS "Student Email",
-	  sd.student_attendance AS "Attendance %%",
+	  s.student_id AS "Student ID",
+	  CONCAT_WS('' '', s.student_fname, s.student_lname) AS "Student Name",
+	  s.student_edu_email AS "Student Email",
+	  s.student_attendance AS "Attendance %%",
 	  CASE 
-	    WHEN sd.student_attendance > 95 THEN ''Excellent''
-	    WHEN sd.student_attendance > 90 THEN ''Good''
-	    WHEN sd.student_attendance > 75 THEN ''Satisfactory''
-	    WHEN sd.student_attendance > 51 THEN ''Irregular Attendance''
-	    WHEN sd.student_attendance > 10 THEN ''Severly Absent''
+	    WHEN s.student_attendance > 95 THEN ''Excellent''
+	    WHEN s.student_attendance > 90 THEN ''Good''
+	    WHEN s.student_attendance > 75 THEN ''Satisfactory''
+	    WHEN s.student_attendance > 51 THEN ''Irregular Attendance''
+	    WHEN s.student_attendance > 10 THEN ''Severely Absent''
 	    ELSE ''Persitently Absent''
 	  END AS "Attendance Rating"
-	FROM student_details AS sd
+	FROM %I.student AS s
 	ORDER BY "Student ID";'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.module_attendance';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.module_attendance AS 
 	SELECT
@@ -782,6 +834,7 @@ BEGIN
 	GROUP BY "Module ID", "Module Name";'
 	, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.course_attendance';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.course_attendance AS 
 	SELECT
@@ -798,6 +851,7 @@ BEGIN
 	GROUP BY "Course ID", "Course Name", "Course Coordinator";'
 	, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.unpaid_tuition';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.unpaid_tuition AS
 	WITH tuition_summary AS (
@@ -846,6 +900,7 @@ BEGIN
 	  ts.closest_tuition_deadline;'
 	, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.room_session_times';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.room_session_times AS
 	SELECT 
@@ -865,6 +920,7 @@ BEGIN
 	ORDER BY r.room_id, s.session_date, s.session_start_time;'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.low_performing_students';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.low_performing_students AS
 	SELECT 
@@ -891,6 +947,7 @@ BEGIN
 	  sa."Attendance Rating";'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.get_staff_sessions';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.get_staff_sessions AS 
 	SELECT 
@@ -906,6 +963,7 @@ BEGIN
 	  OR (sn.session_date = CURRENT_DATE AND sn.session_start_time < CURRENT_TIME);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.get_staff_assignments';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.get_staff_assignments AS 
 	SELECT 
@@ -921,6 +979,7 @@ BEGIN
 	  OR (a.assignment_date = CURRENT_DATE AND a.assignment_start_time < CURRENT_TIME);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_busy';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.staff_busy AS
 	SELECT 
@@ -940,6 +999,7 @@ BEGIN
 	  %I.get_staff_assignments AS sa;'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_availability';
 	EXECUTE format('
 	CREATE OR REPLACE VIEW %I.staff_availability AS
 	WITH date_range AS (
@@ -1013,6 +1073,7 @@ BEGIN
 	  as_grouped.available_date;'
 	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%student_role;';
 	EXECUTE format('
 	GRANT SELECT ON ALL TABLES IN SCHEMA %I TO student_role;
 	REVOKE SELECT ON %I.staff,
@@ -1026,6 +1087,7 @@ BEGIN
 	FROM student_role;'
 	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff,';
 	EXECUTE format('
 	GRANT SELECT ON %I.staff,
 	                %I.staff_role,
@@ -1038,6 +1100,7 @@ BEGIN
 	TO staff_role;'
 	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', ',%.staff_session,';
 	EXECUTE format('
 	GRANT SELECT, UPDATE ON %I.staff_session,
 	                         %I.session,
@@ -1048,6 +1111,7 @@ BEGIN
 	TO teaching_staff_role;'
 	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.course,';
 	EXECUTE format('
 	GRANT SELECT ON %I.course,
 	                %I.department_course,
@@ -1056,10 +1120,12 @@ BEGIN
 	TO teaching_staff_role;'
 	, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', ',,,%admin_staff_role;';
 	EXECUTE format('
 	GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA %I TO admin_staff_role;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_attendance,';
 	EXECUTE format('
 	GRANT SELECT ON %I.student_attendance,
 	                %I.module_attendance,
@@ -1074,6 +1140,7 @@ BEGIN
 	TO admin_staff_role;'
 	, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.module_attendance,';
 	EXECUTE format('
 	GRANT SELECT ON %I.module_attendance,
 	                %I.course_attendance,
@@ -1083,10 +1150,12 @@ BEGIN
 	TO teaching_staff_role;'
 	, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff;';
 	EXECUTE format('
 	ALTER TABLE %I.staff ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_access_policy
 	ON %I.staff
@@ -1097,10 +1166,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_role;';
 	EXECUTE format('
 	ALTER TABLE %I.staff_role ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_role_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_role_access_policy
 	ON %I.staff_role
@@ -1111,10 +1182,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.course;';
 	EXECUTE format('
 	ALTER TABLE %I.course ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_teaching_course_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_teaching_course_access_policy
 	ON %I.course
@@ -1122,6 +1195,7 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_course_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_course_access_policy
 	ON %I.course
@@ -1136,10 +1210,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.department_course;';
 	EXECUTE format('
 	ALTER TABLE %I.department_course ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_teaching_department_course_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_teaching_department_course_access_policy
 	ON %I.course
@@ -1147,6 +1223,7 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_department_course_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_department_course_access_policy
 	ON %I.department_course
@@ -1161,10 +1238,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.module;';
 	EXECUTE format('
 	ALTER TABLE %I.module ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_teaching_module_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_teaching_module_access_policy
 	ON %I.module
@@ -1172,6 +1251,7 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_module_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_module_access_policy
 	ON %I.module
@@ -1186,10 +1266,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.course_module;';
 	EXECUTE format('
 	ALTER TABLE %I.course_module ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_teaching_course_module_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_teaching_course_module_access_policy
 	ON %I.course_module
@@ -1197,6 +1279,7 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_course_module_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_course_module_access_policy
 	ON %I.course_module
@@ -1211,10 +1294,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student;';
 	EXECUTE format('
 	ALTER TABLE %I.student ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_access_policy
 	ON %I.student
@@ -1225,10 +1310,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_course;';
 	EXECUTE format('
 	ALTER TABLE %I.student_course ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_course_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_course_access_policy
 	ON %I.student_course
@@ -1239,6 +1326,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_teaching_student_course_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_teaching_student_course_access_policy
 	ON %I.student_course
@@ -1246,10 +1334,12 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_module;';
 	EXECUTE format('
 	ALTER TABLE %I.student_module ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_module_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_module_access_policy
 	ON %I.student_module
@@ -1260,6 +1350,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_teaching_student_module_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_teaching_student_module_access_policy
 	ON %I.student_module
@@ -1267,10 +1358,12 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.assessment;';
 	EXECUTE format('
 	ALTER TABLE %I.assessment ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_teaching_assessment_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_teaching_assessment_access_policy
 	ON %I.assessment
@@ -1278,6 +1371,7 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_assessment_access_policy_student';
 	EXECUTE format('
 	CREATE POLICY %I_assessment_access_policy_student
 	ON %I.assessment
@@ -1293,10 +1387,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_assessment;';
 	EXECUTE format('
 	ALTER TABLE %I.student_assessment ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_assessment_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_assessment_access_policy
 	ON %I.student_assessment
@@ -1312,6 +1408,7 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_teaching_student_assessment_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_teaching_student_assessment_access_policy
 	ON %I.student_assessment
@@ -1319,10 +1416,12 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.tuition;';
 	EXECUTE format('
 	ALTER TABLE %I.tuition ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_tuition_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_tuition_access_policy
 	ON %I.tuition
@@ -1339,10 +1438,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_tuition;';
 	EXECUTE format('
 	ALTER TABLE %I.student_tuition ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_tuition_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_tuition_access_policy
 	ON %I.student_tuition
@@ -1353,10 +1454,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.tuition_payment;';
 	EXECUTE format('
 	ALTER TABLE %I.tuition_payment ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_tuition_payment_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_tuition_payment_access_policy
 	ON %I.tuition_payment
@@ -1374,10 +1477,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_department;';
 	EXECUTE format('
 	ALTER TABLE %I.staff_department ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_department_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_department_access_policy
 	ON %I.staff_department
@@ -1388,10 +1493,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.building;';
 	EXECUTE format('
 	ALTER TABLE %I.building ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_building_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_building_access_policy
 	ON %I.building
@@ -1402,10 +1509,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.room;';
 	EXECUTE format('
 	ALTER TABLE %I.room ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_room_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_room_access_policy
 	ON %I.room
@@ -1416,10 +1525,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.room_facility;';
 	EXECUTE format('
 	ALTER TABLE %I.room_facility ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_room_facility_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_room_facility_access_policy
 	ON %I.room_facility
@@ -1427,10 +1538,12 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.session;';
 	EXECUTE format('
 	ALTER TABLE %I.session ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_session_access_policy_staff';
 	EXECUTE format('
 	CREATE POLICY %I_session_access_policy_staff
 	ON %I.session
@@ -1445,6 +1558,7 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_session_access_policy_student';
 	EXECUTE format('
 	CREATE POLICY %I_session_access_policy_student
 	ON %I.session
@@ -1459,10 +1573,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_session;';
 	EXECUTE format('
 	ALTER TABLE %I.staff_session ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_session_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_session_access_policy
 	ON %I.staff_session
@@ -1473,10 +1589,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.student_session;';
 	EXECUTE format('
 	ALTER TABLE %I.student_session ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_student_session_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_student_session_access_policy
 	ON %I.student_session
@@ -1487,6 +1605,7 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_teaching_student_session_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_teaching_student_session_access_policy
 	ON %I.student_session
@@ -1494,10 +1613,12 @@ BEGIN
 	USING (pg_has_role(CURRENT_USER, ''teaching_staff_role'', ''USAGE''));'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_contact;';
 	EXECUTE format('
 	ALTER TABLE %I.staff_contact ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_contact_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_contact_access_policy
 	ON %I.staff_contact
@@ -1508,10 +1629,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_office;';
 	EXECUTE format('
 	ALTER TABLE %I.staff_office ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_office_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_office_access_policy
 	ON %I.staff_office
@@ -1522,10 +1645,12 @@ BEGIN
 	);'
 	, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.assignment;';
 	EXECUTE format('
 	ALTER TABLE %I.assignment ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_assignment_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_assignment_access_policy
 	ON %I.assignment
@@ -1540,10 +1665,12 @@ BEGIN
 	);'
 	, schema_name, schema_name, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%.staff_assignment;';
 	EXECUTE format('
 	ALTER TABLE %I.staff_assignment ENABLE ROW LEVEL SECURITY;'
 	, schema_name);
 
+	RAISE NOTICE 'CREATING %', '%_staff_assignment_access_policy';
 	EXECUTE format('
 	CREATE POLICY %I_staff_assignment_access_policy
 	ON %I.staff_assignment

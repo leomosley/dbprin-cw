@@ -152,18 +152,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger function to update student_module to calculate their average grade
-CREATE OR REPLACE FUNCTION branch_template.update_module_grade()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE branch_template.student_module
+CREATE OR REPLACE FUNCTION branch_template.update_module_grade() RETURNS TRIGGER AS $$ BEGIN
+  UPDATE branch_template.student_module AS sm
   SET 
-    module_grade = (
+    sm.module_grade = (
       SELECT ROUND(COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0), 2)
       FROM branch_template.student_assessment AS sa
       JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
       WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
     ),
-    passed = (
+    sm.passed = (
       SELECT CASE
         WHEN COALESCE(SUM(sa.grade * (a.assessment_weighting / 100)), 0) >= 40 THEN TRUE
         ELSE FALSE
@@ -172,8 +170,8 @@ BEGIN
       JOIN shared.assessment AS a ON sa.assessment_id = a.assessment_id
       WHERE sa.student_id = NEW.student_id AND a.module_id = branch_template.student_module.module_id
     )
-  WHERE student_id = NEW.student_id
-    AND module_id = (
+  WHERE sm.student_id = NEW.student_id
+    AND sm.module_id = (
       SELECT module_id
       FROM shared.assessment
       WHERE assessment_id = NEW.assessment_id
@@ -183,19 +181,17 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger function to update student_course to calculate their average grade
-CREATE OR REPLACE FUNCTION branch_template.update_course_grade()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE branch_template.student_course
+CREATE OR REPLACE FUNCTION branch_template.update_course_grade() RETURNS TRIGGER AS $$ BEGIN
+  UPDATE branch_template.student_course AS sc
   SET 
-    culmative_average = (
+    sc.culmative_average = (
       SELECT ROUND(COALESCE(AVG(sm.module_grade), 0), 2)
       FROM branch_template.student_module AS sm
       JOIN branch_template.course_module AS cm ON sm.module_id = cm.module_id
       WHERE sm.student_id = NEW.student_id AND cm.course_id = branch_template.student_course.course_id
     )
-  WHERE student_id = NEW.student_id
-    AND course_id = (
+  WHERE sc.student_id = NEW.student_id
+    AND sc.course_id = (
       SELECT course_id
       FROM branch_template.course_module
       WHERE module_id = NEW.module_id
@@ -208,8 +204,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION branch_template.update_student_attendance()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE branch_template.student
-  SET student_attendance = (
+  UPDATE branch_template.student AS s
+  SET s.student_attendance = (
     SELECT ROUND(CAST(SUM(
       CASE 
         WHEN ss.attendance_record THEN 1 
@@ -221,7 +217,7 @@ BEGIN
     WHERE ss.student_id = NEW.student_id
       AND (s.session_date < CURRENT_DATE OR (s.session_date = CURRENT_DATE AND s.session_start_time <= CURRENT_TIME))
   )
-  WHERE student_id = NEW.student_id;
+  WHERE s.student_id = NEW.student_id;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -428,8 +424,7 @@ CREATE TABLE branch_template.student_module (
   PRIMARY KEY (student_id, module_id),
   FOREIGN KEY (student_id) REFERENCES branch_template.student (student_id),
   FOREIGN KEY (module_id) REFERENCES branch_template.module (module_id),
-  CONSTRAINT valid_grade_percentage CHECK (module_grade >= 0 AND module_grade <= 100),
-  CONSTRAINT valid_passed CHECK ((passed = TRUE AND module_grade >= 40) OR (passed = FALSE AND module_grade < 40))
+  CONSTRAINT valid_grade_percentage CHECK (module_grade >= 0 AND module_grade <= 100)
 );
 
 -- Multi-column index to improve performance for joins or queries on both student_id and module_id
@@ -721,28 +716,20 @@ CREATE TABLE branch_template.staff_assignment (
 
 -- View to show each students attendance percentages
 CREATE OR REPLACE VIEW branch_template.student_attendance AS 
-WITH student_details AS (
-  SELECT 
-    student_id,
-    CONCAT_WS(' ', student_fname, student_lname) AS full_name,
-    student_edu_email AS email,
-    student_attendance
-  FROM branch_template.student
-)
 SELECT 
-  sd.student_id AS "Student ID",
-  sd.full_name AS "Student Name",
-  sd.email AS "Student Email",
-  sd.student_attendance AS "Attendance %",
+  s.student_id AS "Student ID",
+  CONCAT_WS(' ', s.student_fname, s.student_lname) AS "Student Name",
+  s.student_edu_email AS "Student Email",
+  s.student_attendance AS "Attendance %",
   CASE 
-    WHEN sd.student_attendance > 95 THEN 'Excellent'
-    WHEN sd.student_attendance > 90 THEN 'Good'
-    WHEN sd.student_attendance > 75 THEN 'Satisfactory'
-    WHEN sd.student_attendance > 51 THEN 'Irregular Attendance'
-    WHEN sd.student_attendance > 10 THEN 'Severly Absent'
+    WHEN s.student_attendance > 95 THEN 'Excellent'
+    WHEN s.student_attendance > 90 THEN 'Good'
+    WHEN s.student_attendance > 75 THEN 'Satisfactory'
+    WHEN s.student_attendance > 51 THEN 'Irregular Attendance'
+    WHEN s.student_attendance > 10 THEN 'Severely Absent'
     ELSE 'Persitently Absent'
   END AS "Attendance Rating"
-FROM student_details AS sd
+FROM branch_template.student AS s
 ORDER BY "Student ID";
 
 -- View to show the average attendance percentage for each module

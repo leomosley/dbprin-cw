@@ -15,7 +15,8 @@ wrapped_sections = []
 
 for section in sections:
   schema_names = ", ".join(["schema_name"] * section.count('%I'))  # Prepare schema name placeholders
-  formatted_section = f"EXECUTE format('\n{section}'\n, {schema_names});"
+  section_name = "".join(char for char in section.split("\n")[0] if char == char.lower() and char != " ")
+  formatted_section = f"RAISE NOTICE 'CREATING %', '{section_name}';\nEXECUTE format('\n{section}'\n, {schema_names});"
   indented_section = "\n".join(f"\t{line}" for line in formatted_section.splitlines())  # Add one tab per line
   wrapped_sections.append(indented_section)
 
